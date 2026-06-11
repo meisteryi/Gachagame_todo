@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 
 class TodoScreen extends StatefulWidget {
@@ -8,7 +10,11 @@ class TodoScreen extends StatefulWidget {
   State<TodoScreen> createState() => _TodoScreenState();
 }
 
-class _TodoScreenState extends State<TodoScreen> {
+class _TodoScreenState extends State<TodoScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // 💡 탭을 전환해도 화면(데이터)을 파괴하지 않고 유지
+
   DateTime _selectedDate = DateTime.now();
 
   // 💡 카테고리별 색상 정의 (도트 감성에 어울리는 쨍한 색상)
@@ -25,23 +31,107 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   void initState() {
     super.initState();
-    // 앱 실행 시 오늘 날짜의 임시 데이터 추가
-    final todayStr = _formatDate(DateTime.now());
-    _todoList.addAll([
-      {'task': '물 2L 마시기', 'isDone': true, 'category': '일상', 'date': todayStr},
-      {
-        'task': '영단어 50개 암기',
-        'isDone': false,
-        'category': '공부',
-        'date': todayStr,
-      },
-      {
-        'task': '팔굽혀펴기 30회',
-        'isDone': false,
-        'category': '운동',
-        'date': todayStr,
-      },
-    ]);
+    _loadData(); // 앱 실행 시 저장된 데이터 불러오기
+  }
+
+  // --- 💡 기기 저장소(SharedPreferences) 연동 로직 ---
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 1. 커스텀 카테고리 불러오기
+    final String? categoriesStr = prefs.getString('categories');
+    if (categoriesStr != null) {
+      final Map<String, dynamic> decoded = jsonDecode(categoriesStr);
+      setState(() {
+        _categoryColors.clear();
+        decoded.forEach((key, value) {
+          _categoryColors[key] = Color(value as int);
+        });
+      });
+    }
+
+    // 2. 할 일 목록 불러오기
+    final String? todosStr = prefs.getString('todos');
+    if (todosStr != null) {
+      final List<dynamic> decoded = jsonDecode(todosStr);
+      setState(() {
+        _todoList.clear();
+        for (var item in decoded) {
+          final map = Map<String, dynamic>.from(item);
+          // JSON에 저장할 수 없는 TimeOfDay 객체를 문자열에서 다시 복구
+          if (map['time'] != null) {
+            final parts = map['time'].toString().split(':');
+            map['time'] = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          }
+          if (map['alarmTime'] != null) {
+            final parts = map['alarmTime'].toString().split(':');
+            map['alarmTime'] = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          }
+          _todoList.add(map);
+        }
+      });
+    } else {
+      // 최초 실행 시에만 보여줄 임시 데이터 세팅
+      final todayStr = _formatDate(DateTime.now());
+      setState(() {
+        _todoList.addAll([
+          {
+            'task': '물 2L 마시기',
+            'isDone': true,
+            'category': '일상',
+            'date': todayStr,
+            'isAlarmOn': false,
+          },
+          {
+            'task': '영단어 50개 암기',
+            'isDone': false,
+            'category': '공부',
+            'date': todayStr,
+            'isAlarmOn': false,
+          },
+          {
+            'task': '팔굽혀펴기 30회',
+            'isDone': false,
+            'category': '운동',
+            'date': todayStr,
+            'isAlarmOn': false,
+          },
+        ]);
+      });
+      _saveData();
+    }
+  }
+
+  Future<void> _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 1. 카테고리 저장
+    final encodedCategories = _categoryColors.map(
+      (key, value) => MapEntry(key, value.toARGB32()),
+    );
+    await prefs.setString('categories', jsonEncode(encodedCategories));
+
+    // 2. 할 일 목록 저장
+    final encodedTodos = _todoList.map((todo) {
+      final copy = Map<String, dynamic>.from(todo);
+      // JSON에 저장할 수 없는 TimeOfDay 객체를 문자열("HH:mm")로 변환
+      if (copy['time'] != null) {
+        final t = copy['time'] as TimeOfDay;
+        copy['time'] = '${t.hour}:${t.minute}';
+      }
+      if (copy['alarmTime'] != null) {
+        final t = copy['alarmTime'] as TimeOfDay;
+        copy['alarmTime'] = '${t.hour}:${t.minute}';
+      }
+      return copy;
+    }).toList();
+    await prefs.setString('todos', jsonEncode(encodedTodos));
   }
 
   // 날짜 포맷팅 함수 (yyyy-MM-dd)
@@ -79,6 +169,7 @@ class _TodoScreenState extends State<TodoScreen> {
     setState(() {
       _todoList[originalIndex]['isDone'] = value;
     });
+    _saveData(); // 상태 변경 시 저장
   }
 
   // 2. 할 일 추가/수정 바텀 시트
@@ -326,68 +417,118 @@ class _TodoScreenState extends State<TodoScreen> {
                       }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    BouncingWrapper(
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero, // 레트로 느낌의 네모난 버튼
-                            ),
-                          ),
-                          onPressed: () {
-                            if (newTask.trim().isNotEmpty) {
-                              setState(() {
-                                if (isEdit) {
-                                  _todoList[safeIndex]['task'] = newTask.trim();
-                                  _todoList[safeIndex]['category'] =
-                                      selectedCategory;
-                                  _todoList[safeIndex]['time'] = selectedTime;
-                                  _todoList[safeIndex]['alarmTime'] =
-                                      selectedAlarmTime;
-                                  _todoList[safeIndex]['isAlarmOn'] = isAlarmOn;
-                                  _todoList[safeIndex]['location'] = newLocation
-                                      .trim();
-                                  _todoList[safeIndex]['memo'] = newMemo.trim();
-                                } else {
-                                  _todoList.add({
-                                    'task': newTask.trim(),
-                                    'isDone': false,
-                                    'category': selectedCategory,
-                                    'date': _formatDate(_selectedDate),
-                                    'time': selectedTime,
-                                    'alarmTime': selectedAlarmTime,
-                                    'isAlarmOn': isAlarmOn,
-                                    'location': newLocation.trim(),
-                                    'memo': newMemo.trim(),
-                                  });
-                                }
-                              });
-                              if (isAlarmOn && selectedAlarmTime != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
+                    Row(
+                      children: [
+                        Expanded(
+                          child: BouncingWrapper(
+                            child: SizedBox(
+                              height: 50,
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Colors.grey[300],
+                                  foregroundColor: Colors.black,
+                                  shape: const RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      color: Colors.black,
+                                      width: 2,
                                     ),
+                                    borderRadius: BorderRadius.zero,
                                   ),
-                                );
-                              }
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text(
-                            isEdit ? '수정하기' : '추가하기',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  '취소하기',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: BouncingWrapper(
+                            child: SizedBox(
+                              height: 50,
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Colors.black,
+                                  foregroundColor: Colors.white,
+                                  shape: const RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      color: Colors.black,
+                                      width: 2,
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.zero, // 레트로 느낌의 네모난 버튼
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (newTask.trim().isNotEmpty) {
+                                    setState(() {
+                                      if (isEdit) {
+                                        _todoList[safeIndex]['task'] = newTask
+                                            .trim();
+                                        _todoList[safeIndex]['category'] =
+                                            selectedCategory;
+                                        _todoList[safeIndex]['time'] =
+                                            selectedTime;
+                                        _todoList[safeIndex]['alarmTime'] =
+                                            selectedAlarmTime;
+                                        _todoList[safeIndex]['isAlarmOn'] =
+                                            isAlarmOn;
+                                        _todoList[safeIndex]['location'] =
+                                            newLocation.trim();
+                                        _todoList[safeIndex]['memo'] = newMemo
+                                            .trim();
+                                      } else {
+                                        _todoList.add({
+                                          'task': newTask.trim(),
+                                          'isDone': false,
+                                          'category': selectedCategory,
+                                          'date': _formatDate(_selectedDate),
+                                          'time': selectedTime,
+                                          'alarmTime': selectedAlarmTime,
+                                          'isAlarmOn': isAlarmOn,
+                                          'location': newLocation.trim(),
+                                          'memo': newMemo.trim(),
+                                        });
+                                      }
+                                    });
+                                    _saveData(); // 추가/수정 완료 시 저장
+                                    if (isAlarmOn &&
+                                        selectedAlarmTime != null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: Text(
+                                  isEdit ? '수정하기' : '추가하기',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 30),
                   ],
@@ -514,35 +655,77 @@ class _TodoScreenState extends State<TodoScreen> {
                 const SizedBox(height: 12),
               ],
               const SizedBox(height: 24),
-              BouncingWrapper(
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
+              Row(
+                children: [
+                  Expanded(
+                    child: BouncingWrapper(
+                      child: SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            shape: const RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.black, width: 2),
+                              borderRadius: BorderRadius.zero,
+                            ),
+                          ),
+                          icon: const Icon(Icons.delete),
+                          label: const Text(
+                            '삭제하기',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context); // 상세 뷰를 닫고
+                            setState(() {
+                              _todoList.removeAt(originalIndex);
+                            });
+                            _saveData(); // 삭제 후 저장
+                          },
+                        ),
                       ),
                     ),
-                    icon: const Icon(Icons.edit),
-                    label: const Text(
-                      '수정하기',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context); // 상세 뷰를 닫고
-                      _showTodoEditorBottomSheet(
-                        editIndex: originalIndex,
-                      ); // 에디터 열기
-                    },
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: BouncingWrapper(
+                      child: SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            shape: const RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.black, width: 2),
+                              borderRadius: BorderRadius.zero,
+                            ),
+                          ),
+                          icon: const Icon(Icons.edit),
+                          label: const Text(
+                            '수정하기',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context); // 상세 뷰를 닫고
+                            _showTodoEditorBottomSheet(
+                              editIndex: originalIndex,
+                            ); // 에디터 열기
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
             ],
@@ -614,6 +797,7 @@ class _TodoScreenState extends State<TodoScreen> {
                               _categoryColors.remove(entry.key);
                             });
                             setState(() {}); // 메인 화면도 갱신
+                            _saveData(); // 카테고리 삭제 시 저장
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -682,6 +866,7 @@ class _TodoScreenState extends State<TodoScreen> {
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
                           shape: const RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.black, width: 2),
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
@@ -695,6 +880,7 @@ class _TodoScreenState extends State<TodoScreen> {
                                   selectedColor;
                             });
                             setState(() {}); // 메인 화면 갱신
+                            _saveData(); // 카테고리 추가 시 저장
                             Navigator.pop(context);
                           }
                         },
@@ -735,6 +921,7 @@ class _TodoScreenState extends State<TodoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin 사용 시 필수 호출
     final currentTodos = _currentTodos;
     final total = currentTodos.length;
     final done = currentTodos.where((t) => t['isDone'] == true).length;

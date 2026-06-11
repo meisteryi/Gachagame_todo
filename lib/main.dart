@@ -241,60 +241,63 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           itemBuilder: (context, index) {
                             final fish = _ownedFishes[index];
                             return BouncingWrapper(
-                              child: Card(
-                                margin:
-                                    EdgeInsets.zero, // 기본 마진을 완전히 제거해 가로폭 꽉 채우기
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                    color: Colors.black,
-                                    width: 2,
+                              child: SizedBox.expand(
+                                child: Card(
+                                  margin: EdgeInsets
+                                      .zero, // 기본 마진을 완전히 제거해 가로폭 꽉 채우기
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                      color: Colors.black,
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                clipBehavior: Clip
-                                    .antiAlias, // 버튼 클릭 시 물결 효과가 네모를 안 넘어가게 잘라줌
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _swimmingFishType =
-                                          fish['type']?.toString() ??
-                                          'puffer'; // 1. 수조 물고기 변경
-                                      _selectedIndex = 0; // 2. 수조 탭으로 이동
-                                    });
-                                    _pageController.animateToPage(
-                                      0,
-                                      duration: const Duration(
-                                        milliseconds: 300,
-                                      ),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    Navigator.of(context).pop(); // 3. 보관함 닫기
-                                  },
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Transform.scale(
-                                        scale: 1.2,
-                                        child: PixelFish(
-                                          type:
-                                              fish['type']?.toString() ??
-                                              'puffer',
+                                  clipBehavior: Clip
+                                      .antiAlias, // 버튼 클릭 시 물결 효과가 네모를 안 넘어가게 잘라줌
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _swimmingFishType =
+                                            fish['type']?.toString() ??
+                                            'puffer'; // 1. 수조 물고기 변경
+                                        _selectedIndex = 0; // 2. 수조 탭으로 이동
+                                      });
+                                      _pageController.animateToPage(
+                                        0,
+                                        duration: const Duration(
+                                          milliseconds: 300,
                                         ),
-                                      ),
-                                      const SizedBox(height: 6), // 간격 축소
-                                      Text(
-                                        fish['name']?.toString() ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
+                                        curve: Curves.easeInOut,
+                                      );
+                                      Navigator.of(context).pop(); // 3. 보관함 닫기
+                                    },
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Transform.scale(
+                                          scale: 1.2,
+                                          child: PixelFish(
+                                            type:
+                                                fish['type']?.toString() ??
+                                                'puffer',
+                                          ),
                                         ),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1, // 높이가 줄었으므로 글자는 한 줄만 표시
-                                        overflow:
-                                            TextOverflow.ellipsis, // 길면 ... 처리
-                                      ),
-                                    ],
+                                        const SizedBox(height: 6), // 간격 축소
+                                        Text(
+                                          fish['name']?.toString() ?? '',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1, // 높이가 줄었으므로 글자는 한 줄만 표시
+                                          overflow: TextOverflow
+                                              .ellipsis, // 길면 ... 처리
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
