@@ -12,7 +12,9 @@ class SlotMachine extends StatefulWidget {
   static const List<Map<String, dynamic>> fishList = [
     {'type': 'goldfish', 'name': '평범한 금붕어'},
     {'type': 'mackerel', 'name': '날쌘 고등어'},
-    {'type': 'puffer', 'name': '도트 복어'},
+    {'type': 'betta', 'name': '화려한 베타'},
+    {'type': 'nemo', 'name': '귀여운 니모'},
+    {'type': 'guppy', 'name': '조용한 구피'},
     {'type': 'shark', 'name': '무서운 상어'},
     {'type': 'whale', 'name': '전설의 흰수염고래'},
   ];

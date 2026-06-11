@@ -82,6 +82,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             _ownedFishes.add(Map<String, dynamic>.from(item));
           }
         });
+      } else {
+        // 앱 최초 실행 시 기본 물고기 지급
+        setState(() {
+          _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
+        });
       }
       setState(() {
         _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
@@ -248,9 +253,35 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '🐟 내 물고기 보관함',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '🐟 내 물고기 보관함',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    // 대충 추가해 둔 개발용 초기화 버튼
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete_forever,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _ownedFishes.clear();
+                          _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
+                          _swimmingFishType = 'puffer';
+                        });
+                        _saveMainData();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('보관함이 초기화되었습니다. (개발용)')),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 Expanded(
@@ -357,26 +388,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          // 개발용 보관함 초기화 버튼
-          BouncingWrapper(
-            showShadow: false,
-            child: IconButton(
-              icon: const Icon(Icons.delete_forever),
-              tooltip: '보관함 초기화 (개발용)',
-              onPressed: () {
-                setState(() {
-                  _ownedFishes.clear();
-                  _swimmingFishType = 'puffer'; // 수조 물고기도 기본으로 초기화
-                });
-                _saveMainData(); // 💡 초기화 시 저장
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('보관함이 초기화되었습니다. (개발용)')),
-                );
-              },
-            ),
-          ),
-        ],
       ),
       body: PageView(
         controller: _pageController,

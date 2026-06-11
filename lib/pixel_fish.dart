@@ -84,6 +84,45 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, c2, c2, c2, c2, c2, c2, c2, e, e],
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
+    } else if (type == 'betta') {
+      color1 = Colors.pinkAccent; // 화려한 몸통
+      color2 = Colors.cyanAccent; // 펄럭이는 지느러미
+      pixels = [
+        [e, e, e, e, c2, c2, c2, c2, c2, c2, e, e, e, e],
+        [e, e, c2, c2, c2, c1, c1, c1, c1, c2, e, e, e, e],
+        [e, c2, c2, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
+        [c2, c2, c1, c1, c1, c1, c1, c1, c1, w, b, c1, e, e],
+        [c2, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e, e],
+        [e, c2, c2, c1, c1, c1, c1, c2, c2, c2, e, e, e, e],
+        [e, e, c2, c2, c2, c2, c2, c2, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'nemo') {
+      color1 = Colors.deepOrange; // 주황색 몸통
+      color2 = Colors.white; // 흰 줄무늬
+      pixels = [
+        [e, e, e, e, e, e, e, c1, c1, c1, e, e, e, e],
+        [e, e, e, e, e, e, c1, c1, c1, c1, c1, e, e, e],
+        [e, e, c1, c1, c1, c1, c1, c2, c2, c1, c1, c1, e, e],
+        [e, c1, c1, c1, c1, c1, c1, c2, c2, c1, w, b, c1, e],
+        [c1, c1, c1, c1, c1, c1, c1, c2, c2, c1, c1, c1, c1, e],
+        [e, c1, c1, c1, c1, c1, c1, c2, c2, c1, c1, c1, e, e],
+        [e, e, e, e, e, c1, c1, c1, c1, c1, c1, c1, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'guppy') {
+      color1 = Colors.cyanAccent; // 작고 푸른 몸통
+      color2 = Colors.purpleAccent; // 풍성한 보라색 꼬리
+      pixels = [
+        [e, c2, c2, c2, e, e, e, e, e, e, e, e, e, e],
+        [c2, c2, c2, c2, c2, e, e, e, e, e, e, e, e, e],
+        [c2, c2, c2, c2, c2, c1, c1, c1, c1, e, e, e, e, e],
+        [c2, c2, c2, c2, c2, c1, c1, c1, w, b, e, e, e, e],
+        [c2, c2, c2, c2, c1, c1, c1, c1, c1, c1, e, e, e, e],
+        [e, c2, c2, c2, e, e, c1, c1, e, e, e, e, e, e],
+        [e, e, c2, c2, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
     } else {
       // puffer (default)
       color1 = Colors.orangeAccent;
