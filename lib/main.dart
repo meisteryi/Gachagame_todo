@@ -207,7 +207,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         // SafeArea 추가: 아이폰 하단 홈 바에 UI가 가려지지 않도록 보호
         return SafeArea(
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             height:
                 MediaQuery.of(context).size.height *
                 0.5, // 400 고정값 대신 기기 높이의 50% 사용
@@ -232,13 +232,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
-                                childAspectRatio: 0.9,
+                                crossAxisSpacing: 6, // 적당히 좁은 간격 유지
+                                mainAxisSpacing: 12,
+                                childAspectRatio:
+                                    1.25, // 🌟 높이를 대폭 줄여서 카드가 가로로 납작하고 꽉 차 보이게 수정
                               ),
                           itemCount: _ownedFishes.length,
                           itemBuilder: (context, index) {
                             final fish = _ownedFishes[index];
                             return BouncingWrapper(
                               child: Card(
+                                margin:
+                                    EdgeInsets.zero, // 기본 마진을 완전히 제거해 가로폭 꽉 채우기
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   side: const BorderSide(
@@ -277,14 +282,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                               'puffer',
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
+                                      const SizedBox(height: 6), // 간격 축소
                                       Text(
                                         fish['name']?.toString() ?? '',
                                         style: const TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         textAlign: TextAlign.center,
+                                        maxLines: 1, // 높이가 줄었으므로 글자는 한 줄만 표시
+                                        overflow:
+                                            TextOverflow.ellipsis, // 길면 ... 처리
                                       ),
                                     ],
                                   ),
