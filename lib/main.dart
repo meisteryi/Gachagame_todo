@@ -142,7 +142,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               const SizedBox(height: 10),
               Transform.scale(
                 scale: 1.5,
-                child: PixelFish(type: drawnFish['type']),
+                child: PixelFish(
+                  type: drawnFish['type']?.toString() ?? 'puffer',
+                ),
               ), // 도트 물고기 원본 출력!
               const SizedBox(height: 30),
               Text(
@@ -225,7 +227,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                 onTap: () {
                                   setState(() {
                                     _swimmingFishType =
-                                        fish['type']; // 1. 수조 물고기 변경
+                                        fish['type']?.toString() ??
+                                        'puffer'; // 1. 수조 물고기 변경
                                     _selectedIndex = 0; // 2. 수조 탭으로 이동
                                   });
                                   Navigator.of(context).pop(); // 3. 보관함 닫기
@@ -235,11 +238,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                   children: [
                                     Transform.scale(
                                       scale: 1.2,
-                                      child: PixelFish(type: fish['type']),
+                                      child: PixelFish(
+                                        type:
+                                            fish['type']?.toString() ??
+                                            'puffer',
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
                                     Text(
-                                      fish['name'],
+                                      fish['name']?.toString() ?? '',
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -265,6 +272,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 48, // 상단바 두께 축소 (기본값 56)
         title: const Text(
           '가챠 투두 🎲',
           style: TextStyle(fontWeight: FontWeight.bold),
