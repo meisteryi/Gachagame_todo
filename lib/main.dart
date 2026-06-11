@@ -38,6 +38,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   final List<Map<String, dynamic>> _ownedFishes = [];
   String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
+  final PageController _pageController = PageController(initialPage: 0);
 
   // 폭죽 애니메이션 컨트롤러 및 파티클 리스트
   AnimationController? _fireworksController;
@@ -57,6 +58,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _pageController.dispose();
     _fireworksController?.dispose();
     super.dispose();
   }
@@ -101,6 +103,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     setState(() {
       _selectedIndex = index;
     });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   // 슬롯머신이 끝나면 실행될 팝업창
@@ -167,6 +174,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   setState(() {
                     _selectedIndex = 0; // 1. 내 수조 탭으로 즉시 이동
                   });
+                  _pageController.animateToPage(
+                    0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
                   // 2. 탭 전환이 완료된 후 약간의 딜레이를 두고 보관함(바텀 시트) 열기
                   Future.delayed(const Duration(milliseconds: 150), () {
                     if (mounted) _showFishStorage();
@@ -231,6 +243,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         'puffer'; // 1. 수조 물고기 변경
                                     _selectedIndex = 0; // 2. 수조 탭으로 이동
                                   });
+                                  _pageController.animateToPage(
+                                    0,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
                                   Navigator.of(context).pop(); // 3. 보관함 닫기
                                 },
                                 child: Column(
@@ -295,8 +312,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: PageView(
+        controller: _pageController,
+        physics:
+            const NeverScrollableScrollPhysics(), // 스와이프 대신 하단 바 탭으로만 이동하도록 고정
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
         children: [
           // 1. 내 수조 탭 (전체 화면)
           AquariumScreen(
