@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'pixel_fish.dart';
 import 'slot_machine.dart';
 import 'bouncing_wrapper.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
   runApp(const GachaTodoApp());
 }
 
@@ -49,6 +52,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _loadMainData(); // 앱 시작 시 보관함 데이터 불러오기
     _fireworksController =
         AnimationController(
           vsync: this,
@@ -63,6 +67,34 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _pageController.dispose();
     _fireworksController?.dispose();
     super.dispose();
+  }
+
+  // --- 💡 기기 저장소(SharedPreferences) 연동 로직 ---
+  Future<void> _loadMainData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? fishesStr = prefs.getString('ownedFishes');
+      if (fishesStr != null) {
+        final List<dynamic> decoded = jsonDecode(fishesStr);
+        setState(() {
+          _ownedFishes.clear();
+          for (var item in decoded) {
+            _ownedFishes.add(Map<String, dynamic>.from(item));
+          }
+        });
+      }
+      setState(() {
+        _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
+      });
+    } catch (e) {
+      debugPrint('메인 데이터 로드 에러: $e');
+    }
+  }
+
+  Future<void> _saveMainData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('ownedFishes', jsonEncode(_ownedFishes));
+    await prefs.setString('swimmingFish', _swimmingFishType);
   }
 
   // 폭죽 파티클 생성 및 애니메이션 시작
@@ -127,6 +159,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       setState(() {
         _ownedFishes.add(drawnFish);
       });
+      _saveMainData(); // 💡 뽑은 물고기 저장
       _triggerFireworks(); // 🌟 도트 폭죽 팡!
 
       // 폭죽을 잠시 감상할 수 있도록 팝업창을 1.2초 늦게 띄움
@@ -263,6 +296,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                             'puffer'; // 1. 수조 물고기 변경
                                         _selectedIndex = 0; // 2. 수조 탭으로 이동
                                       });
+                                      _saveMainData(); // 💡 수조 물고기 변경 시 저장
                                       _pageController.animateToPage(
                                         0,
                                         duration: const Duration(
@@ -335,6 +369,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   _ownedFishes.clear();
                   _swimmingFishType = 'puffer'; // 수조 물고기도 기본으로 초기화
                 });
+                _saveMainData(); // 💡 초기화 시 저장
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('보관함이 초기화되었습니다. (개발용)')),
                 );

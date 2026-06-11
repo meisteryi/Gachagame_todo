@@ -36,76 +36,88 @@ class _TodoScreenState extends State<TodoScreen>
 
   // --- 💡 기기 저장소(SharedPreferences) 연동 로직 ---
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    // 1. 커스텀 카테고리 불러오기
-    final String? categoriesStr = prefs.getString('categories');
-    if (categoriesStr != null) {
-      final Map<String, dynamic> decoded = jsonDecode(categoriesStr);
-      setState(() {
-        _categoryColors.clear();
-        decoded.forEach((key, value) {
-          _categoryColors[key] = Color(value as int);
+      // 1. 커스텀 카테고리 불러오기
+      final String? categoriesStr = prefs.getString('categories');
+      if (categoriesStr != null) {
+        final Map<String, dynamic> decoded = jsonDecode(categoriesStr);
+        setState(() {
+          _categoryColors.clear();
+          decoded.forEach((key, value) {
+            _categoryColors[key] = Color(
+              (value as num).toInt(),
+            ); // 💡 안전한 숫자 변환
+          });
         });
-      });
-    }
+      }
 
-    // 2. 할 일 목록 불러오기
-    final String? todosStr = prefs.getString('todos');
-    if (todosStr != null) {
-      final List<dynamic> decoded = jsonDecode(todosStr);
-      setState(() {
-        _todoList.clear();
-        for (var item in decoded) {
-          final map = Map<String, dynamic>.from(item);
-          // JSON에 저장할 수 없는 TimeOfDay 객체를 문자열에서 다시 복구
-          if (map['time'] != null) {
-            final parts = map['time'].toString().split(':');
-            map['time'] = TimeOfDay(
-              hour: int.parse(parts[0]),
-              minute: int.parse(parts[1]),
-            );
+      // 2. 할 일 목록 불러오기
+      final String? todosStr = prefs.getString('todos');
+      if (todosStr != null) {
+        final List<dynamic> decoded = jsonDecode(todosStr);
+        setState(() {
+          _todoList.clear();
+          for (var item in decoded) {
+            final map = Map<String, dynamic>.from(item);
+            // JSON에 저장할 수 없는 TimeOfDay 객체를 문자열에서 다시 복구
+            if (map['time'] != null && map['time'].toString().contains(':')) {
+              final parts = map['time'].toString().split(':');
+              map['time'] = TimeOfDay(
+                hour: int.parse(parts[0]),
+                minute: int.parse(parts[1]),
+              );
+            }
+            if (map['alarmTime'] != null &&
+                map['alarmTime'].toString().contains(':')) {
+              final parts = map['alarmTime'].toString().split(':');
+              map['alarmTime'] = TimeOfDay(
+                hour: int.parse(parts[0]),
+                minute: int.parse(parts[1]),
+              );
+            }
+            _todoList.add(map);
           }
-          if (map['alarmTime'] != null) {
-            final parts = map['alarmTime'].toString().split(':');
-            map['alarmTime'] = TimeOfDay(
-              hour: int.parse(parts[0]),
-              minute: int.parse(parts[1]),
-            );
-          }
-          _todoList.add(map);
-        }
-      });
-    } else {
-      // 최초 실행 시에만 보여줄 임시 데이터 세팅
-      final todayStr = _formatDate(DateTime.now());
-      setState(() {
-        _todoList.addAll([
-          {
-            'task': '물 2L 마시기',
-            'isDone': true,
-            'category': '일상',
-            'date': todayStr,
-            'isAlarmOn': false,
-          },
-          {
-            'task': '영단어 50개 암기',
-            'isDone': false,
-            'category': '공부',
-            'date': todayStr,
-            'isAlarmOn': false,
-          },
-          {
-            'task': '팔굽혀펴기 30회',
-            'isDone': false,
-            'category': '운동',
-            'date': todayStr,
-            'isAlarmOn': false,
-          },
-        ]);
-      });
-      _saveData();
+        });
+      } else {
+        _setInitialData();
+      }
+    } catch (e) {
+      debugPrint('투두 데이터 로드 에러: $e');
+      _setInitialData(); // 에러 발생 시 임시 데이터로 안전하게 덮어쓰기
     }
+  }
+
+  void _setInitialData() {
+    final todayStr = _formatDate(DateTime.now());
+    setState(() {
+      _todoList.clear();
+      _todoList.addAll([
+        {
+          'task': '물 2L 마시기',
+          'isDone': true,
+          'category': '일상',
+          'date': todayStr,
+          'isAlarmOn': false,
+        },
+        {
+          'task': '영단어 50개 암기',
+          'isDone': false,
+          'category': '공부',
+          'date': todayStr,
+          'isAlarmOn': false,
+        },
+        {
+          'task': '팔굽혀펴기 30회',
+          'isDone': false,
+          'category': '운동',
+          'date': todayStr,
+          'isAlarmOn': false,
+        },
+      ]);
+    });
+    _saveData();
   }
 
   Future<void> _saveData() async {
@@ -1277,28 +1289,36 @@ class _TodoScreenState extends State<TodoScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // 카테고리 관리 버튼 (좌측 하단)
-            FloatingActionButton(
-              heroTag: 'categoryBtn',
-              onPressed: _showCategoryManagerBottomSheet,
-              backgroundColor: Colors.lightGreenAccent,
-              shape: const RoundedRectangleBorder(
-                side: BorderSide(color: Colors.black, width: 3),
-                borderRadius: BorderRadius.zero,
+            BouncingWrapper(
+              child: FloatingActionButton(
+                heroTag: 'categoryBtn',
+                onPressed: _showCategoryManagerBottomSheet,
+                backgroundColor: Colors.lightGreenAccent,
+                shape: const RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.black, width: 3),
+                  borderRadius: BorderRadius.zero,
+                ),
+                elevation: 0,
+                child: const Icon(
+                  Icons.category,
+                  color: Colors.black,
+                  size: 28,
+                ),
               ),
-              elevation: 0,
-              child: const Icon(Icons.category, color: Colors.black, size: 28),
             ),
             // 할 일 추가 버튼 (우측 하단)
-            FloatingActionButton(
-              heroTag: 'addTodoBtn',
-              onPressed: () => _showTodoEditorBottomSheet(),
-              backgroundColor: Colors.yellowAccent,
-              shape: const RoundedRectangleBorder(
-                side: BorderSide(color: Colors.black, width: 3),
-                borderRadius: BorderRadius.zero,
+            BouncingWrapper(
+              child: FloatingActionButton(
+                heroTag: 'addTodoBtn',
+                onPressed: () => _showTodoEditorBottomSheet(),
+                backgroundColor: Colors.yellowAccent,
+                shape: const RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.black, width: 3),
+                  borderRadius: BorderRadius.zero,
+                ),
+                elevation: 0,
+                child: const Icon(Icons.add, color: Colors.black, size: 28),
               ),
-              elevation: 0,
-              child: const Icon(Icons.add, color: Colors.black, size: 28),
             ),
           ],
         ),
