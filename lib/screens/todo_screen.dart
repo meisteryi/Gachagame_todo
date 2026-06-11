@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../bouncing_wrapper.dart';
 
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
@@ -146,33 +147,39 @@ class _TodoScreenState extends State<TodoScreen> {
                     ),
                     const SizedBox(height: 16),
                     // --- ⏰ 시간 설정 ---
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,
+                    BouncingWrapper(
+                      showShadow: false,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                            ),
+                            side: const BorderSide(
+                              color: Colors.black,
+                              width: 2,
+                            ),
+                            foregroundColor: Colors.black,
                           ),
-                          side: const BorderSide(color: Colors.black, width: 2),
-                          foregroundColor: Colors.black,
+                          icon: const Icon(Icons.access_time, size: 18),
+                          label: Text(
+                            selectedTime?.format(context) ?? '시간 설정',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () async {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (time != null) {
+                              setSheetState(() {
+                                selectedTime = time;
+                                selectedAlarmTime ??= time;
+                              });
+                            }
+                          },
                         ),
-                        icon: const Icon(Icons.access_time, size: 18),
-                        label: Text(
-                          selectedTime?.format(context) ?? '시간 설정',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        onPressed: () async {
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.now(),
-                          );
-                          if (time != null) {
-                            setSheetState(() {
-                              selectedTime = time;
-                              selectedAlarmTime ??= time;
-                            });
-                          }
-                        },
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -206,41 +213,46 @@ class _TodoScreenState extends State<TodoScreen> {
                     ),
                     if (isAlarmOn) ...[
                       const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
+                      BouncingWrapper(
+                        showShadow: false,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 2,
+                              ),
+                              foregroundColor: Colors.black,
                             ),
-                            side: const BorderSide(
-                              color: Colors.black,
-                              width: 2,
+                            icon: const Icon(
+                              Icons.notifications_active,
+                              size: 18,
                             ),
-                            foregroundColor: Colors.black,
+                            label: Text(
+                              selectedAlarmTime?.format(context) ?? '알림 설정',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onPressed: () async {
+                              final time = await showTimePicker(
+                                context: context,
+                                initialTime:
+                                    selectedAlarmTime ??
+                                    selectedTime ??
+                                    TimeOfDay.now(),
+                              );
+                              if (time != null) {
+                                setSheetState(() {
+                                  selectedAlarmTime = time;
+                                });
+                              }
+                            },
                           ),
-                          icon: const Icon(
-                            Icons.notifications_active,
-                            size: 18,
-                          ),
-                          label: Text(
-                            selectedAlarmTime?.format(context) ?? '알림 설정',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          onPressed: () async {
-                            final time = await showTimePicker(
-                              context: context,
-                              initialTime:
-                                  selectedAlarmTime ??
-                                  selectedTime ??
-                                  TimeOfDay.now(),
-                            );
-                            if (time != null) {
-                              setSheetState(() {
-                                selectedAlarmTime = time;
-                              });
-                            }
-                          },
                         ),
                       ),
                     ],
@@ -314,62 +326,65 @@ class _TodoScreenState extends State<TodoScreen> {
                       }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero, // 레트로 느낌의 네모난 버튼
+                    BouncingWrapper(
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero, // 레트로 느낌의 네모난 버튼
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          if (newTask.trim().isNotEmpty) {
-                            setState(() {
-                              if (isEdit) {
-                                _todoList[safeIndex]['task'] = newTask.trim();
-                                _todoList[safeIndex]['category'] =
-                                    selectedCategory;
-                                _todoList[safeIndex]['time'] = selectedTime;
-                                _todoList[safeIndex]['alarmTime'] =
-                                    selectedAlarmTime;
-                                _todoList[safeIndex]['isAlarmOn'] = isAlarmOn;
-                                _todoList[safeIndex]['location'] = newLocation
-                                    .trim();
-                                _todoList[safeIndex]['memo'] = newMemo.trim();
-                              } else {
-                                _todoList.add({
-                                  'task': newTask.trim(),
-                                  'isDone': false,
-                                  'category': selectedCategory,
-                                  'date': _formatDate(_selectedDate),
-                                  'time': selectedTime,
-                                  'alarmTime': selectedAlarmTime,
-                                  'isAlarmOn': isAlarmOn,
-                                  'location': newLocation.trim(),
-                                  'memo': newMemo.trim(),
-                                });
-                              }
-                            });
-                            if (isAlarmOn && selectedAlarmTime != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
+                          onPressed: () {
+                            if (newTask.trim().isNotEmpty) {
+                              setState(() {
+                                if (isEdit) {
+                                  _todoList[safeIndex]['task'] = newTask.trim();
+                                  _todoList[safeIndex]['category'] =
+                                      selectedCategory;
+                                  _todoList[safeIndex]['time'] = selectedTime;
+                                  _todoList[safeIndex]['alarmTime'] =
+                                      selectedAlarmTime;
+                                  _todoList[safeIndex]['isAlarmOn'] = isAlarmOn;
+                                  _todoList[safeIndex]['location'] = newLocation
+                                      .trim();
+                                  _todoList[safeIndex]['memo'] = newMemo.trim();
+                                } else {
+                                  _todoList.add({
+                                    'task': newTask.trim(),
+                                    'isDone': false,
+                                    'category': selectedCategory,
+                                    'date': _formatDate(_selectedDate),
+                                    'time': selectedTime,
+                                    'alarmTime': selectedAlarmTime,
+                                    'isAlarmOn': isAlarmOn,
+                                    'location': newLocation.trim(),
+                                    'memo': newMemo.trim(),
+                                  });
+                                }
+                              });
+                              if (isAlarmOn && selectedAlarmTime != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
+                              Navigator.pop(context);
                             }
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Text(
-                          isEdit ? '수정하기' : '추가하기',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          },
+                          child: Text(
+                            isEdit ? '수정하기' : '추가하기',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -499,28 +514,34 @@ class _TodoScreenState extends State<TodoScreen> {
                 const SizedBox(height: 12),
               ],
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+              BouncingWrapper(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
                     ),
+                    icon: const Icon(Icons.edit),
+                    label: const Text(
+                      '수정하기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context); // 상세 뷰를 닫고
+                      _showTodoEditorBottomSheet(
+                        editIndex: originalIndex,
+                      ); // 에디터 열기
+                    },
                   ),
-                  icon: const Icon(Icons.edit),
-                  label: const Text(
-                    '수정하기',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context); // 상세 뷰를 닫고
-                    _showTodoEditorBottomSheet(
-                      editIndex: originalIndex,
-                    ); // 에디터 열기
-                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -651,35 +672,38 @@ class _TodoScreenState extends State<TodoScreen> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
+                  BouncingWrapper(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
                         ),
-                      ),
-                      onPressed: () {
-                        if (newCategoryName.trim().isNotEmpty &&
-                            !_categoryColors.containsKey(
-                              newCategoryName.trim(),
-                            )) {
-                          setSheetState(() {
-                            _categoryColors[newCategoryName.trim()] =
-                                selectedColor;
-                          });
-                          setState(() {}); // 메인 화면 갱신
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text(
-                        '카테고리 추가하기',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        onPressed: () {
+                          if (newCategoryName.trim().isNotEmpty &&
+                              !_categoryColors.containsKey(
+                                newCategoryName.trim(),
+                              )) {
+                            setSheetState(() {
+                              _categoryColors[newCategoryName.trim()] =
+                                  selectedColor;
+                            });
+                            setState(() {}); // 메인 화면 갱신
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Text(
+                          '카테고리 추가하기',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -727,52 +751,57 @@ class _TodoScreenState extends State<TodoScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
-                  icon: const Icon(Icons.arrow_back_ios, size: 20),
-                  onPressed: () => setState(
-                    () => _selectedDate = _selectedDate.subtract(
-                      const Duration(days: 1),
+                BouncingWrapper(
+                  showShadow: false,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
+                    icon: const Icon(Icons.arrow_back_ios, size: 20),
+                    onPressed: () => setState(
+                      () => _selectedDate = _selectedDate.subtract(
+                        const Duration(days: 1),
+                      ),
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: _showPixelCalendar,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.black, width: 2),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black, offset: Offset(2, 2)),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_month, size: 16),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                BouncingWrapper(
+                  child: GestureDetector(
+                    onTap: _showPixelCalendar,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_month, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
-                  icon: const Icon(Icons.arrow_forward_ios, size: 20),
-                  onPressed: () => setState(
-                    () => _selectedDate = _selectedDate.add(
-                      const Duration(days: 1),
+                BouncingWrapper(
+                  showShadow: false,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
+                    icon: const Icon(Icons.arrow_forward_ios, size: 20),
+                    onPressed: () => setState(
+                      () => _selectedDate = _selectedDate.add(
+                        const Duration(days: 1),
+                      ),
                     ),
                   ),
                 ),
@@ -858,160 +887,103 @@ class _TodoScreenState extends State<TodoScreen> {
                         }
                       }
 
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isDone ? Colors.grey[200] : Colors.white,
-                          border: Border.all(color: Colors.black, width: 2),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black,
-                              offset: Offset(2, 2),
-                            ), // 픽셀 느낌 그림자
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // --- 🌟 도트 그래픽 픽셀 체크박스 ---
-                            PixelCheckbox(
-                              isDone: isDone,
-                              onChanged: (val) =>
-                                  _toggleTodo(originalIndex, val),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: GestureDetector(
-                                behavior:
-                                    HitTestBehavior.opaque, // 빈 공간을 눌러도 인식
-                                onTap: () =>
-                                    _showTodoDetailBottomSheet(originalIndex),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // 카테고리 태그 표시
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            _categoryColors[category] ??
-                                            Colors.grey,
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 1.5,
+                        child: BouncingWrapper(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () =>
+                                _showTodoDetailBottomSheet(originalIndex),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isDone ? Colors.grey[200] : Colors.white,
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  // --- 🌟 도트 그래픽 픽셀 체크박스 ---
+                                  PixelCheckbox(
+                                    isDone: isDone,
+                                    onChanged: (val) =>
+                                        _toggleTodo(originalIndex, val),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // 카테고리 태그 표시
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                _categoryColors[category] ??
+                                                Colors.grey,
+                                            border: Border.all(
+                                              color: Colors.black,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            category,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                      child: Text(
-                                        category,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
+                                        const SizedBox(height: 6),
+                                        // 할 일 텍스트
+                                        Text(
+                                          task,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            decoration: isDone
+                                                ? TextDecoration.lineThrough
+                                                : null,
+                                            color: isDone
+                                                ? Colors.grey[600]
+                                                : Colors.black,
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    // 할 일 텍스트
-                                    Text(
-                                      task,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: isDone
-                                            ? TextDecoration.lineThrough
-                                            : null,
-                                        color: isDone
-                                            ? Colors.grey[600]
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                    // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
-                                    if (timeDisplay.isNotEmpty ||
-                                        location.isNotEmpty ||
-                                        memo.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 8.0,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            if (timeDisplay.isNotEmpty)
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.access_time,
-                                                    size: 14,
-                                                    color: isDone
-                                                        ? Colors.grey[500]
-                                                        : Colors.grey[700],
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    timeDisplay,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: isDone
-                                                          ? Colors.grey[500]
-                                                          : Colors.grey[800],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            if (location.isNotEmpty)
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 4.0,
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.location_on,
-                                                      size: 14,
-                                                      color: isDone
-                                                          ? Colors.grey[500]
-                                                          : Colors.grey[700],
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      location,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
+                                        // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
+                                        if (timeDisplay.isNotEmpty ||
+                                            location.isNotEmpty ||
+                                            memo.isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 8.0,
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                if (timeDisplay.isNotEmpty)
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.access_time,
+                                                        size: 14,
                                                         color: isDone
                                                             ? Colors.grey[500]
-                                                            : Colors.grey[800],
+                                                            : Colors.grey[700],
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            if (memo.isNotEmpty)
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 4.0,
-                                                ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.notes,
-                                                      size: 14,
-                                                      color: isDone
-                                                          ? Colors.grey[500]
-                                                          : Colors.grey[700],
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Expanded(
-                                                      child: Text(
-                                                        memo,
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        timeDisplay,
                                                         style: TextStyle(
                                                           fontSize: 12,
                                                           color: isDone
@@ -1020,18 +992,89 @@ class _TodoScreenState extends State<TodoScreen> {
                                                                     .grey[800],
                                                         ),
                                                       ),
+                                                    ],
+                                                  ),
+                                                if (location.isNotEmpty)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 4.0,
+                                                        ),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.location_on,
+                                                          size: 14,
+                                                          color: isDone
+                                                              ? Colors.grey[500]
+                                                              : Colors
+                                                                    .grey[700],
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 4,
+                                                        ),
+                                                        Text(
+                                                          location,
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: isDone
+                                                                ? Colors
+                                                                      .grey[500]
+                                                                : Colors
+                                                                      .grey[800],
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ],
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                                                  ),
+                                                if (memo.isNotEmpty)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 4.0,
+                                                        ),
+                                                    child: Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.notes,
+                                                          size: 14,
+                                                          color: isDone
+                                                              ? Colors.grey[500]
+                                                              : Colors
+                                                                    .grey[700],
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 4,
+                                                        ),
+                                                        Expanded(
+                                                          child: Text(
+                                                            memo,
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: isDone
+                                                                  ? Colors
+                                                                        .grey[500]
+                                                                  : Colors
+                                                                        .grey[800],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       );
                     },
@@ -1055,7 +1098,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 side: BorderSide(color: Colors.black, width: 3),
                 borderRadius: BorderRadius.zero,
               ),
-              elevation: 4,
+              elevation: 0,
               child: const Icon(Icons.category, color: Colors.black, size: 28),
             ),
             // 할 일 추가 버튼 (우측 하단)
@@ -1067,7 +1110,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 side: BorderSide(color: Colors.black, width: 3),
                 borderRadius: BorderRadius.zero,
               ),
-              elevation: 4,
+              elevation: 0,
               child: const Icon(Icons.add, color: Colors.black, size: 28),
             ),
           ],

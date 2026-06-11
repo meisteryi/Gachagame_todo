@@ -4,6 +4,7 @@ import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'pixel_fish.dart';
 import 'slot_machine.dart';
+import 'bouncing_wrapper.dart';
 
 void main() {
   runApp(const GachaTodoApp());
@@ -35,6 +36,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
+  bool _isGachaMode = false; // 상점에서 가챠 기계로 들어갔는지 여부
 
   final List<Map<String, dynamic>> _ownedFishes = [];
   String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
@@ -102,6 +104,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (index != 2) {
+        _isGachaMode = false; // 다른 탭으로 가면 가챠 화면 초기화
+      }
     });
     _pageController.animateToPage(
       index,
@@ -173,6 +178,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   Navigator.of(context).pop(); // 팝업 닫기
                   setState(() {
                     _selectedIndex = 0; // 1. 내 수조 탭으로 즉시 이동
+                    _isGachaMode = false; // 가챠 화면도 상점 메뉴로 초기화
                   });
                   _pageController.animateToPage(
                     0,
@@ -231,46 +237,57 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           itemCount: _ownedFishes.length,
                           itemBuilder: (context, index) {
                             final fish = _ownedFishes[index];
-                            return Card(
-                              elevation: 2,
-                              clipBehavior: Clip
-                                  .antiAlias, // 버튼 클릭 시 물결 효과가 네모를 안 넘어가게 잘라줌
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _swimmingFishType =
-                                        fish['type']?.toString() ??
-                                        'puffer'; // 1. 수조 물고기 변경
-                                    _selectedIndex = 0; // 2. 수조 탭으로 이동
-                                  });
-                                  _pageController.animateToPage(
-                                    0,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                  Navigator.of(context).pop(); // 3. 보관함 닫기
-                                },
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Transform.scale(
-                                      scale: 1.2,
-                                      child: PixelFish(
-                                        type:
-                                            fish['type']?.toString() ??
-                                            'puffer',
+                            return BouncingWrapper(
+                              child: Card(
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                    color: Colors.black,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                clipBehavior: Clip
+                                    .antiAlias, // 버튼 클릭 시 물결 효과가 네모를 안 넘어가게 잘라줌
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _swimmingFishType =
+                                          fish['type']?.toString() ??
+                                          'puffer'; // 1. 수조 물고기 변경
+                                      _selectedIndex = 0; // 2. 수조 탭으로 이동
+                                    });
+                                    _pageController.animateToPage(
+                                      0,
+                                      duration: const Duration(
+                                        milliseconds: 300,
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      fish['name']?.toString() ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
+                                      curve: Curves.easeInOut,
+                                    );
+                                    Navigator.of(context).pop(); // 3. 보관함 닫기
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Transform.scale(
+                                        scale: 1.2,
+                                        child: PixelFish(
+                                          type:
+                                              fish['type']?.toString() ??
+                                              'puffer',
+                                        ),
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        fish['name']?.toString() ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -297,18 +314,21 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           // 개발용 보관함 초기화 버튼
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            tooltip: '보관함 초기화 (개발용)',
-            onPressed: () {
-              setState(() {
-                _ownedFishes.clear();
-                _swimmingFishType = 'puffer'; // 수조 물고기도 기본으로 초기화
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('보관함이 초기화되었습니다. (개발용)')),
-              );
-            },
+          BouncingWrapper(
+            showShadow: false,
+            child: IconButton(
+              icon: const Icon(Icons.delete_forever),
+              tooltip: '보관함 초기화 (개발용)',
+              onPressed: () {
+                setState(() {
+                  _ownedFishes.clear();
+                  _swimmingFishType = 'puffer'; // 수조 물고기도 기본으로 초기화
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('보관함이 초기화되었습니다. (개발용)')),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -329,30 +349,114 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ),
           // 2. 할 일 탭 (전체 화면)
           const TodoScreen(),
-          // 3. 가챠 샵 탭 (전체 화면 + 폭죽 오버레이)
-          Stack(
-            children: [
-              Container(
-                color: const Color(0xFFFFF0F5), // 연한 핑크색 배경
-                width: double.infinity,
-                height: double.infinity,
-                child: SlotMachine(onDrawDone: _showGachaResult),
-              ),
-              // 폭죽 애니메이션이 실행 중일 때만 그리기
-              if (_fireworksController?.isAnimating == true)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    // 클릭 이벤트를 슬롯머신으로 통과시킴
-                    child: CustomPaint(
-                      painter: PixelFireworksPainter(
-                        _fireworksController!.value,
-                        _particles,
+          // 3. 상점 탭 (상점 메인 메뉴 또는 가챠 기계 + 폭죽 오버레이)
+          _isGachaMode
+              ? Stack(
+                  children: [
+                    Container(
+                      color: const Color(0xFFFFF0F5), // 연한 핑크색 배경
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Stack(
+                        children: [
+                          SlotMachine(onDrawDone: _showGachaResult),
+                          // 상점 메인으로 돌아가기 버튼
+                          SafeArea(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: BouncingWrapper(
+                                showShadow: false,
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.arrow_back_ios,
+                                    size: 28,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isGachaMode = false;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    // 폭죽 애니메이션이 실행 중일 때만 그리기
+                    if (_fireworksController?.isAnimating == true)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          // 클릭 이벤트를 슬롯머신으로 통과시킴
+                          child: CustomPaint(
+                            painter: PixelFireworksPainter(
+                              _fireworksController!.value,
+                              _particles,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                )
+              : Container(
+                  color: const Color(0xFFFFF0F5),
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        '상점 🏪',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      BouncingWrapper(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isGachaMode = true;
+                            });
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: MediaQuery.of(context).size.height / 6,
+                            decoration: BoxDecoration(
+                              color: Colors.orangeAccent,
+                              border: Border.all(color: Colors.black, width: 4),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  '🐟',
+                                  style: TextStyle(fontSize: 40),
+                                ),
+                                const SizedBox(width: 16),
+                                const Text(
+                                  '물고기 뽑기',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black,
+                                        offset: Offset(2, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-            ],
-          ),
         ],
       ),
       // 3. 하단 네비게이션 바
@@ -360,7 +464,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.sailing), label: '내 수조'),
           BottomNavigationBarItem(icon: Icon(Icons.checklist), label: '할 일'),
-          BottomNavigationBarItem(icon: Icon(Icons.storefront), label: '가챠 샵'),
+          BottomNavigationBarItem(icon: Icon(Icons.storefront), label: '상점'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue[800],

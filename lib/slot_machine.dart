@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'pixel_fish.dart';
+import 'bouncing_wrapper.dart';
 
 class SlotMachine extends StatefulWidget {
   final void Function(Map<String, dynamic> drawnFish) onDrawDone;
@@ -55,6 +56,8 @@ class _SlotMachineState extends State<SlotMachine> {
 
     // 1. 레버 당기는 애니메이션 짧게 대기 후 원상복구
     await Future.delayed(const Duration(milliseconds: 250));
+    if (!mounted) return; // 💡 비동기 대기 후 화면이 파괴되었으면 실행 취소
+
     setState(() {
       _isPulling = false;
     });
@@ -105,6 +108,8 @@ class _SlotMachineState extends State<SlotMachine> {
       curve: Curves.easeOutCubic,
     );
 
+    if (!mounted) return; // 💡 애니메이션이 끝난 후 화면이 파괴되었으면 실행 취소
+
     setState(() {
       _isSpinning = false;
     });
@@ -122,7 +127,7 @@ class _SlotMachineState extends State<SlotMachine> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
-              '가챠 샵',
+              '물고기 뽑기 🎰',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -312,22 +317,30 @@ class _SlotMachineState extends State<SlotMachine> {
             ),
             const SizedBox(height: 50),
             // 3. 뽑기 버튼
-            ElevatedButton(
-              onPressed: _spin,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isSpinning ? Colors.grey : Colors.pinkAccent,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 16,
+            BouncingWrapper(
+              child: ElevatedButton(
+                onPressed: _spin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isSpinning
+                      ? Colors.grey
+                      : Colors.pinkAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 16,
+                  ),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Colors.black, width: 3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                elevation: 5,
-              ),
-              child: Text(
-                _isSpinning ? '가챠 진행 중...' : '물고기 뽑기 🐟',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                child: Text(
+                  _isSpinning ? '가챠 진행 중...' : '물고기 뽑기 🐟',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
