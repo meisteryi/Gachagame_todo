@@ -8,6 +8,7 @@ import 'screens/shop_screen.dart';
 import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
+import 'pixel_emoji.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
@@ -199,12 +200,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      '📦 내 보관함',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const Row(
+                      children: [
+                        PixelEmoji('box', size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          '내 보관함',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     // 대충 추가해 둔 개발용 초기화 버튼
                     IconButton(
@@ -238,12 +245,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         // --- 물고기 보관함 영역 ---
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            '🐟 내 물고기',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                          child: Row(
+                            children: [
+                              PixelEmoji('fish', size: 16),
+                              SizedBox(width: 8),
+                              Text(
+                                '내 물고기',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         _ownedFishes.isEmpty
@@ -342,12 +355,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         // --- 수초 보관함 영역 ---
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            '🌱 내 수초',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                          child: Row(
+                            children: [
+                              PixelEmoji('seaweed', size: 16),
+                              SizedBox(width: 8),
+                              Text(
+                                '내 수초',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         _ownedSeaweeds.isEmpty
@@ -469,34 +488,35 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           'Gacha TODO!',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        // 💡 상단바 우측에 내 코인 개수 표시
+        // 💡 상점 탭일 때만 상단바 우측에 내 코인 개수 표시
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.yellow[700],
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black, width: 2),
-            ),
-            child: Row(
-              children: [
-                const Text('🪙', style: TextStyle(fontSize: 16)),
-                const SizedBox(width: 4),
-                Text(
-                  '$_coins',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(color: Colors.black, offset: Offset(1, 1)),
-                    ],
+          if (_selectedIndex == 2)
+            Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.yellow[700],
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: Row(
+                children: [
+                  const PixelEmoji('coin', size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$_coins',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(color: Colors.black, offset: Offset(1, 1)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),

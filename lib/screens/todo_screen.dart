@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
+import '../pixel_emoji.dart';
 
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
@@ -225,12 +226,18 @@ class _TodoScreenState extends State<TodoScreen>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      isEdit ? '할 일 수정 📝' : '새로운 할 일 📝',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isEdit ? '할 일 수정 ' : '새로운 할 일 ',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const PixelEmoji('memo', size: 20),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -520,8 +527,16 @@ class _TodoScreenState extends State<TodoScreen>
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: Text(
-                                            '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
+                                          content: Row(
+                                            children: [
+                                              Text(
+                                                '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! ',
+                                              ),
+                                              const PixelEmoji(
+                                                'bell',
+                                                size: 16,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       );
@@ -782,9 +797,18 @@ class _TodoScreenState extends State<TodoScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '카테고리 관리 🏷️',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '카테고리 관리 ',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      PixelEmoji('tag', size: 20),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   // 기존 카테고리 목록
@@ -1025,12 +1049,18 @@ class _TodoScreenState extends State<TodoScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      '오늘의 달성률 🏆',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '오늘의 달성률 ',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        PixelEmoji('trophy', size: 16),
+                      ],
                     ),
                     Text(
                       '$done / $total 완료',
@@ -1077,14 +1107,7 @@ class _TodoScreenState extends State<TodoScreen>
                           todo['location']?.toString() ?? '';
                       final String memo = todo['memo']?.toString() ?? '';
 
-                      // 💡 시간 및 알림 텍스트 안전하게 조합 (파서를 고장내는 중첩 보간법 제거)
-                      String timeDisplay = '';
-                      if (timeObj != null) {
-                        timeDisplay = timeObj.format(context);
-                        if (isAlarmOn && alarmObj != null) {
-                          timeDisplay += ' (알림 🔔 ${alarmObj.format(context)})';
-                        }
-                      }
+                      final bool hasTime = timeObj != null;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -1159,7 +1182,7 @@ class _TodoScreenState extends State<TodoScreen>
                                           ),
                                         ),
                                         // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
-                                        if (timeDisplay.isNotEmpty ||
+                                        if (hasTime ||
                                             location.isNotEmpty ||
                                             memo.isNotEmpty)
                                           Padding(
@@ -1170,7 +1193,7 @@ class _TodoScreenState extends State<TodoScreen>
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                if (timeDisplay.isNotEmpty)
+                                                if (hasTime)
                                                   Row(
                                                     children: [
                                                       Icon(
@@ -1181,8 +1204,46 @@ class _TodoScreenState extends State<TodoScreen>
                                                             : Colors.grey[700],
                                                       ),
                                                       const SizedBox(width: 4),
-                                                      Text(
-                                                        timeDisplay,
+                                                      Text.rich(
+                                                        TextSpan(
+                                                          children: [
+                                                            TextSpan(
+                                                              text: timeObj
+                                                                  .format(
+                                                                    context,
+                                                                  ),
+                                                            ),
+                                                            if (isAlarmOn &&
+                                                                alarmObj !=
+                                                                    null) ...[
+                                                              const TextSpan(
+                                                                text: ' (알림 ',
+                                                              ),
+                                                              const WidgetSpan(
+                                                                alignment:
+                                                                    PlaceholderAlignment
+                                                                        .middle,
+                                                                child: Padding(
+                                                                  padding:
+                                                                      EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            2,
+                                                                      ),
+                                                                  child:
+                                                                      PixelEmoji(
+                                                                        'bell',
+                                                                        size:
+                                                                            10,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                text:
+                                                                    ' ${alarmObj.format(context)})',
+                                                              ),
+                                                            ],
+                                                          ],
+                                                        ),
                                                         style: TextStyle(
                                                           fontSize: 12,
                                                           color: isDone

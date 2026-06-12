@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
+import '../pixel_emoji.dart';
 
 class AquariumScreen extends StatefulWidget {
   final String swimmingFishType;
@@ -424,7 +425,14 @@ class _AquariumScreenState extends State<AquariumScreen>
           bottom: 20,
           right: 20,
           child: PixelButton(
-            text: '📦 보관함',
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PixelEmoji('box', size: 18),
+                SizedBox(width: 6),
+                Text('보관함'),
+              ],
+            ),
             color: Colors.white,
             textColor: Colors.black,
             onPressed: widget.onShowStorage,
@@ -435,7 +443,14 @@ class _AquariumScreenState extends State<AquariumScreen>
           bottom: 20,
           left: 20,
           child: PixelButton(
-            text: '🍗 먹이 주기',
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PixelEmoji('meat', size: 18),
+                SizedBox(width: 6),
+                Text('먹이 주기'),
+              ],
+            ),
             color: Colors.orangeAccent,
             textColor: Colors.white,
             onPressed: _startFeeding,
@@ -572,14 +587,14 @@ class PixelTankPainter extends CustomPainter {
 
 // --- 🎮 레트로 감성의 8비트 도트 스타일 버튼 ---
 class PixelButton extends StatefulWidget {
-  final String text;
+  final Widget child;
   final Color color;
   final Color textColor;
   final VoidCallback onPressed;
 
   const PixelButton({
     super.key,
-    required this.text,
+    required this.child,
     required this.color,
     required this.textColor,
     required this.onPressed,
@@ -618,13 +633,14 @@ class _PixelButtonState extends State<PixelButton> {
                   BoxShadow(color: Colors.black, offset: Offset(4, 4)),
                 ], // 도트 그림자
         ),
-        child: Text(
-          widget.text,
+        child: DefaultTextStyle(
           style: TextStyle(
             color: widget.textColor,
-            fontWeight: FontWeight.w900, // 폰트를 더 두껍게 해 픽셀 느낌 강조
+            fontWeight: FontWeight.w900,
             fontSize: 16,
+            fontFamily: DefaultTextStyle.of(context).style.fontFamily,
           ),
+          child: widget.child,
         ),
       ),
     );

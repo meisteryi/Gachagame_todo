@@ -4,6 +4,7 @@ import '../bouncing_wrapper.dart';
 import '../slot_machine.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
+import '../pixel_emoji.dart';
 
 class ShopScreen extends StatefulWidget {
   final List<Map<String, dynamic>> ownedFishes;
@@ -134,10 +135,26 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  isDuplicate
-                      ? '😅 이미 있는 ${isFish ? '물고기' : '수초'}예요!'
-                      : '🎉 야생의 ${isFish ? '물고기' : '수초'}가 나타났다!',
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: PixelEmoji(
+                            isDuplicate ? 'sweat' : 'party',
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      TextSpan(
+                        text: isDuplicate
+                            ? '이미 있는 ${isFish ? '물고기' : '수초'}예요!'
+                            : '야생의 ${isFish ? '물고기' : '수초'}가 나타났다!',
+                      ),
+                    ],
+                  ),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
@@ -255,7 +272,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   // 상점 6분할 개별 버튼
   Widget _buildShopItem(
     String title,
-    String icon,
+    Widget icon,
     Color bgColor,
     VoidCallback onTap,
   ) {
@@ -272,7 +289,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(icon, style: const TextStyle(fontSize: 36)),
+              icon,
               const SizedBox(height: 8),
               Text(
                 title,
@@ -359,7 +376,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             Expanded(
                               child: _buildShopItem(
                                 '물고기 뽑기',
-                                '🐟',
+                                const PixelEmoji('fish', size: 36),
                                 Colors.orangeAccent,
                                 () => setState(() => _gachaMode = 'fish'),
                               ),
@@ -368,7 +385,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             Expanded(
                               child: _buildShopItem(
                                 '수초 뽑기',
-                                '🌱',
+                                const PixelEmoji('seaweed', size: 36),
                                 Colors.greenAccent,
                                 () => setState(() => _gachaMode = 'seaweed'),
                               ),

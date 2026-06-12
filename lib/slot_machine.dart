@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
+import 'pixel_emoji.dart';
 
 class SlotMachine extends StatefulWidget {
   final String gachaType; // 'fish' 또는 'seaweed'
@@ -372,16 +373,26 @@ class _SlotMachineState extends State<SlotMachine> {
                     borderRadius: BorderRadius.zero,
                   ),
                 ),
-                child: Text(
-                  _isSpinning
-                      ? '가챠 진행 중...'
-                      : (widget.gachaType == 'seaweed'
-                            ? '수초 뽑기 🌱'
-                            : '물고기 뽑기 🐟'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _isSpinning
+                          ? '가챠 진행 중...'
+                          : (widget.gachaType == 'seaweed'
+                                ? '수초 뽑기 '
+                                : '물고기 뽑기 '),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (!_isSpinning)
+                      PixelEmoji(
+                        widget.gachaType == 'seaweed' ? 'seaweed' : 'fish',
+                        size: 24,
+                      ),
+                  ],
                 ),
               ),
             ),
