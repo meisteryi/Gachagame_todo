@@ -21,7 +21,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --base-href "/Gachagame_todo/" # 💡 중요: 깃허브 레포지토리 이름이 gacha_todo가 아니라면 꼭 실제 이름으로 바꿔주세요!
+        run: flutter build web --web-renderer canvaskit --base-href "/Gachagame_todo/" # 💡 모바일 웹에서도 아이콘/폰트가 깨지지 않도록 CanvasKit 렌더러 강제 적용!
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
