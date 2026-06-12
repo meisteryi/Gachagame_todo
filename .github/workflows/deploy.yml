@@ -21,7 +21,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --web-renderer html --base-href /Gachagame_todo/
+        run: flutter build web --base-href /Gachagame_todo/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

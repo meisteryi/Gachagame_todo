@@ -24,7 +24,23 @@ class GachaTodoApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
+        // 💡 CanvasKit 엔진에서도 애플 기본 폰트와 이모지(🍎)를 최우선으로 사용하도록 강제 지정!
+        fontFamily: '-apple-system',
+        fontFamilyFallback: const [
+          'BlinkMacSystemFont',
+          'Apple Color Emoji',
+          'Segoe UI Emoji',
+        ],
       ),
+      // 💡 웹/PC 환경에서 화면이 너무 넓게 퍼지지 않도록 모바일 비율(최대 너비 450px)로 고정!
+      builder: (context, child) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 450),
+            child: child,
+          ),
+        );
+      },
       home: const MainScreen(),
     );
   }
@@ -44,6 +60,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
   String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
   String? _plantedSeaweedType; // 수조에 심어진 수초
+  int _coins = 0; // 💡 코인 재화 추가
   final PageController _pageController = PageController(initialPage: 0);
 
   @override
@@ -92,6 +109,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       _plantedSeaweedType = prefs.getString('plantedSeaweed');
       setState(() {
         _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
+        _coins = prefs.getInt('coins') ?? 0; // 코인 로드
       });
     } catch (e) {
       debugPrint('메인 데이터 로드 에러: $e');
@@ -108,6 +126,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     } else {
       await prefs.remove('plantedSeaweed');
     }
+    await prefs.setInt('coins', _coins); // 코인 저장
   }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
@@ -197,6 +216,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           _swimmingFishType = 'puffer';
                           _ownedSeaweeds.clear();
                           _plantedSeaweedType = null;
+                          _coins = 0; // 개발용 초기화 시 코인도 0으로
                         });
                         _saveMainData();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -446,6 +466,35 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           'Gacha TODO!',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        // 💡 상단바 우측에 내 코인 개수 표시
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.yellow[700],
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.black, width: 2),
+            ),
+            child: Row(
+              children: [
+                const Text('🪙', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 4),
+                Text(
+                  '$_coins',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(color: Colors.black, offset: Offset(1, 1)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: PageView(
