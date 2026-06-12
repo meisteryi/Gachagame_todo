@@ -125,7 +125,7 @@ class _TodoScreenState extends State<TodoScreen>
 
     // 1. 카테고리 저장
     final encodedCategories = _categoryColors.map(
-      (key, value) => MapEntry(key, value.toARGB32()),
+      (key, value) => MapEntry(key, value.toARGB32()), // 💡 최신 Flutter 권장 방식
     );
     await prefs.setString('categories', jsonEncode(encodedCategories));
 

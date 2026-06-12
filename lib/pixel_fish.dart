@@ -1,23 +1,57 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 // --- 귀여운 2D 도트 물고기를 그리는 위젯 ---
-class PixelFish extends StatelessWidget {
+class PixelFish extends StatefulWidget {
   final String type;
+  final bool isAnimated;
 
-  const PixelFish({super.key, this.type = 'puffer'});
+  const PixelFish({super.key, this.type = 'puffer', this.isAnimated = true});
+
+  @override
+  State<PixelFish> createState() => _PixelFishState();
+}
+
+class _PixelFishState extends State<PixelFish>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600), // 꼬리치는 속도
+    );
+    if (widget.isAnimated) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(60, 40), // 전체 물고기의 크기
-      painter: PixelFishPainter(type),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          size: const Size(60, 40), // 전체 물고기의 크기
+          painter: PixelFishPainter(widget.type, _controller.value),
+        );
+      },
     );
   }
 }
 
 class PixelFishPainter extends CustomPainter {
   final String type;
-  PixelFishPainter(this.type);
+  final double time;
+  PixelFishPainter(this.type, this.time);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -157,11 +191,20 @@ class PixelFishPainter extends CustomPainter {
           paint.color = Colors.lightBlueAccent;
         }
 
+        // 🐟 꼬물거리는 픽셀 애니메이션 (왼쪽 꼬리 부분일수록 위아래로 더 크게 움직임)
+        double wag = 0;
+        if (x < 6) {
+          wag =
+              sin(time * pi * 2 - x * 0.4) *
+              (6 - x) *
+              0.15; // 💡 픽셀 스냅 대신 소수점 단위의 부드러운 웨이브 적용
+        }
+
         // 배열에 맞춰 각 픽셀(사각형)을 캔버스에 그립니다.
         canvas.drawRect(
           Rect.fromLTWH(
             x * pixelWidth,
-            y * pixelHeight,
+            y * pixelHeight + (wag * pixelHeight),
             pixelWidth,
             pixelHeight,
           ),
@@ -172,5 +215,6 @@ class PixelFishPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant PixelFishPainter oldDelegate) =>
+      oldDelegate.type != type || oldDelegate.time != time;
 }

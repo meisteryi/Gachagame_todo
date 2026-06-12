@@ -2,14 +2,17 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../pixel_fish.dart';
+import '../pixel_seaweed.dart';
 
 class AquariumScreen extends StatefulWidget {
   final String swimmingFishType;
+  final String? plantedSeaweedType;
   final VoidCallback onShowStorage;
 
   const AquariumScreen({
     super.key,
     required this.swimmingFishType,
+    required this.plantedSeaweedType,
     required this.onShowStorage,
   });
 
@@ -201,6 +204,18 @@ class _AquariumScreenState extends State<AquariumScreen>
                   Positioned.fill(
                     child: CustomPaint(painter: PixelTankPainter()),
                   ),
+                  // 🌱 선택된 수초를 바닥에 배치 (물의 흐름에 따라 흔들림)
+                  if (widget.plantedSeaweedType != null &&
+                      _fishController != null)
+                    Positioned(
+                      bottom: 25, // 모래 바닥 위에 배치
+                      left: 120, // 수조 가운데 살짝 왼쪽
+                      child: Transform.scale(
+                        alignment: Alignment.bottomCenter, // 💡 바닥을 고정
+                        scale: 1.5, // 복잡한 매트릭스 대신 깔끔한 내장 스케일 속성 사용!
+                        child: PixelSeaweed(type: widget.plantedSeaweedType!),
+                      ),
+                    ),
                   // 헤엄치는 2D 도트 물고기 & 떨어지는 먹이 효과 결합
                   if (_fishController != null && _feedController != null)
                     AnimatedBuilder(
@@ -387,7 +402,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                                 child: Transform(
                                   alignment: Alignment.center,
                                   transform: Matrix4.diagonal3Values(
-                                    flipX ? -1.0 : 1.0,
+                                    flipX ? -1.0 : 1.0, // 좌우 반전 적용
                                     1.0,
                                     1.0,
                                   )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가

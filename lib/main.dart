@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
+import 'screens/shop_screen.dart';
 import 'pixel_fish.dart';
-import 'slot_machine.dart';
+import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
 
 void main() async {
@@ -39,33 +39,22 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
-  bool _isGachaMode = false; // 상점에서 가챠 기계로 들어갔는지 여부
 
   final List<Map<String, dynamic>> _ownedFishes = [];
+  final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
   String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
+  String? _plantedSeaweedType; // 수조에 심어진 수초
   final PageController _pageController = PageController(initialPage: 0);
-
-  // 폭죽 애니메이션 컨트롤러 및 파티클 리스트
-  AnimationController? _fireworksController;
-  final List<Particle> _particles = [];
 
   @override
   void initState() {
     super.initState();
     _loadMainData(); // 앱 시작 시 보관함 데이터 불러오기
-    _fireworksController =
-        AnimationController(
-          vsync: this,
-          duration: const Duration(milliseconds: 1500),
-        )..addListener(() {
-          setState(() {}); // 폭죽이 터지는 동안 매 프레임 화면 갱신
-        });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _fireworksController?.dispose();
     super.dispose();
   }
 
@@ -88,6 +77,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
         });
       }
+
+      // 수초 데이터 불러오기
+      final String? seaweedsStr = prefs.getString('ownedSeaweeds');
+      if (seaweedsStr != null) {
+        final List<dynamic> decodedSeaweeds = jsonDecode(seaweedsStr);
+        setState(() {
+          _ownedSeaweeds.clear();
+          for (var item in decodedSeaweeds) {
+            _ownedSeaweeds.add(Map<String, dynamic>.from(item));
+          }
+        });
+      }
+      _plantedSeaweedType = prefs.getString('plantedSeaweed');
       setState(() {
         _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
       });
@@ -99,51 +101,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Future<void> _saveMainData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('ownedFishes', jsonEncode(_ownedFishes));
+    await prefs.setString('ownedSeaweeds', jsonEncode(_ownedSeaweeds));
     await prefs.setString('swimmingFish', _swimmingFishType);
-  }
-
-  // 폭죽 파티클 생성 및 애니메이션 시작
-  void _triggerFireworks() {
-    final random = Random();
-    _particles.clear();
-    final colors = [
-      Colors.redAccent,
-      Colors.yellowAccent,
-      Colors.blueAccent,
-      Colors.greenAccent,
-      Colors.pinkAccent,
-      Colors.orangeAccent,
-    ];
-
-    // 슬롯머신 주변 여러 위치에서 폭죽이 터지도록 3개의 그룹 생성
-    for (int j = 0; j < 3; j++) {
-      final offsetX = (random.nextDouble() - 0.5) * 200; // 중심 기준 X 분산
-      final offsetY = (random.nextDouble() - 0.5) * 200 - 50; // 중심 기준 Y 분산
-
-      for (int i = 0; i < 40; i++) {
-        final angle = random.nextDouble() * 2 * pi;
-        final speed = random.nextDouble() * 200 + 50;
-        _particles.add(
-          Particle(
-            startX: offsetX,
-            startY: offsetY,
-            vx: cos(angle) * speed,
-            vy: sin(angle) * speed,
-            color: colors[random.nextInt(colors.length)],
-          ),
-        );
-      }
+    if (_plantedSeaweedType != null) {
+      await prefs.setString('plantedSeaweed', _plantedSeaweedType!);
+    } else {
+      await prefs.remove('plantedSeaweed');
     }
-    _fireworksController?.forward(from: 0); // 애니메이션 0부터 재생
   }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (index != 2) {
-        _isGachaMode = false; // 다른 탭으로 가면 가챠 화면 초기화
-      }
     });
     _pageController.animateToPage(
       index,
@@ -152,95 +122,42 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
   }
 
-  // 슬롯머신이 끝나면 실행될 팝업창
-  void _showGachaResult(Map<String, dynamic> drawnFish) {
-    // 1. 중복 여부 확인
-    final bool isDuplicate = _ownedFishes.any(
-      (fish) => fish['type'] == drawnFish['type'],
-    );
-
-    // 2. 중복이 아닐 때의 로직 처리 (보관함 추가 및 폭죽)
-    if (!isDuplicate) {
-      setState(() {
-        _ownedFishes.add(drawnFish);
-      });
-      _saveMainData(); // 💡 뽑은 물고기 저장
-      _triggerFireworks(); // 🌟 도트 폭죽 팡!
-
-      // 폭죽을 잠시 감상할 수 있도록 팝업창을 1.2초 늦게 띄움
-      Future.delayed(const Duration(milliseconds: 1200), () {
-        if (mounted) _showResultDialog(drawnFish, isDuplicate);
-      });
-    } else {
-      // 중복일 경우는 지체 없이 바로 팝업창 띄움
-      _showResultDialog(drawnFish, isDuplicate);
-    }
+  // 상점 탭에서 새로운 물고기를 뽑았을 때 호출되는 함수
+  void _onAddFish(Map<String, dynamic> drawnFish) {
+    setState(() {
+      _ownedFishes.add(drawnFish);
+    });
+    _saveMainData();
   }
 
-  // 결과 다이얼로그 띄우기
-  void _showResultDialog(Map<String, dynamic> drawnFish, bool isDuplicate) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            isDuplicate ? '😅 앗, 이미 있는 물고기예요!' : '🎉 앗! 야생의 물고기가 나타났다!',
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
-              Transform.scale(
-                scale: 1.5,
-                child: PixelFish(
-                  type: drawnFish['type']?.toString() ?? 'puffer',
-                ),
-              ), // 도트 물고기 원본 출력!
-              const SizedBox(height: 30),
-              Text(
-                isDuplicate
-                    ? '[${drawnFish['name']}] 은(는) 이미 보관함에 있습니다!\n아쉽지만 다음 기회를 노려보세요.'
-                    : '[${drawnFish['name']}] 가 당첨되었습니다!\n보관함에서 물고기를 선택해 수조에 넣어보세요.',
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(), // 팝업 닫기
-              child: const Text('닫기'),
-            ),
-            if (!isDuplicate) // 중복이 아닐 때만 보관함 이동 버튼 표시
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // 팝업 닫기
-                  setState(() {
-                    _selectedIndex = 0; // 1. 내 수조 탭으로 즉시 이동
-                    _isGachaMode = false; // 가챠 화면도 상점 메뉴로 초기화
-                  });
-                  _pageController.animateToPage(
-                    0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                  // 2. 탭 전환이 완료된 후 약간의 딜레이를 두고 보관함(바텀 시트) 열기
-                  Future.delayed(const Duration(milliseconds: 150), () {
-                    if (mounted) _showFishStorage();
-                  });
-                },
-                child: const Text('보관함으로 가기'),
-              ),
-          ],
-        );
-      },
-    );
+  void _onAddSeaweed(Map<String, dynamic> drawnSeaweed) {
+    setState(() {
+      _ownedSeaweeds.add(drawnSeaweed);
+    });
+    _saveMainData();
   }
 
-  // 물고기 보관함 열기
-  void _showFishStorage() {
+  // 상점 탭에서 보관함으로 이동할 때 호출되는 함수
+  void _navigateToAquariumAndShowStorage() {
+    setState(() {
+      _selectedIndex = 0;
+    });
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) _showStorage();
+    });
+  }
+
+  // 통합 보관함(물고기 & 수초) 열기
+  void _showStorage() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // 화면 비율에 따라 높이를 조정할 수 있게 허용
+      backgroundColor: Colors.transparent, // 둥근 모서리 디자인을 위해 투명 처리
       builder: (context) {
         // SafeArea 추가: 아이폰 하단 홈 바에 UI가 가려지지 않도록 보호
         return SafeArea(
@@ -248,8 +165,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             height:
                 MediaQuery.of(context).size.height *
-                0.5, // 400 고정값 대신 기기 높이의 50% 사용
+                0.6, // 스크롤을 위해 기기 높이의 60% 사용
             width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -257,7 +178,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      '🐟 내 물고기 보관함',
+                      '📦 내 보관함',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -274,6 +195,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           _ownedFishes.clear();
                           _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
                           _swimmingFishType = 'puffer';
+                          _ownedSeaweeds.clear();
+                          _plantedSeaweedType = null;
                         });
                         _saveMainData();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -285,90 +208,226 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: _ownedFishes.isEmpty
-                      ? const Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // --- 물고기 보관함 영역 ---
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            '아직 뽑은 물고기가 없어요!\n가챠 샵에서 물고기를 뽑아보세요.',
-                            textAlign: TextAlign.center,
+                            '🐟 내 물고기',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        )
-                      : GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                crossAxisSpacing: 6, // 적당히 좁은 간격 유지
-                                mainAxisSpacing: 12,
-                                childAspectRatio:
-                                    1.25, // 🌟 높이를 대폭 줄여서 카드가 가로로 납작하고 꽉 차 보이게 수정
-                              ),
-                          itemCount: _ownedFishes.length,
-                          itemBuilder: (context, index) {
-                            final fish = _ownedFishes[index];
-                            return BouncingWrapper(
-                              child: SizedBox.expand(
-                                child: Card(
-                                  margin: EdgeInsets
-                                      .zero, // 기본 마진을 완전히 제거해 가로폭 꽉 채우기
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    side: const BorderSide(
-                                      color: Colors.black,
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  clipBehavior: Clip
-                                      .antiAlias, // 버튼 클릭 시 물결 효과가 네모를 안 넘어가게 잘라줌
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        _swimmingFishType =
-                                            fish['type']?.toString() ??
-                                            'puffer'; // 1. 수조 물고기 변경
-                                        _selectedIndex = 0; // 2. 수조 탭으로 이동
-                                      });
-                                      _saveMainData(); // 💡 수조 물고기 변경 시 저장
-                                      _pageController.animateToPage(
-                                        0,
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        curve: Curves.easeInOut,
-                                      );
-                                      Navigator.of(context).pop(); // 3. 보관함 닫기
-                                    },
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Transform.scale(
-                                          scale: 1.2,
-                                          child: PixelFish(
-                                            type:
-                                                fish['type']?.toString() ??
-                                                'puffer',
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6), // 간격 축소
-                                        Text(
-                                          fish['name']?.toString() ?? '',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 1, // 높이가 줄었으므로 글자는 한 줄만 표시
-                                          overflow: TextOverflow
-                                              .ellipsis, // 길면 ... 처리
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
                         ),
+                        _ownedFishes.isEmpty
+                            ? const Text('아직 뽑은 물고기가 없어요!')
+                            : GridView.builder(
+                                shrinkWrap: true,
+                                physics:
+                                    const NeverScrollableScrollPhysics(), // 스크롤은 부모가 대신함
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 6,
+                                      mainAxisSpacing: 12,
+                                      childAspectRatio: 1.25,
+                                    ),
+                                itemCount: _ownedFishes.length,
+                                itemBuilder: (context, index) {
+                                  final fish = _ownedFishes[index];
+                                  return BouncingWrapper(
+                                    child: SizedBox.expand(
+                                      child: Card(
+                                        margin: EdgeInsets.zero,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color:
+                                                _swimmingFishType ==
+                                                    fish['type']
+                                                ? Colors.redAccent
+                                                : Colors.black,
+                                            width:
+                                                _swimmingFishType ==
+                                                    fish['type']
+                                                ? 4
+                                                : 2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              _swimmingFishType =
+                                                  fish['type']?.toString() ??
+                                                  'puffer';
+                                              _selectedIndex = 0;
+                                            });
+                                            _saveMainData();
+                                            _pageController.animateToPage(
+                                              0,
+                                              duration: const Duration(
+                                                milliseconds: 300,
+                                              ),
+                                              curve: Curves.easeInOut,
+                                            );
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Transform.scale(
+                                                scale: 1.2,
+                                                child: PixelFish(
+                                                  type:
+                                                      fish['type']
+                                                          ?.toString() ??
+                                                      'puffer',
+                                                  isAnimated:
+                                                      false, // 💡 보관함에서는 가만히 있도록 설정
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                fish['name']?.toString() ?? '',
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                        const SizedBox(height: 24),
+
+                        // --- 수초 보관함 영역 ---
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            '🌱 내 수초',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        _ownedSeaweeds.isEmpty
+                            ? const Padding(
+                                padding: EdgeInsets.only(bottom: 20),
+                                child: Text(
+                                  '아직 뽑은 수초가 없어요!\n가챠 샵에서 수초를 뽑아보세요.',
+                                ),
+                              )
+                            : GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 6,
+                                      mainAxisSpacing: 12,
+                                      childAspectRatio:
+                                          1.0, // 수초는 세로가 기므로 정방형으로 비율 조정
+                                    ),
+                                itemCount: _ownedSeaweeds.length,
+                                itemBuilder: (context, index) {
+                                  final seaweed = _ownedSeaweeds[index];
+                                  return BouncingWrapper(
+                                    child: SizedBox.expand(
+                                      child: Card(
+                                        margin: EdgeInsets.zero,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color:
+                                                _plantedSeaweedType ==
+                                                    seaweed['type']
+                                                ? Colors.greenAccent
+                                                : Colors.black,
+                                            width:
+                                                _plantedSeaweedType ==
+                                                    seaweed['type']
+                                                ? 4
+                                                : 2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              _plantedSeaweedType =
+                                                  seaweed['type']?.toString() ??
+                                                  'green_algae';
+                                              _selectedIndex = 0;
+                                            });
+                                            _saveMainData();
+                                            _pageController.animateToPage(
+                                              0,
+                                              duration: const Duration(
+                                                milliseconds: 300,
+                                              ),
+                                              curve: Curves.easeInOut,
+                                            );
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Transform.scale(
+                                                scale: 1.1,
+                                                child: PixelSeaweed(
+                                                  type:
+                                                      seaweed['type']
+                                                          ?.toString() ??
+                                                      'green_algae',
+                                                  isAnimated:
+                                                      false, // 💡 보관함에서는 가만히 있도록 설정
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                seaweed['name']?.toString() ??
+                                                    '',
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -384,7 +443,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         toolbarHeight: 48, // 상단바 두께 축소 (기본값 56)
         title: const Text(
-          '가챠 투두 🎲',
+          'Gacha TODO!',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -402,118 +461,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           // 1. 내 수조 탭 (전체 화면)
           AquariumScreen(
             swimmingFishType: _swimmingFishType,
-            onShowStorage: _showFishStorage,
+            plantedSeaweedType: _plantedSeaweedType,
+            onShowStorage: _showStorage,
           ),
           // 2. 할 일 탭 (전체 화면)
           const TodoScreen(),
           // 3. 상점 탭 (상점 메인 메뉴 또는 가챠 기계 + 폭죽 오버레이)
-          _isGachaMode
-              ? Stack(
-                  children: [
-                    Container(
-                      color: const Color(0xFFFFF0F5), // 연한 핑크색 배경
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Stack(
-                        children: [
-                          SlotMachine(onDrawDone: _showGachaResult),
-                          // 상점 메인으로 돌아가기 버튼
-                          SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: BouncingWrapper(
-                                showShadow: false,
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.arrow_back_ios,
-                                    size: 28,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isGachaMode = false;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // 폭죽 애니메이션이 실행 중일 때만 그리기
-                    if (_fireworksController?.isAnimating == true)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          // 클릭 이벤트를 슬롯머신으로 통과시킴
-                          child: CustomPaint(
-                            painter: PixelFireworksPainter(
-                              _fireworksController!.value,
-                              _particles,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                )
-              : Container(
-                  color: const Color(0xFFFFF0F5),
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        '상점 🏪',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      BouncingWrapper(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isGachaMode = true;
-                            });
-                          },
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.8,
-                            height: MediaQuery.of(context).size.height / 6,
-                            decoration: BoxDecoration(
-                              color: Colors.orangeAccent,
-                              border: Border.all(color: Colors.black, width: 4),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  '🐟',
-                                  style: TextStyle(fontSize: 40),
-                                ),
-                                const SizedBox(width: 16),
-                                const Text(
-                                  '물고기 뽑기',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black,
-                                        offset: Offset(2, 2),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          ShopScreen(
+            ownedFishes: _ownedFishes,
+            ownedSeaweeds: _ownedSeaweeds,
+            onAddFish: _onAddFish,
+            onAddSeaweed: _onAddSeaweed,
+            onNavigateToAquarium: _navigateToAquariumAndShowStorage,
+          ),
         ],
       ),
       // 3. 하단 네비게이션 바
@@ -529,61 +489,4 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       ),
     );
   }
-}
-
-// --- 🌟 2D 도트 폭죽 효과를 위한 파티클 및 페인터 🌟 ---
-class Particle {
-  final double startX;
-  final double startY;
-  final double vx;
-  final double vy;
-  final Color color;
-
-  Particle({
-    required this.startX,
-    required this.startY,
-    required this.vx,
-    required this.vy,
-    required this.color,
-  });
-}
-
-class PixelFireworksPainter extends CustomPainter {
-  final double progress;
-  final List<Particle> particles;
-
-  PixelFireworksPainter(this.progress, this.particles);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (progress == 0) return;
-    final paint = Paint();
-    final center = Offset(size.width / 2, size.height / 2);
-
-    for (var p in particles) {
-      // 시간(progress)에 따른 파티클 위치 계산 및 중력(떨어짐) 효과 적용
-      double currentX = center.dx + p.startX + (p.vx * progress * 1.5);
-      double currentY =
-          center.dy +
-          p.startY +
-          (p.vy * progress * 1.5) +
-          (250 * progress * progress);
-
-      // 시간이 지날수록 점점 투명해지도록 설정
-      paint.color = p.color.withValues(alpha: (1.0 - progress).clamp(0.0, 1.0));
-
-      // 도트 느낌을 살리기 위해 정사각형 픽셀 모양(8x8)으로 그림
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: Offset(currentX, currentY),
-          width: 8,
-          height: 8,
-        ),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant PixelFireworksPainter oldDelegate) => true;
 }
