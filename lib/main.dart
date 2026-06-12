@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
@@ -24,13 +25,15 @@ class GachaTodoApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
-        // 💡 CanvasKit 엔진에서도 애플 기본 폰트와 이모지(🍎)를 최우선으로 사용하도록 강제 지정!
-        fontFamily: '-apple-system',
-        fontFamilyFallback: const [
-          'BlinkMacSystemFont',
-          'Apple Color Emoji',
-          'Segoe UI Emoji',
-        ],
+        // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
+        fontFamily: kIsWeb ? '-apple-system' : null,
+        fontFamilyFallback: kIsWeb
+            ? const [
+                'BlinkMacSystemFont',
+                'Apple Color Emoji',
+                'Segoe UI Emoji',
+              ]
+            : null,
       ),
       // 💡 웹/PC 환경에서 화면이 너무 넓게 퍼지지 않도록 모바일 비율(최대 너비 450px)로 고정!
       builder: (context, child) {
