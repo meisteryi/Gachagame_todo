@@ -15,6 +15,6 @@ void main() {
     await tester.pumpWidget(const GachaTodoApp());
 
     // 앱이 정상적으로 빌드되고 메인 타이틀이 화면에 보이는지 확인합니다.
-    expect(find.text('가챠 투두 🎲'), findsOneWidget);
+    expect(find.text('Gacha TODO!'), findsOneWidget);
   });
 }
