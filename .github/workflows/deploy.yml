@@ -21,7 +21,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --base-href "/Gachagame_todo/" # 💡 최신 플러터에서는 예쁜 CanvasKit이 강제 기본 적용되므로 에러를 뱉는 옵션 제거!
+        run: flutter build web --web-renderer html --base-href /Gachagame_todo/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
