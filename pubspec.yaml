@@ -51,6 +51,11 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
+  web:
+    generate: true
+    image_path: 'assets/icon.png'
+    background_color: '#FFF0F5' # 바탕화면 앱 아이콘의 배경색
+    theme_color: '#FFF0F5' # 브라우저 상단바 테마색
   image_path: 'assets/icon.png'
 
 # For information on the generic Dart part of this file, see the
