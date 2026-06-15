@@ -170,7 +170,26 @@ class _PixelEmojiPainter extends CustomPainter {
     final double pw = size.width / 8;
     final double ph = size.height / 8;
     final paint = Paint();
+    final outlinePaint = Paint()..color = Colors.black;
 
+    final outlineOffsets = const [
+      Offset(-1, 0), Offset(1, 0), Offset(0, -1), Offset(0, 1),
+      Offset(-1, -1), Offset(1, -1), Offset(-1, 1), Offset(1, 1),
+    ];
+
+    // 1. 얇은 테두리(외곽선) 그리기
+    for (int y = 0; y < 8; y++) {
+      for (int x = 0; x < 8; x++) {
+        final char = data[y][x];
+        if (char != '.') {
+          for (var offset in outlineOffsets) {
+            canvas.drawRect(Rect.fromLTWH(x * pw + offset.dx, y * ph + offset.dy, pw, ph), outlinePaint);
+          }
+        }
+      }
+    }
+
+    // 2. 내부 픽셀 그리기
     for (int y = 0; y < 8; y++) {
       for (int x = 0; x < 8; x++) {
         final char = data[y][x];

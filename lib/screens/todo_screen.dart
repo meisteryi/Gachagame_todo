@@ -1144,54 +1144,7 @@ class _TodoScreenState extends State<TodoScreen>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // 💡 상하좌우로 1px씩 비켜서 배치하여 얇은 검정 테두리 효과 연출
-                            Positioned(
-                              left: -1,
-                              child: ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black,
-                                  BlendMode.srcIn,
-                                ),
-                                child: PixelEmoji('trophy', size: 16),
-                              ),
-                            ),
-                            Positioned(
-                              left: 1,
-                              child: ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black,
-                                  BlendMode.srcIn,
-                                ),
-                                child: PixelEmoji('trophy', size: 16),
-                              ),
-                            ),
-                            Positioned(
-                              top: -1,
-                              child: ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black,
-                                  BlendMode.srcIn,
-                                ),
-                                child: PixelEmoji('trophy', size: 16),
-                              ),
-                            ),
-                            Positioned(
-                              top: 1,
-                              child: ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black,
-                                  BlendMode.srcIn,
-                                ),
-                                child: PixelEmoji('trophy', size: 16),
-                              ),
-                            ),
-                            // 원본 트로피를 맨 위에 덮기
-                            PixelEmoji('trophy', size: 16),
-                          ],
-                        ),
+                        const PixelEmoji('trophy', size: 16),
                       ],
                     ),
                     Text(
