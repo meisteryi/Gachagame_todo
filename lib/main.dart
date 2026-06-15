@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,7 +64,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> _ownedFishes = [];
   final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
   String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
-  String? _plantedSeaweedType; // 수조에 심어진 수초
+  List<Map<String, dynamic>> _plantedSeaweeds = []; // 💡 수조에 심어진 여러 수초들의 위치 정보
   int _coins = 0; // 💡 코인 재화 추가
   final PageController _pageController = PageController(initialPage: 0);
 
@@ -110,7 +111,20 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           }
         });
       }
-      _plantedSeaweedType = prefs.getString('plantedSeaweed');
+      final String? plantedSeaweedsStr = prefs.getString('plantedSeaweeds');
+      if (plantedSeaweedsStr != null) {
+        final List<dynamic> decoded = jsonDecode(plantedSeaweedsStr);
+        _plantedSeaweeds = decoded
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      } else {
+        // 기존 단일 수초 데이터 호환성 유지 및 마이그레이션
+        final String? oldSeaweed = prefs.getString('plantedSeaweed');
+        if (oldSeaweed != null) {
+          _plantedSeaweeds.add({'type': oldSeaweed, 'x': 140.0});
+          prefs.remove('plantedSeaweed');
+        }
+      }
       setState(() {
         _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
         _coins = prefs.getInt('coins') ?? 0; // 코인 로드
@@ -125,11 +139,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     await prefs.setString('ownedFishes', jsonEncode(_ownedFishes));
     await prefs.setString('ownedSeaweeds', jsonEncode(_ownedSeaweeds));
     await prefs.setString('swimmingFish', _swimmingFishType);
-    if (_plantedSeaweedType != null) {
-      await prefs.setString('plantedSeaweed', _plantedSeaweedType!);
-    } else {
-      await prefs.remove('plantedSeaweed');
-    }
+    await prefs.setString('plantedSeaweeds', jsonEncode(_plantedSeaweeds));
     await prefs.setInt('coins', _coins); // 코인 저장
   }
 
@@ -225,7 +235,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
                           _swimmingFishType = 'puffer';
                           _ownedSeaweeds.clear();
-                          _plantedSeaweedType = null;
+                          _plantedSeaweeds.clear();
                           _coins = 0; // 개발용 초기화 시 코인도 0으로
                         });
                         _saveMainData();
@@ -398,13 +408,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color:
-                                                _plantedSeaweedType ==
-                                                    seaweed['type']
+                                                _plantedSeaweeds.any(
+                                                  (s) =>
+                                                      s['type'] ==
+                                                      seaweed['type'],
+                                                )
                                                 ? Colors.greenAccent
                                                 : Colors.black,
                                             width:
-                                                _plantedSeaweedType ==
-                                                    seaweed['type']
+                                                _plantedSeaweeds.any(
+                                                  (s) =>
+                                                      s['type'] ==
+                                                      seaweed['type'],
+                                                )
                                                 ? 4
                                                 : 2,
                                           ),
@@ -416,9 +432,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         child: InkWell(
                                           onTap: () {
                                             setState(() {
-                                              _plantedSeaweedType =
-                                                  seaweed['type']?.toString() ??
-                                                  'green_algae';
+                                              _plantedSeaweeds.add({
+                                                'type':
+                                                    seaweed['type']
+                                                        ?.toString() ??
+                                                    'green_algae',
+                                                'x':
+                                                    140.0 +
+                                                    (Random().nextDouble() *
+                                                            40 -
+                                                        20), // 💡 추가 시 겹치지 않게 위치 살짝 분산
+                                              });
                                               _selectedIndex = 0;
                                             });
                                             _saveMainData();
@@ -533,7 +557,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           // 1. 내 수조 탭 (전체 화면)
           AquariumScreen(
             swimmingFishType: _swimmingFishType,
-            plantedSeaweedType: _plantedSeaweedType,
+            plantedSeaweeds: _plantedSeaweeds,
+            onUpdateSeaweeds: (newList) {
+              setState(() => _plantedSeaweeds = newList);
+              _saveMainData(); // 편집 위치 실시간 저장
+            },
             onShowStorage: _showStorage,
           ),
           // 2. 할 일 탭 (전체 화면)

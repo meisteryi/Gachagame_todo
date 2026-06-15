@@ -7,13 +7,15 @@ import '../pixel_emoji.dart';
 
 class AquariumScreen extends StatefulWidget {
   final String swimmingFishType;
-  final String? plantedSeaweedType;
+  final List<Map<String, dynamic>> plantedSeaweeds;
+  final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final VoidCallback onShowStorage;
 
   const AquariumScreen({
     super.key,
     required this.swimmingFishType,
-    required this.plantedSeaweedType,
+    required this.plantedSeaweeds,
+    required this.onUpdateSeaweeds,
     required this.onShowStorage,
   });
 
@@ -29,6 +31,7 @@ class _AquariumScreenState extends State<AquariumScreen>
   bool _isFeeding = false;
   double _feedStartX = 0;
   double _feedStartY = 0;
+  bool _isEditMode = false; // 🌟 수초 편집 모드
 
   @override
   void initState() {
@@ -205,18 +208,113 @@ class _AquariumScreenState extends State<AquariumScreen>
                   Positioned.fill(
                     child: CustomPaint(painter: PixelTankPainter()),
                   ),
-                  // 🌱 선택된 수초를 바닥에 배치 (물의 흐름에 따라 흔들림)
-                  if (widget.plantedSeaweedType != null &&
-                      _fishController != null)
-                    Positioned(
-                      bottom: 25, // 모래 바닥 위에 배치
-                      left: 120, // 수조 가운데 살짝 왼쪽
-                      child: Transform.scale(
-                        alignment: Alignment.bottomCenter, // 💡 바닥을 고정
-                        scale: 1.5, // 복잡한 매트릭스 대신 깔끔한 내장 스케일 속성 사용!
-                        child: PixelSeaweed(type: widget.plantedSeaweedType!),
-                      ),
-                    ),
+                  // 🌱 여러 개의 수초를 바닥에 배치 및 편집 가능하게 구성
+                  if (_fishController != null)
+                    ...widget.plantedSeaweeds.asMap().entries.map((entry) {
+                      final int idx = entry.key;
+                      final Map<String, dynamic> seaweed = entry.value;
+                      final double x =
+                          (seaweed['x'] as num?)?.toDouble() ?? 140.0;
+
+                      return Positioned(
+                        key: ObjectKey(
+                          seaweed,
+                        ), // 💡 순서가 바뀌어도 드래그가 끊기지 않도록 고유 키 부여
+                        bottom: 25,
+                        left: x,
+                        child: Listener(
+                          onPointerDown: _isEditMode
+                              ? (_) {
+                                  // 💡 터치 시 해당 수초를 배열 맨 끝으로 보내서 화면 맨 앞(위)으로 렌더링
+                                  if (idx !=
+                                      widget.plantedSeaweeds.length - 1) {
+                                    setState(() {
+                                      widget.plantedSeaweeds.remove(seaweed);
+                                      widget.plantedSeaweeds.add(seaweed);
+                                    });
+                                    widget.onUpdateSeaweeds(
+                                      widget.plantedSeaweeds,
+                                    );
+                                  }
+                                }
+                              : null,
+                          child: GestureDetector(
+                            onPanUpdate: _isEditMode
+                                ? (details) {
+                                    setState(() {
+                                      seaweed['x'] = (x + details.delta.dx)
+                                          .clamp(10.0, 280.0); // 어항 범위 제한
+                                    });
+                                  }
+                                : null,
+                            onPanEnd: _isEditMode
+                                ? (_) => widget.onUpdateSeaweeds(
+                                    widget.plantedSeaweeds,
+                                  )
+                                : null,
+                            onDoubleTap: _isEditMode
+                                ? () {
+                                    setState(() {
+                                      widget.plantedSeaweeds.remove(
+                                        seaweed,
+                                      ); // 💡 바뀐 순서에 맞춰 안전하게 객체로 삭제
+                                    });
+                                    widget.onUpdateSeaweeds(
+                                      widget.plantedSeaweeds,
+                                    );
+                                  }
+                                : null,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  color: Colors.transparent, // 💡 드래그 터치 영역 확보
+                                  child: Container(
+                                    decoration: _isEditMode
+                                        ? BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.redAccent,
+                                              width: 2,
+                                            ),
+                                            color: Colors.redAccent.withValues(
+                                              alpha: 0.2,
+                                            ),
+                                          )
+                                        : null,
+                                    child: Transform.scale(
+                                      alignment: Alignment.bottomCenter,
+                                      scale: 1.5,
+                                      child: PixelSeaweed(
+                                        type: seaweed['type'] ?? 'green_algae',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // 💡 왼쪽 도트 화살표
+                                if (_isEditMode)
+                                  Positioned(
+                                    left: -12,
+                                    child: CustomPaint(
+                                      size: const Size(6, 10),
+                                      painter: PixelArrowPainter(isLeft: true),
+                                    ),
+                                  ),
+                                // 💡 오른쪽 도트 화살표
+                                if (_isEditMode)
+                                  Positioned(
+                                    right: -12,
+                                    child: CustomPaint(
+                                      size: const Size(6, 10),
+                                      painter: PixelArrowPainter(isLeft: false),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                   // 헤엄치는 2D 도트 물고기 & 떨어지는 먹이 효과 결합
                   if (_fishController != null && _feedController != null)
                     AnimatedBuilder(
@@ -456,9 +554,125 @@ class _AquariumScreenState extends State<AquariumScreen>
             ),
           ),
         ),
+        // 🌿 수초 꾸미기 편집 모드 토글 버튼 (상단 우측)
+        Positioned(
+          top: 16,
+          right: 16,
+          child: PixelButton(
+            color: _isEditMode ? Colors.greenAccent : Colors.white,
+            textColor: Colors.black,
+            onPressed: () => setState(() => _isEditMode = !_isEditMode),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_isEditMode ? Icons.check : Icons.edit, size: 18),
+                const SizedBox(width: 6),
+                Text(_isEditMode ? '편집 완료' : '수초 편집'),
+              ],
+            ),
+          ),
+        ),
+        // 💡 편집 모드일 때 안내 메시지
+        if (_isEditMode)
+          Positioned(
+            top: 80,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  border: Border.all(color: Colors.yellowAccent, width: 2),
+                ),
+                child: const Text(
+                  '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
+}
+
+// --- ⬅️➡️ 수초 편집 모드용 도트 화살표 ---
+class PixelArrowPainter extends CustomPainter {
+  final bool isLeft;
+
+  PixelArrowPainter({required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final outlinePaint = Paint()..color = Colors.black;
+    final fillPaint = Paint()..color = Colors.white;
+    const double p = 2.0; // 픽셀 크기
+
+    // 3x5 도트 매트릭스로 그리는 좌우 화살표
+    final List<List<int>> pointsLeft = [
+      [2, 0],
+      [1, 1],
+      [2, 1],
+      [0, 2],
+      [1, 2],
+      [2, 2],
+      [1, 3],
+      [2, 3],
+      [2, 4],
+    ];
+    final List<List<int>> pointsRight = [
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [0, 2],
+      [1, 2],
+      [2, 2],
+      [0, 3],
+      [1, 3],
+      [0, 4],
+    ];
+
+    final points = isLeft ? pointsLeft : pointsRight;
+
+    // 1. 외곽선(검은색) 먼저 그리기: 상하좌우 및 대각선으로 1픽셀(p)씩 빗겨서 배치
+    final offsets = [
+      Offset(-p, 0),
+      Offset(p, 0),
+      Offset(0, -p),
+      Offset(0, p),
+      Offset(-p, -p),
+      Offset(p, -p),
+      Offset(-p, p),
+      Offset(p, p),
+    ];
+
+    for (var pt in points) {
+      for (var offset in offsets) {
+        canvas.drawRect(
+          Rect.fromLTWH(pt[0] * p + offset.dx, pt[1] * p + offset.dy, p, p),
+          outlinePaint,
+        );
+      }
+    }
+
+    // 2. 내부(흰색) 화살표 그리기
+    for (var pt in points) {
+      canvas.drawRect(Rect.fromLTWH(pt[0] * p, pt[1] * p, p, p), fillPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant PixelArrowPainter oldDelegate) =>
+      oldDelegate.isLeft != isLeft;
 }
 
 // --- 🌊 도트 느낌의 흔들리는 수면 애니메이션 ---

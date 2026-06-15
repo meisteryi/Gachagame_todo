@@ -18,6 +18,12 @@ class _TodoScreenState extends State<TodoScreen>
 
   DateTime _selectedDate = DateTime.now();
 
+  // 💡 무한 스크롤(PageView)을 위해 특정 기준일부터의 차이(일수)를 인덱스로 변환합니다.
+  final DateTime _baseDate = DateTime.utc(2020, 1, 1);
+  late final PageController _datePageController = PageController(
+    initialPage: _dateToIndex(_selectedDate),
+  );
+
   // 💡 카테고리별 색상 정의 (도트 감성에 어울리는 쨍한 색상)
   final Map<String, Color> _categoryColors = {
     '일상': Colors.greenAccent,
@@ -29,10 +35,27 @@ class _TodoScreenState extends State<TodoScreen>
   // 전체 할 일 목록 (날짜 및 카테고리 포함)
   final List<Map<String, dynamic>> _todoList = [];
 
+  int _dateToIndex(DateTime date) {
+    // 일광절약시간(DST) 문제를 방지하기 위해 강제로 UTC로 계산
+    final utcDate = DateTime.utc(date.year, date.month, date.day);
+    return utcDate.difference(_baseDate).inDays;
+  }
+
+  DateTime _indexToDate(int index) {
+    final utcDate = _baseDate.add(Duration(days: index));
+    return DateTime(utcDate.year, utcDate.month, utcDate.day);
+  }
+
   @override
   void initState() {
     super.initState();
     _loadData(); // 앱 실행 시 저장된 데이터 불러오기
+  }
+
+  @override
+  void dispose() {
+    _datePageController.dispose();
+    super.dispose();
   }
 
   // --- 💡 기기 저장소(SharedPreferences) 연동 로직 ---
@@ -152,9 +175,13 @@ class _TodoScreenState extends State<TodoScreen>
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
-  // 현재 선택된 날짜의 할 일만 필터링
-  List<Map<String, dynamic>> get _currentTodos {
-    final dateStr = _formatDate(_selectedDate);
+  // 현재 선택된 날짜의 할 일 (위쪽 프로그레스 바 통계 용도)
+  List<Map<String, dynamic>> get _currentTodos =>
+      _getTodosForDate(_selectedDate);
+
+  // 💡 특정 날짜의 할 일을 필터링하고 정렬하는 메서드
+  List<Map<String, dynamic>> _getTodosForDate(DateTime date) {
+    final dateStr = _formatDate(date);
     final filteredList = _todoList
         .where((todo) => todo['date'] == dateStr)
         .toList();
@@ -949,9 +976,11 @@ class _TodoScreenState extends State<TodoScreen>
     );
 
     if (picked != null && mounted) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      _datePageController.animateToPage(
+        _dateToIndex(picked),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -962,15 +991,6 @@ class _TodoScreenState extends State<TodoScreen>
     final total = currentTodos.length;
     final done = currentTodos.where((t) => t['isDone'] == true).length;
     final progress = total == 0 ? 0.0 : done / total;
-
-    // --- 💡 카테고리별로 할 일 그룹화 ---
-    final Map<String, List<Map<String, dynamic>>> groupedTodos = {};
-    for (var todo in currentTodos) {
-      final cat = todo['category']?.toString() ?? '미지정';
-      groupedTodos.putIfAbsent(cat, () => []).add(todo);
-    }
-    // 카테고리를 가나다순으로 정렬
-    final sortedCategories = groupedTodos.keys.toList()..sort();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -989,11 +1009,16 @@ class _TodoScreenState extends State<TodoScreen>
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
                     icon: const Icon(Icons.arrow_back_ios, size: 20),
-                    onPressed: () => setState(
-                      () => _selectedDate = _selectedDate.subtract(
+                    onPressed: () {
+                      final newDate = _selectedDate.subtract(
                         const Duration(days: 1),
-                      ),
-                    ),
+                      );
+                      _datePageController.animateToPage(
+                        _dateToIndex(newDate),
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
                   ),
                 ),
                 BouncingWrapper(
@@ -1030,11 +1055,16 @@ class _TodoScreenState extends State<TodoScreen>
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
                     icon: const Icon(Icons.arrow_forward_ios, size: 20),
-                    onPressed: () => setState(
-                      () => _selectedDate = _selectedDate.add(
+                    onPressed: () {
+                      final newDate = _selectedDate.add(
                         const Duration(days: 1),
-                      ),
-                    ),
+                      );
+                      _datePageController.animateToPage(
+                        _dateToIndex(newDate),
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
                   ),
                 ),
               ],
@@ -1068,7 +1098,54 @@ class _TodoScreenState extends State<TodoScreen>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        PixelEmoji('trophy', size: 16),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            // 💡 상하좌우로 1px씩 비켜서 배치하여 얇은 검정 테두리 효과 연출
+                            Positioned(
+                              left: -1,
+                              child: ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black,
+                                  BlendMode.srcIn,
+                                ),
+                                child: PixelEmoji('trophy', size: 16),
+                              ),
+                            ),
+                            Positioned(
+                              left: 1,
+                              child: ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black,
+                                  BlendMode.srcIn,
+                                ),
+                                child: PixelEmoji('trophy', size: 16),
+                              ),
+                            ),
+                            Positioned(
+                              top: -1,
+                              child: ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black,
+                                  BlendMode.srcIn,
+                                ),
+                                child: PixelEmoji('trophy', size: 16),
+                              ),
+                            ),
+                            Positioned(
+                              top: 1,
+                              child: ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black,
+                                  BlendMode.srcIn,
+                                ),
+                                child: PixelEmoji('trophy', size: 16),
+                              ),
+                            ),
+                            // 원본 트로피를 맨 위에 덮기
+                            PixelEmoji('trophy', size: 16),
+                          ],
+                        ),
                       ],
                     ),
                     Text(
@@ -1088,224 +1165,290 @@ class _TodoScreenState extends State<TodoScreen>
 
           // --- 3. 카테고리별 할 일 리스트 ---
           Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity == null) return;
-                if (details.primaryVelocity! < 0) {
-                  // 스와이프 Left: 다음 날
-                  setState(
-                    () => _selectedDate = _selectedDate.add(
-                      const Duration(days: 1),
-                    ),
-                  );
-                } else if (details.primaryVelocity! > 0) {
-                  // 스와이프 Right: 이전 날
-                  setState(
-                    () => _selectedDate = _selectedDate.subtract(
-                      const Duration(days: 1),
+            child: PageView.builder(
+              controller: _datePageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _selectedDate = _indexToDate(index);
+                });
+              },
+              itemBuilder: (context, index) {
+                final pageDate = _indexToDate(index);
+                final pageTodos = _getTodosForDate(pageDate);
+
+                final Map<String, List<Map<String, dynamic>>> pageGroupedTodos =
+                    {};
+                for (var todo in pageTodos) {
+                  final cat = todo['category']?.toString() ?? '미지정';
+                  pageGroupedTodos.putIfAbsent(cat, () => []).add(todo);
+                }
+                final pageSortedCategories = pageGroupedTodos.keys.toList()
+                  ..sort();
+
+                if (pageTodos.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                   );
                 }
-              },
-              child: currentTodos.isEmpty
-                  ? const Center(
-                      child: Text(
-                        '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: sortedCategories.length,
-                      itemBuilder: (context, catIndex) {
-                        final category = sortedCategories[catIndex];
-                        final catTodos = groupedTodos[category]!;
 
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            dividerColor:
-                                Colors.transparent, // 💡 확장 타일 위아래 선 제거
-                          ),
-                          child: ExpansionTile(
-                            initiallyExpanded: true,
-                            // 💡 날짜별, 카테고리별로 접힘 상태를 기기가 기억하게 함
-                            key: PageStorageKey(
-                              'cat_${_formatDate(_selectedDate)}_$category',
+                return ListView.builder(
+                  padding: const EdgeInsets.only(
+                    bottom: 100,
+                  ), // 💡 플로팅 버튼에 가리지 않게 하단 여백 추가
+                  itemCount: pageSortedCategories.length,
+                  itemBuilder: (context, catIndex) {
+                    final category = pageSortedCategories[catIndex];
+                    final catTodos = pageGroupedTodos[category]!;
+
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors.transparent, // 💡 확장 타일 위아래 선 제거
+                      ),
+                      child: ExpansionTile(
+                        initiallyExpanded: true,
+                        // 💡 날짜별, 카테고리별로 접힘 상태를 기기가 기억하게 함
+                        key: PageStorageKey(
+                          'cat_${_formatDate(pageDate)}_$category',
+                        ),
+                        title: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _categoryColors[category] ?? Colors.grey,
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Text(
+                                category,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
-                            title: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${catTodos.where((t) => t['isDone'] == true).length}/${catTodos.length} 완료',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        children: catTodos.map((todo) {
+                          final originalIndex = _todoList.indexOf(todo);
+
+                          // 💡 에러 방지: 분석기가 헷갈리지 않도록 모든 데이터를 미리 변수로 안전하게 추출합니다.
+                          final bool isDone = todo['isDone'] == true;
+                          final String task = todo['task']?.toString() ?? '';
+                          final TimeOfDay? timeObj = todo['time'] as TimeOfDay?;
+                          final TimeOfDay? alarmObj =
+                              todo['alarmTime'] as TimeOfDay?;
+                          final bool isAlarmOn = todo['isAlarmOn'] == true;
+                          final String location =
+                              todo['location']?.toString() ?? '';
+                          final String memo = todo['memo']?.toString() ?? '';
+
+                          final bool hasTime = timeObj != null;
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4, // 💡 간격을 살짝 좁힘
+                            ),
+                            child: BouncingWrapper(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () =>
+                                    _showTodoDetailBottomSheet(originalIndex),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color:
-                                        _categoryColors[category] ??
-                                        Colors.grey,
+                                    color: isDone
+                                        ? Colors.grey[200]
+                                        : Colors.white,
                                     border: Border.all(
                                       color: Colors.black,
                                       width: 2,
                                     ),
                                   ),
-                                  child: Text(
-                                    category,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${catTodos.where((t) => t['isDone'] == true).length}/${catTodos.length} 완료',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            children: catTodos.map((todo) {
-                              final originalIndex = _todoList.indexOf(todo);
-
-                              // 💡 에러 방지: 분석기가 헷갈리지 않도록 모든 데이터를 미리 변수로 안전하게 추출합니다.
-                              final bool isDone = todo['isDone'] == true;
-                              final String task =
-                                  todo['task']?.toString() ?? '';
-                              final TimeOfDay? timeObj =
-                                  todo['time'] as TimeOfDay?;
-                              final TimeOfDay? alarmObj =
-                                  todo['alarmTime'] as TimeOfDay?;
-                              final bool isAlarmOn = todo['isAlarmOn'] == true;
-                              final String location =
-                                  todo['location']?.toString() ?? '';
-                              final String memo =
-                                  todo['memo']?.toString() ?? '';
-
-                              final bool hasTime = timeObj != null;
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 4, // 💡 간격을 살짝 좁힘
-                                ),
-                                child: BouncingWrapper(
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () => _showTodoDetailBottomSheet(
-                                      originalIndex,
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: isDone
-                                            ? Colors.grey[200]
-                                            : Colors.white,
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 2,
-                                        ),
+                                  child: Row(
+                                    children: [
+                                      // --- 🌟 도트 그래픽 픽셀 체크박스 ---
+                                      PixelCheckbox(
+                                        isDone: isDone,
+                                        onChanged: (val) =>
+                                            _toggleTodo(originalIndex, val),
                                       ),
-                                      child: Row(
-                                        children: [
-                                          // --- 🌟 도트 그래픽 픽셀 체크박스 ---
-                                          PixelCheckbox(
-                                            isDone: isDone,
-                                            onChanged: (val) =>
-                                                _toggleTodo(originalIndex, val),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                // 할 일 텍스트
-                                                Text(
-                                                  task,
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    decoration: isDone
-                                                        ? TextDecoration
-                                                              .lineThrough
-                                                        : null,
-                                                    color: isDone
-                                                        ? Colors.grey[600]
-                                                        : Colors.black,
-                                                  ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // 할 일 텍스트
+                                            Text(
+                                              task,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                decoration: isDone
+                                                    ? TextDecoration.lineThrough
+                                                    : null,
+                                                color: isDone
+                                                    ? Colors.grey[600]
+                                                    : Colors.black,
+                                              ),
+                                            ),
+                                            // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
+                                            if (hasTime ||
+                                                location.isNotEmpty ||
+                                                memo.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 8.0,
                                                 ),
-                                                // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
-                                                if (hasTime ||
-                                                    location.isNotEmpty ||
-                                                    memo.isNotEmpty)
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          top: 8.0,
-                                                        ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        if (hasTime)
-                                                          Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .access_time,
-                                                                size: 14,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    if (hasTime)
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.access_time,
+                                                            size: 14,
+                                                            color: isDone
+                                                                ? Colors
+                                                                      .grey[500]
+                                                                : Colors
+                                                                      .grey[700],
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          Text.rich(
+                                                            TextSpan(
+                                                              children: [
+                                                                TextSpan(
+                                                                  text: timeObj
+                                                                      .format(
+                                                                        context,
+                                                                      ),
+                                                                ),
+                                                                if (isAlarmOn &&
+                                                                    alarmObj !=
+                                                                        null) ...[
+                                                                  const TextSpan(
+                                                                    text:
+                                                                        ' (알림 ',
+                                                                  ),
+                                                                  const WidgetSpan(
+                                                                    alignment:
+                                                                        PlaceholderAlignment
+                                                                            .middle,
+                                                                    child: Padding(
+                                                                      padding: EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            2,
+                                                                      ),
+                                                                      child: PixelEmoji(
+                                                                        'bell',
+                                                                        size:
+                                                                            10,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  TextSpan(
+                                                                    text:
+                                                                        ' ${alarmObj.format(context)})',
+                                                                  ),
+                                                                ],
+                                                              ],
+                                                            ),
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: isDone
+                                                                  ? Colors
+                                                                        .grey[500]
+                                                                  : Colors
+                                                                        .grey[800],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    if (location.isNotEmpty)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              top: 4.0,
+                                                            ),
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons.location_on,
+                                                              size: 14,
+                                                              color: isDone
+                                                                  ? Colors
+                                                                        .grey[500]
+                                                                  : Colors
+                                                                        .grey[700],
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 4,
+                                                            ),
+                                                            Text(
+                                                              location,
+                                                              style: TextStyle(
+                                                                fontSize: 12,
                                                                 color: isDone
                                                                     ? Colors
                                                                           .grey[500]
                                                                     : Colors
-                                                                          .grey[700],
+                                                                          .grey[800],
                                                               ),
-                                                              const SizedBox(
-                                                                width: 4,
-                                                              ),
-                                                              Text.rich(
-                                                                TextSpan(
-                                                                  children: [
-                                                                    TextSpan(
-                                                                      text: timeObj
-                                                                          .format(
-                                                                            context,
-                                                                          ),
-                                                                    ),
-                                                                    if (isAlarmOn &&
-                                                                        alarmObj !=
-                                                                            null) ...[
-                                                                      const TextSpan(
-                                                                        text:
-                                                                            ' (알림 ',
-                                                                      ),
-                                                                      const WidgetSpan(
-                                                                        alignment:
-                                                                            PlaceholderAlignment.middle,
-                                                                        child: Padding(
-                                                                          padding: EdgeInsets.symmetric(
-                                                                            horizontal:
-                                                                                2,
-                                                                          ),
-                                                                          child: PixelEmoji(
-                                                                            'bell',
-                                                                            size:
-                                                                                10,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      TextSpan(
-                                                                        text:
-                                                                            ' ${alarmObj.format(context)})',
-                                                                      ),
-                                                                    ],
-                                                                  ],
-                                                                ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    if (memo.isNotEmpty)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              top: 4.0,
+                                                            ),
+                                                        child: Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Icon(
+                                                              Icons.notes,
+                                                              size: 14,
+                                                              color: isDone
+                                                                  ? Colors
+                                                                        .grey[500]
+                                                                  : Colors
+                                                                        .grey[700],
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 4,
+                                                            ),
+                                                            Expanded(
+                                                              child: Text(
+                                                                memo,
                                                                 style: TextStyle(
                                                                   fontSize: 12,
                                                                   color: isDone
@@ -1315,101 +1458,28 @@ class _TodoScreenState extends State<TodoScreen>
                                                                             .grey[800],
                                                                 ),
                                                               ),
-                                                            ],
-                                                          ),
-                                                        if (location.isNotEmpty)
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets.only(
-                                                                  top: 4.0,
-                                                                ),
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(
-                                                                  Icons
-                                                                      .location_on,
-                                                                  size: 14,
-                                                                  color: isDone
-                                                                      ? Colors
-                                                                            .grey[500]
-                                                                      : Colors
-                                                                            .grey[700],
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 4,
-                                                                ),
-                                                                Text(
-                                                                  location,
-                                                                  style: TextStyle(
-                                                                    fontSize:
-                                                                        12,
-                                                                    color:
-                                                                        isDone
-                                                                        ? Colors
-                                                                              .grey[500]
-                                                                        : Colors
-                                                                              .grey[800],
-                                                                  ),
-                                                                ),
-                                                              ],
                                                             ),
-                                                          ),
-                                                        if (memo.isNotEmpty)
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets.only(
-                                                                  top: 4.0,
-                                                                ),
-                                                            child: Row(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Icon(
-                                                                  Icons.notes,
-                                                                  size: 14,
-                                                                  color: isDone
-                                                                      ? Colors
-                                                                            .grey[500]
-                                                                      : Colors
-                                                                            .grey[700],
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 4,
-                                                                ),
-                                                                Expanded(
-                                                                  child: Text(
-                                                                    memo,
-                                                                    style: TextStyle(
-                                                                      fontSize:
-                                                                          12,
-                                                                      color:
-                                                                          isDone
-                                                                          ? Colors.grey[500]
-                                                                          : Colors.grey[800],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
+                                                          ],
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        );
-                      },
-                    ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
