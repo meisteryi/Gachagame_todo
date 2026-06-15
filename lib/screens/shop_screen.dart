@@ -7,18 +7,22 @@ import '../pixel_seaweed.dart';
 import '../pixel_emoji.dart';
 
 class ShopScreen extends StatefulWidget {
+  final int coins;
   final List<Map<String, dynamic>> ownedFishes;
   final List<Map<String, dynamic>> ownedSeaweeds;
   final void Function(Map<String, dynamic> fish) onAddFish;
   final void Function(Map<String, dynamic> seaweed) onAddSeaweed;
+  final void Function(int cost, int amount) onBuyFeed;
   final VoidCallback onNavigateToAquarium;
 
   const ShopScreen({
     super.key,
+    required this.coins,
     required this.ownedFishes,
     required this.ownedSeaweeds,
     required this.onAddFish,
     required this.onAddSeaweed,
+    required this.onBuyFeed,
     required this.onNavigateToAquarium,
   });
 
@@ -269,6 +273,152 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     );
   }
 
+  // --- 먹이 상점 화면 UI ---
+  Widget _buildFeedShop() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            '먹이 상점',
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const PixelEmoji('meat', size: 64),
+          const SizedBox(height: 40),
+          _buildBuyFeedButton('일반 먹이 10개', 1, 10),
+          const SizedBox(height: 20),
+          _buildBuyFeedButton('특제 먹이 10개', 3, 10),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBuyFeedButton(String title, int cost, int amount) {
+    return BouncingWrapper(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orangeAccent,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: const RoundedRectangleBorder(
+            side: BorderSide(color: Colors.black, width: 4),
+            borderRadius: BorderRadius.zero,
+          ),
+        ),
+        onPressed: () => _confirmBuyFeed(title, cost, amount),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 12),
+            const PixelEmoji('coin', size: 16),
+            const SizedBox(width: 4),
+            Text(
+              '$cost',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmBuyFeed(String title, int cost, int amount) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '구매 확인',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '$title\n정말 $cost코인으로 구매하시겠습니까?',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.greenAccent,
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          if (widget.coins >= cost) {
+                            widget.onBuyFeed(cost, amount);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('먹이 구매 완료! 🍗')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('코인이 부족합니다! 🪙')),
+                            );
+                          }
+                        },
+                        child: const Text(
+                          '구매',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // 상점 6분할 개별 버튼
   Widget _buildShopItem(
     String title,
@@ -397,7 +547,14 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       Expanded(
                         child: Row(
                           children: [
-                            Expanded(child: _buildEmptyShopItem()),
+                            Expanded(
+                              child: _buildShopItem(
+                                '먹이 상점',
+                                const PixelEmoji('meat', size: 36),
+                                Colors.redAccent,
+                                () => setState(() => _gachaMode = 'feed'),
+                              ),
+                            ),
                             const SizedBox(width: 16),
                             Expanded(child: _buildEmptyShopItem()),
                           ],
@@ -429,12 +586,11 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             duration: const Duration(milliseconds: 350), // 애니메이션 속도 경쾌하게 조절
             opacity: _gachaMode != 'none' ? 1.0 : 0.0,
             curve: Curves.easeInOutCubic,
-            child: AnimatedScale(
+            child: AnimatedSlide(
               duration: const Duration(milliseconds: 350),
-              scale: _gachaMode != 'none' ? 1.0 : 0.15,
-              alignment: _gachaMode == 'fish'
-                  ? const Alignment(-0.5, -0.3)
-                  : const Alignment(0.5, -0.3), // 💡 선택한 가챠 종류에 따라 튀어나오는 위치 변경
+              offset: _gachaMode != 'none'
+                  ? Offset.zero
+                  : const Offset(1.0, 0.0), // 💡 오른쪽에서 슬라이드로 등장
               curve: Curves.easeInOutCubic,
               child: Stack(
                 children: [
@@ -444,23 +600,41 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     height: double.infinity,
                     child: Stack(
                       children: [
-                        if (_gachaMode != 'none')
+                        if (_gachaMode == 'fish' || _gachaMode == 'seaweed')
                           SlotMachine(
                             gachaType: _gachaMode,
                             onDrawDone: _showGachaResult,
                           ),
+                        if (_gachaMode == 'feed') _buildFeedShop(),
                         SafeArea(
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: BouncingWrapper(
-                              showShadow: false,
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_back_ios,
-                                  size: 28,
-                                ),
-                                onPressed: () =>
+                              showShadow: true,
+                              child: GestureDetector(
+                                onTap: () =>
                                     setState(() => _gachaMode = 'none'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 3,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    '< 뒤로',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),

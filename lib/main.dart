@@ -66,6 +66,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
   List<Map<String, dynamic>> _plantedSeaweeds = []; // 💡 수조에 심어진 여러 수초들의 위치 정보
   int _coins = 0; // 💡 코인 재화 추가
+  int _feedCount = 10; // 💡 기본 먹이 개수 (테스트용 10개)
   final PageController _pageController = PageController(initialPage: 0);
 
   @override
@@ -128,6 +129,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       setState(() {
         _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
         _coins = prefs.getInt('coins') ?? 0; // 코인 로드
+        _feedCount = prefs.getInt('feedCount') ?? 10; // 먹이 로드
       });
     } catch (e) {
       debugPrint('메인 데이터 로드 에러: $e');
@@ -141,6 +143,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     await prefs.setString('swimmingFish', _swimmingFishType);
     await prefs.setString('plantedSeaweeds', jsonEncode(_plantedSeaweeds));
     await prefs.setInt('coins', _coins); // 코인 저장
+    await prefs.setInt('feedCount', _feedCount); // 먹이 저장
   }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
@@ -237,6 +240,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           _ownedSeaweeds.clear();
                           _plantedSeaweeds.clear();
                           _coins = 0; // 개발용 초기화 시 코인도 0으로
+                          _feedCount = 10; // 먹이 초기화
                         });
                         _saveMainData();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -503,6 +507,48 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
   }
 
+  // 🎮 픽셀 감성 하단 네비게이션 탭 아이템 빌더
+  Widget _buildPixelBottomNavItem(int index, String emoji, String label) {
+    final isSelected = _selectedIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onItemTapped(index),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          color: isSelected ? Colors.yellowAccent : Colors.grey[300],
+          child: SafeArea(
+            top: false, // 💡 하단 여백만 적용하여 배경색이 화면 끝까지 채워지도록 설정
+            child: Container(
+              height: 56, // 💡 탭 바의 두께를 살짝 줄여서 슬림하게
+              padding: const EdgeInsets.only(
+                top: 6,
+              ), // 💡 내용물을 위에서 살짝 눌러서 아래로 안착시킴
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Opacity(
+                    opacity: isSelected ? 1.0 : 0.4,
+                    child: PixelEmoji(emoji, size: isSelected ? 24 : 20),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: isSelected ? 13 : 11,
+                      color: isSelected ? Colors.black : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -512,23 +558,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           'Gacha TODO!',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        // 💡 상점 탭일 때만 상단바 우측에 내 코인 개수 표시
+        // 💡 탭에 따라 우측 상단바 UI를 다르게 표시
         actions: [
-          if (_selectedIndex == 2)
+          if (_selectedIndex == 0) // 내 수조 탭: 남은 먹이 개수 표시
             Container(
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.yellow[700],
+                color: Colors.orangeAccent,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.black, width: 2),
               ),
               child: Row(
                 children: [
-                  const PixelEmoji('coin', size: 16),
+                  const PixelEmoji('meat', size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    '$_coins',
+                    '$_feedCount',
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
@@ -540,6 +586,70 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                 ],
               ),
+            ),
+          if (_selectedIndex == 2)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orangeAccent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: Row(
+                    children: [
+                      const PixelEmoji('meat', size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$_feedCount',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[700],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: Row(
+                    children: [
+                      const PixelEmoji('coin', size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$_coins',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -558,6 +668,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           AquariumScreen(
             swimmingFishType: _swimmingFishType,
             plantedSeaweeds: _plantedSeaweeds,
+            feedCount: _feedCount,
+            onFeed: () {
+              setState(() => _feedCount--);
+              _saveMainData(); // 먹이 소모 시 저장
+            },
             onUpdateSeaweeds: (newList) {
               setState(() => _plantedSeaweeds = newList);
               _saveMainData(); // 편집 위치 실시간 저장
@@ -568,24 +683,41 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           const TodoScreen(),
           // 3. 상점 탭 (상점 메인 메뉴 또는 가챠 기계 + 폭죽 오버레이)
           ShopScreen(
+            coins: _coins,
             ownedFishes: _ownedFishes,
             ownedSeaweeds: _ownedSeaweeds,
             onAddFish: _onAddFish,
             onAddSeaweed: _onAddSeaweed,
+            onBuyFeed: (cost, amount) {
+              setState(() {
+                _coins -= cost;
+                _feedCount += amount;
+              });
+              _saveMainData();
+            },
             onNavigateToAquarium: _navigateToAquariumAndShowStorage,
           ),
         ],
       ),
-      // 3. 하단 네비게이션 바
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.sailing), label: '내 수조'),
-          BottomNavigationBarItem(icon: Icon(Icons.checklist), label: '할 일'),
-          BottomNavigationBarItem(icon: Icon(Icons.storefront), label: '상점'),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue[800],
-        onTap: _onItemTapped,
+      // 3. 픽셀 스타일 하단 네비게이션 바
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.black, // 아이템 사이의 구분선을 위해 배경을 검은색으로
+          border: Border(top: BorderSide(color: Colors.black, width: 4)),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment:
+                CrossAxisAlignment.stretch, // 💡 아이템들이 세로로 꽉 차도록 늘림
+            children: [
+              _buildPixelBottomNavItem(0, 'fish', '내 수조'),
+              Container(width: 4, color: Colors.black),
+              _buildPixelBottomNavItem(1, 'memo', '할 일'),
+              Container(width: 4, color: Colors.black),
+              _buildPixelBottomNavItem(2, 'coin', '상점'),
+            ],
+          ),
+        ),
       ),
     );
   }

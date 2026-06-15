@@ -8,6 +8,8 @@ import '../pixel_emoji.dart';
 class AquariumScreen extends StatefulWidget {
   final String swimmingFishType;
   final List<Map<String, dynamic>> plantedSeaweeds;
+  final int feedCount;
+  final VoidCallback onFeed;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final VoidCallback onShowStorage;
 
@@ -15,6 +17,8 @@ class AquariumScreen extends StatefulWidget {
     super.key,
     required this.swimmingFishType,
     required this.plantedSeaweeds,
+    required this.feedCount,
+    required this.onFeed,
     required this.onUpdateSeaweeds,
     required this.onShowStorage,
   });
@@ -144,6 +148,15 @@ class _AquariumScreenState extends State<AquariumScreen>
   // 🐟 먹이 주기 로직
   void _startFeeding() {
     if (_isFeeding) return; // 이미 먹이를 먹는 중이면 중복 실행 방지
+
+    if (widget.feedCount <= 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('남은 먹이가 없습니다!')));
+      return;
+    }
+
+    widget.onFeed(); // 💡 먹이 개수 -1 차감 및 상태 저장 알림
 
     setState(() {
       _isFeeding = true;
