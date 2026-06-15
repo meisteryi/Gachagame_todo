@@ -204,6 +204,70 @@ class _TodoScreenState extends State<TodoScreen>
     return filteredList;
   }
 
+  // 공통 안내 팝업창
+  void _showNoticeDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '알림',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.grey[300],
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 3),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      '닫기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // 1. 체크박스 상태 토글
   void _toggleTodo(int originalIndex, bool value) {
     setState(() {
@@ -550,22 +614,8 @@ class _TodoScreenState extends State<TodoScreen>
                                     _saveData(); // 추가/수정 완료 시 저장
                                     if (isAlarmOn &&
                                         selectedAlarmTime != null) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            children: [
-                                              Text(
-                                                '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! ',
-                                              ),
-                                              const PixelEmoji(
-                                                'bell',
-                                                size: 16,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                      _showNoticeDialog(
+                                        '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
                                       );
                                     }
                                     Navigator.pop(context);
@@ -862,11 +912,7 @@ class _TodoScreenState extends State<TodoScreen>
                             setState(() {}); // 메인 화면도 갱신
                             _saveData(); // 카테고리 삭제 시 저장
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('최소 1개의 카테고리는 남겨둬야 합니다!'),
-                              ),
-                            );
+                            _showNoticeDialog('최소 1개의 카테고리는 남겨둬야 합니다!');
                           }
                         },
                       );

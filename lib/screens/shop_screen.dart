@@ -89,6 +89,70 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     _fireworksController?.forward(from: 0);
   }
 
+  // 공통 안내 팝업창
+  void _showNoticeDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '알림',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.grey[300],
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 3),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      '닫기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // 슬롯머신이 끝나면 실행될 팝업창 로직
   void _showGachaResult(Map<String, dynamic> drawnItem) {
     final bool isFish = _gachaMode == 'fish';
@@ -291,8 +355,6 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           const PixelEmoji('meat', size: 64),
           const SizedBox(height: 40),
           _buildBuyFeedButton('일반 먹이 10개', 1, 10),
-          const SizedBox(height: 20),
-          _buildBuyFeedButton('특제 먹이 10개', 3, 10),
         ],
       ),
     );
@@ -394,13 +456,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           Navigator.pop(context);
                           if (widget.coins >= cost) {
                             widget.onBuyFeed(cost, amount);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('먹이 구매 완료! 🍗')),
-                            );
+                            _showNoticeDialog('먹이 구매 완료! 🍗');
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('코인이 부족합니다! 🪙')),
-                            );
+                            _showNoticeDialog('코인이 부족합니다! 🪙');
                           }
                         },
                         child: const Text(

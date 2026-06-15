@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
+import 'screens/mission_screen.dart';
 import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
@@ -158,6 +159,70 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
   }
 
+  // 공통 안내 팝업창
+  void _showNoticeDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '알림',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.grey[300],
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 3),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      '닫기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   // 상점 탭에서 새로운 물고기를 뽑았을 때 호출되는 함수
   void _onAddFish(Map<String, dynamic> drawnFish) {
     setState(() {
@@ -243,9 +308,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           _feedCount = 10; // 먹이 초기화
                         });
                         _saveMainData();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('보관함이 초기화되었습니다. (개발용)')),
-                        );
+                        _showNoticeDialog('보관함이 초기화되었습니다. (개발용)');
                       },
                     ),
                   ],
@@ -587,7 +650,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
-          if (_selectedIndex == 2)
+          if (_selectedIndex >= 2) // 미션 탭이나 상점 탭일 때는 코인/먹이 표시
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -681,7 +744,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ),
           // 2. 할 일 탭 (전체 화면)
           const TodoScreen(),
-          // 3. 상점 탭 (상점 메인 메뉴 또는 가챠 기계 + 폭죽 오버레이)
+          // 3. 미션 탭 (코인 획득)
+          MissionScreen(
+            isActive: _selectedIndex == 2,
+            onAddCoin: (amount) {
+              setState(() => _coins += amount);
+              _saveMainData();
+            },
+          ),
+          // 4. 상점 탭 (상점 메인 메뉴 또는 가챠 기계 + 폭죽 오버레이)
           ShopScreen(
             coins: _coins,
             ownedFishes: _ownedFishes,
@@ -702,8 +773,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       // 3. 픽셀 스타일 하단 네비게이션 바
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          color: Colors.black, // 아이템 사이의 구분선을 위해 배경을 검은색으로
-          border: Border(top: BorderSide(color: Colors.black, width: 4)),
+          border: Border(
+            top: BorderSide(color: Colors.black, width: 2),
+          ), // 💡 상단 테두리 얇게 수정
         ),
         child: IntrinsicHeight(
           child: Row(
@@ -711,10 +783,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 CrossAxisAlignment.stretch, // 💡 아이템들이 세로로 꽉 차도록 늘림
             children: [
               _buildPixelBottomNavItem(0, 'fish', '내 수조'),
-              Container(width: 4, color: Colors.black),
               _buildPixelBottomNavItem(1, 'memo', '할 일'),
-              Container(width: 4, color: Colors.black),
-              _buildPixelBottomNavItem(2, 'coin', '상점'),
+              _buildPixelBottomNavItem(2, 'trophy', '미션'),
+              _buildPixelBottomNavItem(3, 'coin', '상점'),
             ],
           ),
         ),
