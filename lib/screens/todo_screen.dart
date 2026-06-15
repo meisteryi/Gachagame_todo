@@ -963,6 +963,15 @@ class _TodoScreenState extends State<TodoScreen>
     final done = currentTodos.where((t) => t['isDone'] == true).length;
     final progress = total == 0 ? 0.0 : done / total;
 
+    // --- 💡 카테고리별로 할 일 그룹화 ---
+    final Map<String, List<Map<String, dynamic>>> groupedTodos = {};
+    for (var todo in currentTodos) {
+      final cat = todo['category']?.toString() ?? '미지정';
+      groupedTodos.putIfAbsent(cat, () => []).add(todo);
+    }
+    // 카테고리를 가나다순으로 정렬
+    final sortedCategories = groupedTodos.keys.toList()..sort();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
@@ -1079,266 +1088,329 @@ class _TodoScreenState extends State<TodoScreen>
 
           // --- 3. 카테고리별 할 일 리스트 ---
           Expanded(
-            child: currentTodos.isEmpty
-                ? const Center(
-                    child: Text(
-                      '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == null) return;
+                if (details.primaryVelocity! < 0) {
+                  // 스와이프 Left: 다음 날
+                  setState(
+                    () => _selectedDate = _selectedDate.add(
+                      const Duration(days: 1),
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: currentTodos.length,
-                    itemBuilder: (context, index) {
-                      final todo = currentTodos[index];
-                      // 전체 목록인 _todoList에서의 원본 인덱스를 찾아 수정되도록 함
-                      final originalIndex = _todoList.indexOf(todo);
+                  );
+                } else if (details.primaryVelocity! > 0) {
+                  // 스와이프 Right: 이전 날
+                  setState(
+                    () => _selectedDate = _selectedDate.subtract(
+                      const Duration(days: 1),
+                    ),
+                  );
+                }
+              },
+              child: currentTodos.isEmpty
+                  ? const Center(
+                      child: Text(
+                        '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: sortedCategories.length,
+                      itemBuilder: (context, catIndex) {
+                        final category = sortedCategories[catIndex];
+                        final catTodos = groupedTodos[category]!;
 
-                      // 💡 에러 방지: 분석기가 헷갈리지 않도록 모든 데이터를 미리 변수로 안전하게 추출합니다.
-                      final bool isDone = todo['isDone'] == true;
-                      final String category =
-                          todo['category']?.toString() ?? '';
-                      final String task = todo['task']?.toString() ?? '';
-                      final TimeOfDay? timeObj = todo['time'] as TimeOfDay?;
-                      final TimeOfDay? alarmObj =
-                          todo['alarmTime'] as TimeOfDay?;
-                      final bool isAlarmOn = todo['isAlarmOn'] == true;
-                      final String location =
-                          todo['location']?.toString() ?? '';
-                      final String memo = todo['memo']?.toString() ?? '';
-
-                      final bool hasTime = timeObj != null;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: BouncingWrapper(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () =>
-                                _showTodoDetailBottomSheet(originalIndex),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: isDone ? Colors.grey[200] : Colors.white,
-                                border: Border.all(
-                                  color: Colors.black,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  // --- 🌟 도트 그래픽 픽셀 체크박스 ---
-                                  PixelCheckbox(
-                                    isDone: isDone,
-                                    onChanged: (val) =>
-                                        _toggleTodo(originalIndex, val),
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            dividerColor:
+                                Colors.transparent, // 💡 확장 타일 위아래 선 제거
+                          ),
+                          child: ExpansionTile(
+                            initiallyExpanded: true,
+                            // 💡 날짜별, 카테고리별로 접힘 상태를 기기가 기억하게 함
+                            key: PageStorageKey(
+                              'cat_${_formatDate(_selectedDate)}_$category',
+                            ),
+                            title: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // 카테고리 태그 표시
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                _categoryColors[category] ??
-                                                Colors.grey,
-                                            border: Border.all(
-                                              color: Colors.black,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            category,
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
-                                            ),
-                                          ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        _categoryColors[category] ??
+                                        Colors.grey,
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    category,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${catTodos.where((t) => t['isDone'] == true).length}/${catTodos.length} 완료',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            children: catTodos.map((todo) {
+                              final originalIndex = _todoList.indexOf(todo);
+
+                              // 💡 에러 방지: 분석기가 헷갈리지 않도록 모든 데이터를 미리 변수로 안전하게 추출합니다.
+                              final bool isDone = todo['isDone'] == true;
+                              final String task =
+                                  todo['task']?.toString() ?? '';
+                              final TimeOfDay? timeObj =
+                                  todo['time'] as TimeOfDay?;
+                              final TimeOfDay? alarmObj =
+                                  todo['alarmTime'] as TimeOfDay?;
+                              final bool isAlarmOn = todo['isAlarmOn'] == true;
+                              final String location =
+                                  todo['location']?.toString() ?? '';
+                              final String memo =
+                                  todo['memo']?.toString() ?? '';
+
+                              final bool hasTime = timeObj != null;
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4, // 💡 간격을 살짝 좁힘
+                                ),
+                                child: BouncingWrapper(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => _showTodoDetailBottomSheet(
+                                      originalIndex,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: isDone
+                                            ? Colors.grey[200]
+                                            : Colors.white,
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 2,
                                         ),
-                                        const SizedBox(height: 6),
-                                        // 할 일 텍스트
-                                        Text(
-                                          task,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            decoration: isDone
-                                                ? TextDecoration.lineThrough
-                                                : null,
-                                            color: isDone
-                                                ? Colors.grey[600]
-                                                : Colors.black,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // --- 🌟 도트 그래픽 픽셀 체크박스 ---
+                                          PixelCheckbox(
+                                            isDone: isDone,
+                                            onChanged: (val) =>
+                                                _toggleTodo(originalIndex, val),
                                           ),
-                                        ),
-                                        // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
-                                        if (hasTime ||
-                                            location.isNotEmpty ||
-                                            memo.isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 8.0,
-                                            ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                if (hasTime)
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.access_time,
-                                                        size: 14,
-                                                        color: isDone
-                                                            ? Colors.grey[500]
-                                                            : Colors.grey[700],
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text.rich(
-                                                        TextSpan(
-                                                          children: [
-                                                            TextSpan(
-                                                              text: timeObj
-                                                                  .format(
-                                                                    context,
-                                                                  ),
-                                                            ),
-                                                            if (isAlarmOn &&
-                                                                alarmObj !=
-                                                                    null) ...[
-                                                              const TextSpan(
-                                                                text: ' (알림 ',
-                                                              ),
-                                                              const WidgetSpan(
-                                                                alignment:
-                                                                    PlaceholderAlignment
-                                                                        .middle,
-                                                                child: Padding(
-                                                                  padding:
-                                                                      EdgeInsets.symmetric(
-                                                                        horizontal:
-                                                                            2,
-                                                                      ),
-                                                                  child:
-                                                                      PixelEmoji(
-                                                                        'bell',
-                                                                        size:
-                                                                            10,
-                                                                      ),
-                                                                ),
-                                                              ),
-                                                              TextSpan(
-                                                                text:
-                                                                    ' ${alarmObj.format(context)})',
-                                                              ),
-                                                            ],
-                                                          ],
-                                                        ),
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: isDone
-                                                              ? Colors.grey[500]
-                                                              : Colors
-                                                                    .grey[800],
-                                                        ),
-                                                      ),
-                                                    ],
+                                                // 할 일 텍스트
+                                                Text(
+                                                  task,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    decoration: isDone
+                                                        ? TextDecoration
+                                                              .lineThrough
+                                                        : null,
+                                                    color: isDone
+                                                        ? Colors.grey[600]
+                                                        : Colors.black,
                                                   ),
-                                                if (location.isNotEmpty)
+                                                ),
+                                                // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
+                                                if (hasTime ||
+                                                    location.isNotEmpty ||
+                                                    memo.isNotEmpty)
                                                   Padding(
                                                     padding:
                                                         const EdgeInsets.only(
-                                                          top: 4.0,
+                                                          top: 8.0,
                                                         ),
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons.location_on,
-                                                          size: 14,
-                                                          color: isDone
-                                                              ? Colors.grey[500]
-                                                              : Colors
-                                                                    .grey[700],
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 4,
-                                                        ),
-                                                        Text(
-                                                          location,
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: isDone
-                                                                ? Colors
-                                                                      .grey[500]
-                                                                : Colors
-                                                                      .grey[800],
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                if (memo.isNotEmpty)
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          top: 4.0,
-                                                        ),
-                                                    child: Row(
+                                                    child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                        Icon(
-                                                          Icons.notes,
-                                                          size: 14,
-                                                          color: isDone
-                                                              ? Colors.grey[500]
-                                                              : Colors
-                                                                    .grey[700],
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 4,
-                                                        ),
-                                                        Expanded(
-                                                          child: Text(
-                                                            memo,
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: isDone
-                                                                  ? Colors
-                                                                        .grey[500]
-                                                                  : Colors
-                                                                        .grey[800],
+                                                        if (hasTime)
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .access_time,
+                                                                size: 14,
+                                                                color: isDone
+                                                                    ? Colors
+                                                                          .grey[500]
+                                                                    : Colors
+                                                                          .grey[700],
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text.rich(
+                                                                TextSpan(
+                                                                  children: [
+                                                                    TextSpan(
+                                                                      text: timeObj
+                                                                          .format(
+                                                                            context,
+                                                                          ),
+                                                                    ),
+                                                                    if (isAlarmOn &&
+                                                                        alarmObj !=
+                                                                            null) ...[
+                                                                      const TextSpan(
+                                                                        text:
+                                                                            ' (알림 ',
+                                                                      ),
+                                                                      const WidgetSpan(
+                                                                        alignment:
+                                                                            PlaceholderAlignment.middle,
+                                                                        child: Padding(
+                                                                          padding: EdgeInsets.symmetric(
+                                                                            horizontal:
+                                                                                2,
+                                                                          ),
+                                                                          child: PixelEmoji(
+                                                                            'bell',
+                                                                            size:
+                                                                                10,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      TextSpan(
+                                                                        text:
+                                                                            ' ${alarmObj.format(context)})',
+                                                                      ),
+                                                                    ],
+                                                                  ],
+                                                                ),
+                                                                style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: isDone
+                                                                      ? Colors
+                                                                            .grey[500]
+                                                                      : Colors
+                                                                            .grey[800],
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        if (location.isNotEmpty)
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets.only(
+                                                                  top: 4.0,
+                                                                ),
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(
+                                                                  Icons
+                                                                      .location_on,
+                                                                  size: 14,
+                                                                  color: isDone
+                                                                      ? Colors
+                                                                            .grey[500]
+                                                                      : Colors
+                                                                            .grey[700],
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                Text(
+                                                                  location,
+                                                                  style: TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color:
+                                                                        isDone
+                                                                        ? Colors
+                                                                              .grey[500]
+                                                                        : Colors
+                                                                              .grey[800],
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
                                                           ),
-                                                        ),
+                                                        if (memo.isNotEmpty)
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets.only(
+                                                                  top: 4.0,
+                                                                ),
+                                                            child: Row(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.notes,
+                                                                  size: 14,
+                                                                  color: isDone
+                                                                      ? Colors
+                                                                            .grey[500]
+                                                                      : Colors
+                                                                            .grey[700],
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    memo,
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          12,
+                                                                      color:
+                                                                          isDone
+                                                                          ? Colors.grey[500]
+                                                                          : Colors.grey[800],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
                                                       ],
                                                     ),
                                                   ),
                                               ],
                                             ),
                                           ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
+            ),
           ),
         ],
       ),
