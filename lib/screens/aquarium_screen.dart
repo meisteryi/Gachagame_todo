@@ -425,6 +425,9 @@ class _AquariumScreenState extends State<AquariumScreen>
           bottom: 20,
           right: 20,
           child: PixelButton(
+            color: Colors.white,
+            textColor: Colors.black,
+            onPressed: widget.onShowStorage,
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -433,9 +436,6 @@ class _AquariumScreenState extends State<AquariumScreen>
                 Text('보관함'),
               ],
             ),
-            color: Colors.white,
-            textColor: Colors.black,
-            onPressed: widget.onShowStorage,
           ),
         ),
         // 먹이 주기 버튼 (왼쪽 배치)
@@ -443,6 +443,9 @@ class _AquariumScreenState extends State<AquariumScreen>
           bottom: 20,
           left: 20,
           child: PixelButton(
+            color: Colors.orangeAccent,
+            textColor: Colors.white,
+            onPressed: _startFeeding,
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -451,9 +454,6 @@ class _AquariumScreenState extends State<AquariumScreen>
                 Text('먹이 주기'),
               ],
             ),
-            color: Colors.orangeAccent,
-            textColor: Colors.white,
-            onPressed: _startFeeding,
           ),
         ),
       ],
