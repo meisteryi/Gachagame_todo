@@ -1144,7 +1144,7 @@ class _TodoScreenState extends State<TodoScreen>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const PixelEmoji('trophy', size: 16),
+                        PixelEmoji('trophy', size: 16),
                       ],
                     ),
                     Text(
