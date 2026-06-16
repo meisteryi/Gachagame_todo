@@ -220,8 +220,8 @@ class _SlotMachineState extends State<SlotMachine> {
                     height: 180,
                     decoration: BoxDecoration(
                       color: widget.gachaType == 'seaweed'
-                          ? Colors.teal
-                          : Colors.redAccent, // 수초일 땐 청록색 기계
+                          ? const Color(0xFF85CAC5)
+                          : const Color(0xFFFFB7B2), // 부드러운 기계 색상
                       border: Border.all(
                         color: Colors.black,
                         width: 6,
@@ -249,7 +249,7 @@ class _SlotMachineState extends State<SlotMachine> {
                           child: const Text(
                             'LUCKY GACHA',
                             style: TextStyle(
-                              color: Colors.yellowAccent,
+                              color: Color(0xFFFFF3B0),
                               fontWeight: FontWeight.w900,
                               fontSize: 16,
                               letterSpacing: 2,
@@ -330,7 +330,7 @@ class _SlotMachineState extends State<SlotMachine> {
                                     width: 36,
                                     height: 36,
                                     decoration: BoxDecoration(
-                                      color: Colors.redAccent,
+                                      color: const Color(0xFFFFB7B2),
                                       border: Border.all(
                                         color: Colors.black,
                                         width: 4,
@@ -386,8 +386,8 @@ class _SlotMachineState extends State<SlotMachine> {
                       backgroundColor: _isSpinning
                           ? Colors.grey
                           : (widget.gachaType == 'seaweed'
-                                ? Colors.green
-                                : Colors.pinkAccent),
+                                ? const Color(0xFFA8D8B9)
+                                : const Color(0xFFFFC6D3)),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -434,8 +434,8 @@ class _SlotMachineState extends State<SlotMachine> {
                       backgroundColor: _isSpinning
                           ? Colors.grey
                           : (widget.gachaType == 'seaweed'
-                                ? Colors.teal
-                                : Colors.deepOrangeAccent),
+                                ? const Color(0xFF85CAC5)
+                                : const Color(0xFFFFAAA5)),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
