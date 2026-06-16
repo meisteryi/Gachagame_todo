@@ -156,38 +156,44 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   }
 
   // 슬롯머신이 끝나면 실행될 팝업창 로직
-  void _showGachaResult(Map<String, dynamic> drawnItem) {
+  void _showGachaResult(List<Map<String, dynamic>> drawnItems) {
     final bool isFish = _gachaMode == 'fish';
     final list = isFish ? widget.ownedFishes : widget.ownedSeaweeds;
 
-    final bool isDuplicate = list.any(
-      (item) => item['type'] == drawnItem['type'],
-    );
+    List<Map<String, dynamic>> processedResults = [];
+    bool hasNew = false;
 
-    if (!isDuplicate) {
-      if (isFish) {
-        widget.onAddFish(drawnItem);
-      } else {
-        widget.onAddSeaweed(drawnItem);
+    for (var item in drawnItems) {
+      final isDuplicate = list.any(
+        (existing) => existing['type'] == item['type'],
+      );
+      processedResults.add({'item': item, 'isNew': !isDuplicate});
+
+      if (!isDuplicate) {
+        if (isFish) {
+          widget.onAddFish(item);
+        } else {
+          widget.onAddSeaweed(item);
+        }
+        hasNew = true;
       }
-      _triggerFireworks(); // 🌟 도트 폭죽 팡!
+    }
 
-      // 폭죽을 잠시 감상할 수 있도록 팝업창을 1.2초 늦게 띄움
+    if (hasNew) {
+      _triggerFireworks(); // 🌟 새로운 아이템이 하나라도 있으면 폭죽 팡!
       Future.delayed(const Duration(milliseconds: 1200), () {
-        if (mounted) _showResultDialog(drawnItem, isDuplicate, isFish);
+        if (mounted) _showResultDialog(processedResults, isFish);
       });
     } else {
-      // 중복일 경우는 지체 없이 바로 팝업창 띄움
-      _showResultDialog(drawnItem, isDuplicate, isFish);
+      _showResultDialog(processedResults, isFish);
     }
   }
 
   // 결과 다이얼로그 띄우기
-  void _showResultDialog(
-    Map<String, dynamic> drawnItem,
-    bool isDuplicate,
-    bool isFish,
-  ) {
+  void _showResultDialog(List<Map<String, dynamic>> results, bool isFish) {
+    final bool isSingle = results.length == 1;
+    final bool hasAnyNew = results.any((r) => r['isNew'] == true);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -213,15 +219,19 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         child: Padding(
                           padding: const EdgeInsets.only(right: 6),
                           child: PixelEmoji(
-                            isDuplicate ? 'sweat' : 'party',
+                            hasAnyNew ? 'party' : 'sweat',
                             size: 24,
                           ),
                         ),
                       ),
                       TextSpan(
-                        text: isDuplicate
-                            ? '이미 있는 ${isFish ? '물고기' : '수초'}예요!'
-                            : '야생의 ${isFish ? '물고기' : '수초'}가 나타났다!',
+                        text: isSingle
+                            ? (hasAnyNew
+                                  ? '야생의 ${isFish ? '물고기' : '수초'}가 나타났다!'
+                                  : '이미 있는 ${isFish ? '물고기' : '수초'}예요!')
+                            : (hasAnyNew
+                                  ? '새로운 친구들을 획득했다!'
+                                  : '모두 이미 있는 친구들이네요..'),
                       ),
                     ],
                   ),
@@ -232,29 +242,89 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.lightBlueAccent.withValues(alpha: 0.2),
-                    border: Border.all(color: Colors.black, width: 3),
+                if (isSingle)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlueAccent.withValues(alpha: 0.2),
+                      border: Border.all(color: Colors.black, width: 3),
+                    ),
+                    child: Transform.scale(
+                      scale: 1.5,
+                      child: isFish
+                          ? PixelFish(
+                              type:
+                                  results[0]['item']['type']?.toString() ??
+                                  'puffer',
+                              isAnimated: false,
+                            )
+                          : PixelSeaweed(
+                              type:
+                                  results[0]['item']['type']?.toString() ??
+                                  'green_algae',
+                              isAnimated: false,
+                            ),
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        alignment: WrapAlignment.center,
+                        children: results.map((r) {
+                          final item = r['item'];
+                          final isNew = r['isNew'] as bool;
+                          return Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isNew
+                                  ? Colors.lightBlueAccent.withValues(
+                                      alpha: 0.2,
+                                    )
+                                  : Colors.grey[200],
+                              border: Border.all(color: Colors.black, width: 2),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                isFish
+                                    ? PixelFish(
+                                        type: item['type'],
+                                        isAnimated: false,
+                                      )
+                                    : PixelSeaweed(
+                                        type: item['type'],
+                                        isAnimated: false,
+                                      ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  isNew ? 'NEW' : '중복',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 10,
+                                    color: isNew
+                                        ? Colors.redAccent
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
-                  child: Transform.scale(
-                    scale: 1.5,
-                    child: isFish
-                        ? PixelFish(
-                            type: drawnItem['type']?.toString() ?? 'puffer',
-                          )
-                        : PixelSeaweed(
-                            type:
-                                drawnItem['type']?.toString() ?? 'green_algae',
-                          ),
-                  ),
-                ),
                 const SizedBox(height: 24),
                 Text(
-                  isDuplicate
-                      ? '[${drawnItem['name']}] 은(는) 이미 보관함에 있습니다!\n아쉽지만 다음 기회를 노려보세요.'
-                      : '[${drawnItem['name']}] 가 당첨되었습니다!\n보관함에서 ${isFish ? '물고기' : '수초'}를 선택해 수조에 넣어보세요.',
+                  isSingle
+                      ? (hasAnyNew
+                            ? '[${results[0]['item']['name']}] 가 당첨되었습니다!\n보관함에서 확인해보세요.'
+                            : '[${results[0]['item']['name']}] 은(는) 이미 보관함에 있습니다!\n아쉽지만 다음 기회를 노려보세요.')
+                      : (hasAnyNew
+                            ? '새로운 ${isFish ? '물고기' : '수초'}를 획득했습니다!\n보관함에서 확인해보세요.'
+                            : '전부 이미 보유 중인 ${isFish ? '물고기' : '수초'}입니다.\n아쉽지만 다음 기회를 노려보세요.'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -290,7 +360,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    if (!isDuplicate) ...[
+                    if (hasAnyNew) ...[
                       const SizedBox(width: 12),
                       Expanded(
                         child: BouncingWrapper(
@@ -664,9 +734,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           SlotMachine(
                             gachaType: _gachaMode,
                             onDrawDone: _showGachaResult,
-                            onSpinStart: () {
-                              if (widget.coins >= 1) {
-                                widget.onSpendCoin(1);
+                            onSpinStart: (cost) {
+                              if (widget.coins >= cost) {
+                                widget.onSpendCoin(cost);
                                 return true;
                               } else {
                                 _showNoticeDialog('코인이 부족합니다! 🪙');

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -48,7 +49,86 @@ class GachaTodoApp extends StatelessWidget {
           ),
         );
       },
-      home: const MainScreen(),
+      home: const SplashScreen(),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? _timer;
+  bool _hasNavigated = false; // 💡 중복 이동 방지 플래그
+
+  @override
+  void initState() {
+    super.initState();
+    // 💡 약 1.2초 대기 후 메인 화면으로 전환하는 타이머 시작
+    _timer = Timer(const Duration(milliseconds: 1200), _navigateToMain);
+  }
+
+  void _navigateToMain() {
+    if (_hasNavigated) return; // 이미 넘어갔다면 실행 취소
+
+    if (mounted) {
+      _hasNavigated = true; // 이동 처리 상태 저장
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const MainScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // 💡 화면이 파괴될 때 타이머도 안전하게 취소
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF81D4FA), // 시원한 물색 배경
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          _timer?.cancel(); // 💡 화면을 탭하면 즉시 메인 화면으로 이동
+          _navigateToMain();
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.scale(
+                scale: 2.5,
+                child: const PixelFish(type: 'puffer'), // 기본 도트 복어
+              ),
+              const SizedBox(height: 60),
+              const Text(
+                'Gacha TODO!',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                  shadows: [Shadow(color: Colors.black, offset: Offset(3, 3))],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -61,7 +141,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1; // 💡 앱의 초기 화면을 수조(0)에서 '할 일(1)' 탭으로 변경
 
   final List<Map<String, dynamic>> _ownedFishes = [];
   final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
@@ -69,7 +149,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   List<Map<String, dynamic>> _plantedSeaweeds = []; // 💡 수조에 심어진 여러 수초들의 위치 정보
   int _coins = 0; // 💡 코인 재화 추가
   int _feedCount = 10; // 💡 기본 먹이 개수 (테스트용 10개)
-  final PageController _pageController = PageController(initialPage: 0);
+  final PageController _pageController = PageController(
+    initialPage: 1,
+  ); // 💡 초기 화면을 '할 일'로 변경
 
   @override
   void initState() {

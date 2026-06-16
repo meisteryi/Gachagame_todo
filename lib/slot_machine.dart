@@ -7,8 +7,8 @@ import 'pixel_emoji.dart';
 
 class SlotMachine extends StatefulWidget {
   final String gachaType; // 'fish' 또는 'seaweed'
-  final void Function(Map<String, dynamic> drawnItem) onDrawDone;
-  final bool Function() onSpinStart;
+  final void Function(List<Map<String, dynamic>> drawnItems) onDrawDone;
+  final bool Function(int cost) onSpinStart;
 
   const SlotMachine({
     super.key,
@@ -89,10 +89,10 @@ class _SlotMachineState extends State<SlotMachine> {
         : PixelFish(type: type);
   }
 
-  Future<void> _spin() async {
+  Future<void> _spin({int count = 1}) async {
     if (_isSpinning) return; // 이미 돌고 있으면 무시
 
-    if (!widget.onSpinStart()) return; // 코인 부족 시 취소
+    if (!widget.onSpinStart(count)) return; // 코인 부족 시 취소
 
     setState(() {
       _isSpinning = true;
@@ -107,9 +107,15 @@ class _SlotMachineState extends State<SlotMachine> {
       _isPulling = false;
     });
 
-    // 2. 당첨될 물고기 랜덤 선택
+    // 2. 당첨될 물고기(들) 랜덤 선택
     final random = Random();
-    final winIndex = random.nextInt(_currentList.length);
+    final List<Map<String, dynamic>> winners = [];
+    for (int i = 0; i < count; i++) {
+      winners.add(_currentList[random.nextInt(_currentList.length)]);
+    }
+
+    // 슬롯머신이 시각적으로 멈출 목표는 첫 번째 당첨 아이템으로 설정
+    final winIndex = _currentList.indexOf(winners.first);
 
     // 3. 현재 위치에서 몇 바퀴를 더 돌아서 목표 물고기에 도달할지 계산
     final current1 = _ctrl1.selectedItem;
@@ -157,8 +163,7 @@ class _SlotMachineState extends State<SlotMachine> {
     });
 
     // 5. 모두 멈추면 팝업 띄우기 함수 호출
-    final winner = _currentList[winIndex];
-    widget.onDrawDone(winner);
+    widget.onDrawDone(winners);
   }
 
   @override
@@ -368,60 +373,109 @@ class _SlotMachineState extends State<SlotMachine> {
               ),
             ),
             const SizedBox(height: 50),
-            // 3. 뽑기 버튼
-            BouncingWrapper(
-              child: ElevatedButton(
-                onPressed: _spin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isSpinning
-                      ? Colors.grey
-                      : (widget.gachaType == 'seaweed'
-                            ? Colors.green
-                            : Colors.pinkAccent), // 수초일 땐 녹색 버튼
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 16,
-                  ),
-                  elevation: 0,
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black, width: 4),
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _isSpinning
-                          ? '가챠 진행 중...'
+            // 3. 뽑기 버튼 (1회 / 10회)
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              alignment: WrapAlignment.center,
+              children: [
+                BouncingWrapper(
+                  child: ElevatedButton(
+                    onPressed: () => _spin(count: 1),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isSpinning
+                          ? Colors.grey
                           : (widget.gachaType == 'seaweed'
-                                ? '수초 뽑기 '
-                                : '물고기 뽑기 '),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                                ? Colors.green
+                                : Colors.pinkAccent),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 4),
+                        borderRadius: BorderRadius.zero,
                       ),
                     ),
-                    if (!_isSpinning) ...[
-                      PixelEmoji(
-                        widget.gachaType == 'seaweed' ? 'seaweed' : 'fish',
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      const PixelEmoji('coin', size: 16),
-                      const SizedBox(width: 4),
-                      const Text(
-                        '1',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                    child: Column(
+                      children: [
+                        const Text(
+                          '1회 뽑기',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
-                  ],
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            PixelEmoji('coin', size: 16),
+                            SizedBox(width: 4),
+                            Text(
+                              '1',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                BouncingWrapper(
+                  child: ElevatedButton(
+                    onPressed: () => _spin(count: 10),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isSpinning
+                          ? Colors.grey
+                          : (widget.gachaType == 'seaweed'
+                                ? Colors.teal
+                                : Colors.deepOrangeAccent),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 4),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          '10연속 뽑기',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            PixelEmoji('coin', size: 16),
+                            SizedBox(width: 4),
+                            Text(
+                              '10',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
