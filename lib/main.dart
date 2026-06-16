@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
@@ -19,10 +20,16 @@ void main() async {
   runApp(const GachaTodoApp());
 }
 
-class GachaTodoApp extends StatelessWidget {
+class GachaTodoApp extends StatefulWidget {
   const GachaTodoApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<GachaTodoApp> createState() => _GachaTodoAppState();
+}
+
+class _GachaTodoAppState extends State<GachaTodoApp> {
+  bool _showSplash = true; // 💡 스플래시 화면 표시 여부 상태
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,52 +56,23 @@ class GachaTodoApp extends StatelessWidget {
           ),
         );
       },
-      home: const SplashScreen(),
+      // 💡 Navigator 버그를 원천 차단하기 위해 AnimatedSwitcher를 사용한 직접 상태 전환 방식으로 변경!
+      home: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        child: _showSplash
+            ? SplashScreen(
+                key: const ValueKey('splash'),
+                onSkip: () => setState(() => _showSplash = false),
+              )
+            : const MainScreen(key: ValueKey('main')),
+      ),
     );
   }
 }
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  Timer? _timer;
-  bool _hasNavigated = false; // 💡 중복 이동 방지 플래그
-
-  @override
-  void initState() {
-    super.initState();
-    // 💡 약 1.2초 대기 후 메인 화면으로 전환하는 타이머 시작
-    _timer = Timer(const Duration(milliseconds: 1200), _navigateToMain);
-  }
-
-  void _navigateToMain() {
-    if (_hasNavigated) return; // 이미 넘어갔다면 실행 취소
-
-    if (mounted) {
-      _hasNavigated = true; // 이동 처리 상태 저장
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const MainScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-        ),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel(); // 💡 화면이 파괴될 때 타이머도 안전하게 취소
-    super.dispose();
-  }
+class SplashScreen extends StatelessWidget {
+  final VoidCallback onSkip;
+  const SplashScreen({super.key, required this.onSkip});
 
   @override
   Widget build(BuildContext context) {
@@ -102,10 +80,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: const Color(0xFF81D4FA), // 시원한 물색 배경
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          _timer?.cancel(); // 💡 화면을 탭하면 즉시 메인 화면으로 이동
-          _navigateToMain();
-        },
+        onTap: onSkip, // 💡 화면 터치 시 상태를 변경하여 부드럽게 MainScreen으로 교체
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -115,14 +90,23 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: const PixelFish(type: 'puffer'), // 기본 도트 복어
               ),
               const SizedBox(height: 60),
-              const Text(
+              Text(
                 'Gacha TODO!',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 28,
                   color: Colors.white,
-                  letterSpacing: 2,
-                  shadows: [Shadow(color: Colors.black, offset: Offset(3, 3))],
+                  shadows: const [
+                    Shadow(color: Colors.black, offset: Offset(3, 3)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                '- 화면을 터치해서 시작 -',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
                 ),
               ),
             ],
@@ -643,32 +627,24 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           color: isSelected ? Colors.yellowAccent : Colors.grey[300],
-          child: SafeArea(
-            top: false, // 💡 하단 여백만 적용하여 배경색이 화면 끝까지 채워지도록 설정
-            child: Container(
-              height: 56, // 💡 탭 바의 두께를 살짝 줄여서 슬림하게
-              padding: const EdgeInsets.only(
-                top: 6,
-              ), // 💡 내용물을 위에서 살짝 눌러서 아래로 안착시킴
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Opacity(
-                    opacity: isSelected ? 1.0 : 0.4,
-                    child: PixelEmoji(emoji, size: isSelected ? 24 : 20),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: isSelected ? 13 : 11,
-                      color: isSelected ? Colors.black : Colors.grey[600],
-                    ),
-                  ),
-                ],
+          padding: const EdgeInsets.only(top: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Opacity(
+                opacity: isSelected ? 1.0 : 0.4,
+                child: PixelEmoji(emoji, size: isSelected ? 24 : 20),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: isSelected ? 13 : 11,
+                  color: isSelected ? Colors.black : Colors.grey[600],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -680,9 +656,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 48, // 상단바 두께 축소 (기본값 56)
-        title: const Text(
+        title: Text(
           'Gacha TODO!',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: GoogleFonts.pressStart2p(fontSize: 16),
         ),
         // 💡 탭에 따라 우측 상단바 UI를 다르게 표시
         actions: [
@@ -865,16 +841,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             top: BorderSide(color: Colors.black, width: 2),
           ), // 💡 상단 테두리 얇게 수정
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment:
-                CrossAxisAlignment.stretch, // 💡 아이템들이 세로로 꽉 차도록 늘림
-            children: [
-              _buildPixelBottomNavItem(0, 'fish', '내 수조'),
-              _buildPixelBottomNavItem(1, 'memo', '할 일'),
-              _buildPixelBottomNavItem(2, 'trophy', '미션'),
-              _buildPixelBottomNavItem(3, 'coin', '상점'),
-            ],
+        child: SafeArea(
+          top: false, // 하단 아이폰 홈 바 여백 보호
+          child: SizedBox(
+            height: 56, // IntrinsicHeight 대신 안전하고 렌더링이 빠른 고정 높이 사용
+            child: Row(
+              children: [
+                _buildPixelBottomNavItem(0, 'fish', '내 수조'),
+                _buildPixelBottomNavItem(1, 'memo', '할 일'),
+                _buildPixelBottomNavItem(2, 'trophy', '미션'),
+                _buildPixelBottomNavItem(3, 'coin', '상점'),
+              ],
+            ),
           ),
         ),
       ),

@@ -82,7 +82,13 @@ class _MissionScreenState extends State<MissionScreen>
     };
 
     if (missionStr != null) {
-      data = Map<String, dynamic>.from(jsonDecode(missionStr));
+      // 💡 기존 저장 데이터와 새로운 기본값 병합 (Null 에러 방지)
+      final Map<String, dynamic> decoded = Map<String, dynamic>.from(
+        jsonDecode(missionStr),
+      );
+      decoded.forEach((key, value) {
+        data[key] = value;
+      });
     }
 
     final weekStartStr = _formatDate(
@@ -106,7 +112,7 @@ class _MissionScreenState extends State<MissionScreen>
       data['daily_attendance_claimed'] = false;
       data['daily_all_clear_claimed'] = false;
       data['weekly_attendance_progress'] =
-          (data['weekly_attendance_progress'] as int) + 1;
+          ((data['weekly_attendance_progress'] ?? 0) as int) + 1;
       if (data['weekly_attendance_progress'] > 7) {
         data['weekly_attendance_progress'] = 7;
       }
@@ -118,7 +124,7 @@ class _MissionScreenState extends State<MissionScreen>
       if (data['last_daily_all_clear_counted_date'] != nowDateStr) {
         data['last_daily_all_clear_counted_date'] = nowDateStr;
         data['weekly_all_clear_progress'] =
-            (data['weekly_all_clear_progress'] as int) + 1;
+            ((data['weekly_all_clear_progress'] ?? 0) as int) + 1;
         if (data['weekly_all_clear_progress'] > 7) {
           data['weekly_all_clear_progress'] = 7;
         }
