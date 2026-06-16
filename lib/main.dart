@@ -11,6 +11,7 @@ import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
 import 'pixel_emoji.dart';
+import 'slot_machine.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
@@ -290,26 +291,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           ),
                         ),
                       ],
-                    ),
-                    // 대충 추가해 둔 개발용 초기화 버튼
-                    IconButton(
-                      icon: const Icon(
-                        Icons.delete_forever,
-                        color: Colors.redAccent,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _ownedFishes.clear();
-                          _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
-                          _swimmingFishType = 'puffer';
-                          _ownedSeaweeds.clear();
-                          _plantedSeaweeds.clear();
-                          _coins = 0; // 개발용 초기화 시 코인도 0으로
-                          _feedCount = 10; // 먹이 초기화
-                        });
-                        _saveMainData();
-                        _showNoticeDialog('보관함이 초기화되었습니다. (개발용)');
-                      },
                     ),
                   ],
                 ),
@@ -721,11 +702,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         controller: _pageController,
         physics:
             const NeverScrollableScrollPhysics(), // 스와이프 대신 하단 바 탭으로만 이동하도록 고정
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
         children: [
           // 1. 내 수조 탭 (전체 화면)
           AquariumScreen(
@@ -743,7 +719,31 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             onShowStorage: _showStorage,
           ),
           // 2. 할 일 탭 (전체 화면)
-          const TodoScreen(),
+          TodoScreen(
+            onSecretCommand: () {
+              setState(() => _coins += 1000);
+              _saveMainData();
+            },
+            onUnlockAllCommand: () {
+              setState(() {
+                _ownedFishes.clear();
+                _ownedFishes.add({
+                  'type': 'puffer',
+                  'name': '도트 복어',
+                }); // 기본 복어 유지
+                _ownedFishes.addAll(
+                  SlotMachine.fishList.map((e) => Map<String, dynamic>.from(e)),
+                );
+                _ownedSeaweeds.clear();
+                _ownedSeaweeds.addAll(
+                  SlotMachine.seaweedList.map(
+                    (e) => Map<String, dynamic>.from(e),
+                  ),
+                );
+              });
+              _saveMainData();
+            },
+          ),
           // 3. 미션 탭 (코인 획득)
           MissionScreen(
             isActive: _selectedIndex == 2,
@@ -763,6 +763,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               setState(() {
                 _coins -= cost;
                 _feedCount += amount;
+              });
+              _saveMainData();
+            },
+            onSpendCoin: (cost) {
+              setState(() {
+                _coins -= cost;
               });
               _saveMainData();
             },

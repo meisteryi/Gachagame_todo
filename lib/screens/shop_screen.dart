@@ -13,6 +13,7 @@ class ShopScreen extends StatefulWidget {
   final void Function(Map<String, dynamic> fish) onAddFish;
   final void Function(Map<String, dynamic> seaweed) onAddSeaweed;
   final void Function(int cost, int amount) onBuyFeed;
+  final void Function(int cost) onSpendCoin;
   final VoidCallback onNavigateToAquarium;
 
   const ShopScreen({
@@ -23,6 +24,7 @@ class ShopScreen extends StatefulWidget {
     required this.onAddFish,
     required this.onAddSeaweed,
     required this.onBuyFeed,
+    required this.onSpendCoin,
     required this.onNavigateToAquarium,
   });
 
@@ -662,6 +664,15 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           SlotMachine(
                             gachaType: _gachaMode,
                             onDrawDone: _showGachaResult,
+                            onSpinStart: () {
+                              if (widget.coins >= 1) {
+                                widget.onSpendCoin(1);
+                                return true;
+                              } else {
+                                _showNoticeDialog('코인이 부족합니다! 🪙');
+                                return false;
+                              }
+                            },
                           ),
                         if (_gachaMode == 'feed') _buildFeedShop(),
                         SafeArea(

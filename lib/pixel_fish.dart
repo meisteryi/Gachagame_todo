@@ -157,6 +157,97 @@ class PixelFishPainter extends CustomPainter {
         [e, e, c2, c2, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
+    } else if (type == 'axolotl') {
+      color1 = Colors.pink[200]!; // 귀여운 분홍색 몸통
+      color2 = Colors.pinkAccent; // 아가미 및 꼬리
+      pixels = [
+        [e, e, e, e, e, e, e, c2, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, c2, c1, c1, e, e, e, e],
+        [e, e, e, e, e, e, c2, c1, c1, c1, c1, e, e, e],
+        [e, c2, c2, e, c1, c1, c1, c1, c1, w, b, c1, e, e],
+        [c2, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e, e],
+        [e, c2, c2, e, c1, c1, c1, c1, c1, c1, e, e, e, e],
+        [e, e, e, e, e, c1, e, c2, c1, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'tuna') {
+      color1 = Colors.blueGrey[300]!; // 은빛 몸통
+      color2 = Colors.indigo[800]!; // 진한 지느러미
+      pixels = [
+        [e, e, e, e, e, e, c2, c2, c2, e, e, e, e, e],
+        [e, e, e, e, e, e, e, c2, c2, e, e, e, e, e],
+        [e, c2, c2, e, e, c1, c1, c1, c1, c1, c2, e, e, e],
+        [c2, c1, c1, c1, c1, c1, c1, c1, c1, w, b, c1, e, e],
+        [c2, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e, e],
+        [e, c2, c2, e, e, c1, c1, c1, c1, c1, c2, e, e, e],
+        [e, e, e, e, e, e, e, c2, c2, e, e, e, e, e],
+        [e, e, e, e, e, e, c2, c2, c2, e, e, e, e, e],
+      ];
+    } else if (type == 'shrimp') {
+      color1 = Colors.deepOrangeAccent; // 붉은 새우 등
+      color2 = Colors.orange[200]!; // 연한 새우 배
+      pixels = [
+        [e, e, e, e, e, e, e, e, e, c1, c1, e, e, e],
+        [e, e, e, e, c1, c1, c1, e, c1, w, b, e, e, e],
+        [e, e, e, c1, c2, c2, c2, c1, c1, c1, c1, e, e, e],
+        [e, e, c1, c2, c2, c1, c1, c1, c1, e, e, e, e, e],
+        [e, c1, c1, c2, c1, e, c1, e, c1, e, e, e, e, e],
+        [c1, c1, c1, e, e, c2, e, c2, e, e, e, e, e, e],
+        [c1, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'seahorse') {
+      color1 = Colors.amber; // 노란 몸통
+      color2 = Colors.orange; // 주황색 갈기
+      pixels = [
+        [e, e, e, e, e, e, e, e, c2, c1, c1, c2, e, e],
+        [e, e, e, e, e, e, e, c2, c1, w, b, c1, e, e],
+        [e, e, e, e, e, e, e, c2, c1, c1, c1, c1, c1, e],
+        [e, e, e, e, e, e, e, e, c1, c1, e, e, e, e],
+        [e, e, e, e, e, e, c2, c1, c1, c1, e, e, e, e],
+        [e, e, e, e, e, c2, c1, c1, c1, c2, e, e, e, e],
+        [e, e, c1, c1, c1, c1, c1, c1, e, e, e, e, e, e],
+        [e, e, e, c1, c1, c1, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'turtle') {
+      color1 = Colors.green; // 초록 피부
+      color2 = Colors.brown[700]!; // 갈색 등딱지
+      pixels = [
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, c2, c2, c2, c2, c2, e, e, e, e, e],
+        [e, e, e, c2, c2, c2, c2, c2, c2, c2, e, e, e, e],
+        [e, e, c2, c2, c2, c2, c2, c2, c2, c2, c1, c1, e, e],
+        [e, c1, c1, c2, c2, c2, c2, c2, c2, c1, w, b, c1, e],
+        [e, e, e, c1, c1, e, e, e, c1, c1, c1, c1, c1, e],
+        [e, e, e, c1, e, e, e, e, e, c1, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'jellyfish') {
+      color1 = Colors.pinkAccent[100]!; // 분홍빛 우산
+      color2 = Colors.purpleAccent[100]!; // 보라빛 촉수
+      pixels = [
+        [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
+        [e, e, e, e, c1, c1, c1, c1, c1, c1, e, e, e, e],
+        [e, e, e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
+        [e, e, e, c1, c1, w, b, c1, w, b, c1, c1, e, e],
+        [e, e, e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
+        [e, e, e, c2, e, c2, e, e, c2, e, c2, e, e, e],
+        [e, e, c2, e, e, c2, e, e, c2, e, e, c2, e, e],
+        [e, e, e, c2, e, e, c2, c2, e, e, c2, e, e, e],
+      ];
+    } else if (type == 'stingray') {
+      color1 = Colors.blueGrey; // 푸른 회색 등
+      color2 = Colors.grey[400]!; // 배
+      pixels = [
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
+        [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
+        [e, c1, c1, c1, c1, c1, c1, c1, c1, c1, w, b, e, e],
+        [c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e],
+        [e, c1, c1, c1, c1, c1, c1, c1, c1, c1, w, b, e, e],
+        [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
+        [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
+      ];
     } else {
       // puffer (default)
       color1 = Colors.orangeAccent;
@@ -191,20 +282,26 @@ class PixelFishPainter extends CustomPainter {
           paint.color = Colors.lightBlueAccent;
         }
 
-        // 🐟 꼬물거리는 픽셀 애니메이션 (왼쪽 꼬리 부분일수록 위아래로 더 크게 움직임)
-        double wag = 0;
-        if (x < 6) {
-          wag =
-              sin(time * pi * 2 - x * 0.4) *
-              (6 - x) *
-              0.15; // 💡 픽셀 스냅 대신 소수점 단위의 부드러운 웨이브 적용
+        double dx = 0.0;
+        double dy = 0.0;
+
+        if (type == 'jellyfish') {
+          // 🪼 해파리: 촉수 부분(y >= 5)이 아래로 갈수록 좌우로 하늘하늘 흔들리도록 적용
+          if (y >= 5) {
+            dx = sin(time * pi * 4 - y * 0.8) * (y - 4) * 0.2;
+          }
+        } else {
+          // 🐟 일반 물고기: 왼쪽 꼬리 부분(x < 6)일수록 위아래로 더 크게 움직임
+          if (x < 6) {
+            dy = sin(time * pi * 2 - x * 0.4) * (6 - x) * 0.15;
+          }
         }
 
         // 배열에 맞춰 각 픽셀(사각형)을 캔버스에 그립니다.
         canvas.drawRect(
           Rect.fromLTWH(
-            x * pixelWidth,
-            y * pixelHeight + (wag * pixelHeight),
+            x * pixelWidth + (dx * pixelWidth),
+            y * pixelHeight + (dy * pixelHeight),
             pixelWidth,
             pixelHeight,
           ),

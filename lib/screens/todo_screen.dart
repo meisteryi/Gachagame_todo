@@ -5,7 +5,10 @@ import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
 
 class TodoScreen extends StatefulWidget {
-  const TodoScreen({super.key});
+  final VoidCallback? onSecretCommand;
+  final VoidCallback? onUnlockAllCommand;
+
+  const TodoScreen({super.key, this.onSecretCommand, this.onUnlockAllCommand});
 
   @override
   State<TodoScreen> createState() => _TodoScreenState();
@@ -580,6 +583,26 @@ class _TodoScreenState extends State<TodoScreen>
                                   ),
                                 ),
                                 onPressed: () {
+                                  // 💡 개발자 치트키 로직
+                                  if (newTask.trim() == 'showmethemoney') {
+                                    widget.onSecretCommand?.call();
+                                    _showNoticeDialog(
+                                      '쇼미더머니! 코인 1,000개가 지급되었습니다. 🪙',
+                                    );
+                                    Navigator.pop(context);
+                                    return; // 일정으로 추가하지 않고 종료
+                                  }
+
+                                  // 💡 개발자 치트키 2: 모든 물고기/수초 해금
+                                  if (newTask.trim() == 'unlockall') {
+                                    widget.onUnlockAllCommand?.call();
+                                    _showNoticeDialog(
+                                      '도감 100% 달성! 모든 물고기와 수초가 보관함에 추가되었습니다. 🐟🌿',
+                                    );
+                                    Navigator.pop(context);
+                                    return; // 일정으로 추가하지 않고 종료
+                                  }
+
                                   if (newTask.trim().isNotEmpty) {
                                     setState(() {
                                       if (isEdit) {

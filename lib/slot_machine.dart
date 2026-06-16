@@ -8,11 +8,13 @@ import 'pixel_emoji.dart';
 class SlotMachine extends StatefulWidget {
   final String gachaType; // 'fish' 또는 'seaweed'
   final void Function(Map<String, dynamic> drawnItem) onDrawDone;
+  final bool Function() onSpinStart;
 
   const SlotMachine({
     super.key,
     required this.gachaType,
     required this.onDrawDone,
+    required this.onSpinStart,
   });
 
   static const List<Map<String, dynamic>> fishList = [
@@ -23,6 +25,13 @@ class SlotMachine extends StatefulWidget {
     {'type': 'guppy', 'name': '조용한 구피'},
     {'type': 'shark', 'name': '무서운 상어'},
     {'type': 'whale', 'name': '전설의 흰수염고래'},
+    {'type': 'axolotl', 'name': '귀여운 우파루파'},
+    {'type': 'tuna', 'name': '은빛 참치'},
+    {'type': 'shrimp', 'name': '통통한 새우'},
+    {'type': 'seahorse', 'name': '꼬불꼬불 해마'},
+    {'type': 'turtle', 'name': '느긋한 거북이'},
+    {'type': 'jellyfish', 'name': '둥둥 해파리'},
+    {'type': 'stingray', 'name': '납작한 가오리'},
   ];
 
   // 💡 수초 목록 추가!
@@ -32,6 +41,11 @@ class SlotMachine extends StatefulWidget {
     {'type': 'kelp', 'name': '길쭉한 다시마'},
     {'type': 'coral', 'name': '아름다운 산호'},
     {'type': 'anemone', 'name': '춤추는 말미잘'},
+    {'type': 'purple_kelp', 'name': '보라색 미역'},
+    {'type': 'short_grass', 'name': '짧은 잔디 수초'},
+    {'type': 'blue_coral', 'name': '푸른 산호초'},
+    {'type': 'tall_bamboo', 'name': '거대 대나무 수초'},
+    {'type': 'golden_leaf', 'name': '황금빛 잎수초'},
   ];
 
   @override
@@ -77,6 +91,8 @@ class _SlotMachineState extends State<SlotMachine> {
 
   Future<void> _spin() async {
     if (_isSpinning) return; // 이미 돌고 있으면 무시
+
+    if (!widget.onSpinStart()) return; // 코인 부족 시 취소
 
     setState(() {
       _isSpinning = true;
@@ -387,11 +403,22 @@ class _SlotMachineState extends State<SlotMachine> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (!_isSpinning)
+                    if (!_isSpinning) ...[
                       PixelEmoji(
                         widget.gachaType == 'seaweed' ? 'seaweed' : 'fish',
                         size: 24,
                       ),
+                      const SizedBox(width: 12),
+                      const PixelEmoji('coin', size: 16),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '1',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

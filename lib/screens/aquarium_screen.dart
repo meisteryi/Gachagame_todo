@@ -42,8 +42,8 @@ class _AquariumScreenState extends State<AquariumScreen>
     super.initState();
     _fishController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 15),
-    )..repeat(); // 15초 주기로 5가지 모션을 수행하며 무한 반복
+      duration: const Duration(seconds: 30),
+    )..repeat(); // 30초 주기로 10가지 모션을 수행하며 무한 반복
 
     _feedController = AnimationController(
       vsync: this,
@@ -59,49 +59,128 @@ class _AquariumScreenState extends State<AquariumScreen>
   }
 
   // 평상시 물고기의 유영 궤도를 계산하는 헬퍼 함수 (재사용성 및 애니메이션 보간을 위해 분리)
-  (Offset, bool) _getNormalFishPosAndFlip(double v, double w, double h) {
+  (Offset, bool) _getNormalFishPosAndFlip(
+    String type,
+    double v,
+    double w,
+    double h,
+  ) {
     double x = 0;
     double y = 0;
     bool flipX = false;
 
-    if (v < 0.2) {
-      final t = v * 5;
-      x = w * t;
-      y = h / 2 + sin(t * pi * 2) * 30; // 상하 이동 속도 절반 (4 -> 2)
-      flipX = false;
-    } else if (v < 0.4) {
-      final t = (v - 0.2) * 5;
-      x = w - (w * t);
-      y =
-          h / 2 -
-          (h / 4 * t) +
-          sin(t * pi * 2) * 16; // 속도를 한 번 더 절반 수준으로 늦춤 (5 -> 2)
-      flipX = true;
-    } else if (v < 0.6) {
-      final t = (v - 0.4) * 5;
-      x = (w / 2) * t + sin(t * pi * 2) * 40;
-      y = h / 4 + (h / 4) * t + (1 - cos(t * pi * 2)) * 40;
-      flipX = cos(t * pi * 2) < -0.5;
-    } else if (v < 0.8) {
-      final t = (v - 0.6) * 5;
-      x = (w / 2) + (w / 2) * t;
-      final frac = t * 1 % 1; // 지그재그 튀는 속도를 한 번 더 늦춤 (3 -> 1)
-      y = h / 2 + (frac < 0.5 ? frac * 2 : (1 - frac) * 2) * 35;
-      flipX = false;
+    if (type == 'jellyfish') {
+      // 🪼 해파리: 위아래로 강하게 펄스 치며 수직 이동 강조, 느린 수평 이동
+      double drift = sin(v * pi * 2); // 30초 동안 1번 좌우 왕복 (거북이처럼 느리게)
+      x = w / 2 + drift * (w / 2.5);
+      // % 대신 연속적인 사인 곡선을 사용하여 위치가 뚝 끊기지 않게 보정
+      double pulse = (sin(v * pi * 20) + 1.0) / 2.0; // 펄스(맥박) 주기를 3배 느리게 완화
+      y = h * 0.4 + sin(v * pi * 2) * (h * 0.2) - (pulse * 20.0);
+      flipX = drift < 0;
+    } else if (type == 'seahorse') {
+      // 🐉 해마: 꼿꼿하게 서서 위아래로 통통 튀며 아주 느리게 전진
+      double t = v * 2; // 30초 동안 좌우 왕복 1회
+      x = (w / 2) + sin(t * pi * 2) * (w * 0.4);
+      y = h * 0.6 + sin(v * pi * 30) * 12; // 빠르게 통통 튀기 (조금 더 부드럽게 완화)
+      flipX = cos(t * pi * 2) < 0;
+    } else if (type == 'shrimp') {
+      // 🦐 새우: 바닥을 기어가다가 연속성을 유지하며 뒤로 펄쩍 뜀
+      double cycleV = (v * 4) % 1.0; // 30초 동안 4사이클
+      int cycle = (v * 4).floor();
+      bool isMovingRight = cycle % 2 == 0; // 지그재그 방향
+
+      double xProgress;
+      if (cycleV < 0.8) {
+        // 0.0 ~ 0.8 동안 목표 지점보다 살짝 더 전진 (1.1배)
+        xProgress = (cycleV / 0.8) * 1.1;
+        double subT = cycleV / 0.8;
+        y = h * 0.95 - (sin(subT * pi * 16).abs() * 4); // 바닥을 꼬물꼬물
+      } else {
+        // 0.8 ~ 1.0 동안 초과했던 0.1만큼 뒤로 후퇴하며 펄쩍 뜀!
+        double subT = (cycleV - 0.8) / 0.2;
+        xProgress = 1.1 - (subT * 0.1);
+        y = h * 0.95 - (sin(subT * pi) * 35); // 부드러운 포물선 점프
+      }
+
+      x = isMovingRight
+          ? (w * 0.1) + (w * 0.8 * xProgress)
+          : (w * 0.9) - (w * 0.8 * xProgress);
+
+      flipX = !isMovingRight; // 점프 시에도 시선 유지
     } else {
-      final t = (v - 0.8) * 5;
-      x = w - (w * t);
-      y =
-          h / 2 +
-          50 * sin(t * pi) +
-          sin(t * pi * 2) * 15; // 상하 이동 속도 절반 (4 -> 2)
-      flipX = true;
+      // 🐟 일반 물고기 그룹 (10단계 다채로운 모션)
+      double timeV = v;
+      bool isFast = type == 'shark' || type == 'mackerel' || type == 'tuna';
+      bool isBottom =
+          type == 'stingray' || type == 'turtle' || type == 'axolotl';
+
+      if (isFast) timeV = (v * 1.8) % 1.0; // 날쌘 친구들은 거의 2배 속도
+      if (isBottom) timeV = (v * 0.7) % 1.0; // 느긋한 친구들은 0.7배 속도
+
+      if (timeV < 0.1) {
+        final t = timeV * 10;
+        x = (w * 0.8) * t;
+        y = h / 2 + sin(t * pi * 2) * 20;
+        flipX = false;
+      } else if (timeV < 0.2) {
+        final t = (timeV - 0.1) * 10;
+        x = (w * 0.8) - (w * 0.4 * t);
+        y = h / 2 + (h * 0.2 * t) + sin(t * pi * 4) * 10;
+        flipX = true;
+      } else if (timeV < 0.3) {
+        final t = (timeV - 0.2) * 10;
+        x = (w * 0.4) + (w * 0.6 * t);
+        y = h * 0.7 - (h * 0.4 * t);
+        flipX = false;
+      } else if (timeV < 0.4) {
+        final t = (timeV - 0.3) * 10;
+        x = w - (w * 0.8 * t);
+        y = h * 0.3 + sin(t * pi * 2) * 30;
+        flipX = true;
+      } else if (timeV < 0.5) {
+        final t = (timeV - 0.4) * 10;
+        x = (w * 0.2) + sin(t * pi * 2) * 40;
+        y = h * 0.3 + (h * 0.4 * t) - cos(t * pi * 2) * 40 + 40;
+        flipX = cos(t * pi * 2) < -0.5;
+      } else if (timeV < 0.6) {
+        final t = (timeV - 0.5) * 10;
+        x = (w * 0.2) + (w * 0.7 * t);
+        final frac = (t * 2) % 1.0;
+        y = h * 0.7 - (frac < 0.5 ? frac * 2 : (1 - frac) * 2) * 20;
+        flipX = false;
+      } else if (timeV < 0.7) {
+        final t = (timeV - 0.6) * 10;
+        x = (w * 0.9) - (w * 0.5 * t);
+        y = h * 0.7 + sin(t * pi) * 30;
+        flipX = true;
+      } else if (timeV < 0.8) {
+        final t = (timeV - 0.7) * 10;
+        x = (w * 0.4) + (w * 0.4 * t);
+        y = h * 0.7 - (h * 0.5 * t) + sin(t * pi * 3) * 15;
+        flipX = false;
+      } else if (timeV < 0.9) {
+        final t = (timeV - 0.8) * 10;
+        x = (w * 0.8) - (w * 0.6 * t);
+        y = h * 0.2 + (h * 0.3 * t);
+        flipX = true;
+      } else {
+        final t = (timeV - 0.9) * 10;
+        x = (w * 0.2) - (w * 0.2 * t);
+        y = h * 0.5 + sin(t * pi * 2) * 20;
+        flipX = true;
+      }
+
+      // 가오리나 거북이는 바닥에 깔려서 헤엄치도록 y 반경을 아래로 보정
+      if (isBottom) {
+        y = (y * 0.4) + (h * 0.55);
+      }
     }
     return (Offset(x, y), flipX);
   }
 
   // 현재 물고기의 위치와 좌우 반전 상태를 계산하는 통합 함수 (회전각 계산을 위한 미래 위치 예측용)
   (double, double, bool) _getFishPose(
+    String type,
     bool isFeeding,
     double fishV,
     double feedV,
@@ -131,13 +210,23 @@ class _AquariumScreenState extends State<AquariumScreen>
         flipX = targetX < _feedStartX;
       } else {
         final t = (feedV - 0.7) / 0.3;
-        final (nextOffset, nextFlip) = _getNormalFishPosAndFlip(fishV, w, h);
+        final (nextOffset, nextFlip) = _getNormalFishPosAndFlip(
+          type,
+          fishV,
+          w,
+          h,
+        );
         x = targetX + (nextOffset.dx - targetX) * t;
         y = targetY + (nextOffset.dy - targetY) * t;
         flipX = t > 0.8 ? nextFlip : (nextOffset.dx < targetX);
       }
     } else {
-      final (normalOffset, normalFlip) = _getNormalFishPosAndFlip(fishV, w, h);
+      final (normalOffset, normalFlip) = _getNormalFishPosAndFlip(
+        type,
+        fishV,
+        w,
+        h,
+      );
       x = normalOffset.dx;
       y = normalOffset.dy;
       flipX = normalFlip;
@@ -229,7 +318,12 @@ class _AquariumScreenState extends State<AquariumScreen>
     final double w = 320.0 - 60.0;
     final double h = 320.0 - 40.0 - 30.0;
 
-    final (startOffset, _) = _getNormalFishPosAndFlip(v, w, h);
+    final (startOffset, _) = _getNormalFishPosAndFlip(
+      widget.swimmingFishType,
+      v,
+      w,
+      h,
+    );
     _feedStartX = startOffset.dx;
     _feedStartY = startOffset.dy;
 
@@ -408,6 +502,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                         final feedV = _isFeeding ? _feedController!.value : 0.0;
 
                         final currentPose = _getFishPose(
+                          widget.swimmingFishType,
                           _isFeeding,
                           fishV,
                           feedV,
@@ -424,6 +519,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                             ? min(1.0, feedV + 0.005)
                             : 0.0;
                         final nextPose = _getFishPose(
+                          widget.swimmingFishType,
                           _isFeeding,
                           nextFishV,
                           nextFeedV,
@@ -443,6 +539,16 @@ class _AquariumScreenState extends State<AquariumScreen>
                           if (dx.abs() > 0.01 || dy.abs() > 0.01) {
                             tiltAngle = flipX ? atan2(dy, -dx) : atan2(dy, dx);
                           }
+                        }
+
+                        // 💡 해파리, 해마처럼 수직으로 서서 다니는 생물은 회전(기울기)을 제한합니다.
+                        if (widget.swimmingFishType == 'jellyfish' ||
+                            widget.swimmingFishType == 'seahorse') {
+                          tiltAngle = 0.0;
+                        }
+                        // 새우는 바닥 기어다니거나 뒤로 펄쩍 뛰므로 각도를 약간만 줌
+                        if (widget.swimmingFishType == 'shrimp') {
+                          tiltAngle *= 0.3;
                         }
 
                         if (_isFeeding) {

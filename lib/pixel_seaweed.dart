@@ -120,6 +120,78 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, c2, c2, c2, c2, c2, e],
         [e, e, c2, c2, c2, e, e],
       ];
+    } else if (type == 'purple_kelp') {
+      color1 = Colors.purple;
+      color2 = Colors.deepPurple;
+      pixels = [
+        [e, c1, c2, e, e, e],
+        [e, c2, c1, e, e, e],
+        [e, c1, c2, c2, e, e],
+        [e, c1, c1, c2, e, e],
+        [e, c2, c1, c1, e, e],
+        [e, c1, c2, c1, e, e],
+        [e, c1, c1, c2, e, e],
+        [e, c2, c1, c1, e, e],
+        [e, c1, c2, c1, e, e],
+        [e, c1, c1, c1, e, e],
+      ];
+    } else if (type == 'short_grass') {
+      color1 = Colors.lightGreenAccent;
+      color2 = Colors.green;
+      pixels = [
+        [e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e],
+        [e, c1, e, e, e, c2, e, e],
+        [c1, c1, e, c1, e, c2, c2, e],
+        [c1, c2, c1, c1, c2, c1, c2, e],
+        [c1, c1, c1, c2, c1, c1, c1, e],
+      ];
+    } else if (type == 'blue_coral') {
+      color1 = Colors.blueAccent;
+      color2 = Colors.lightBlue;
+      pixels = [
+        [e, e, c1, e, e, e, c2, e],
+        [e, c1, c1, e, e, c2, c2, e],
+        [c1, c1, e, c1, c2, c2, e, e],
+        [e, c1, c1, c1, c1, c2, e, e],
+        [e, e, c1, c1, c1, e, e, e],
+        [e, c2, c1, c1, c1, c2, e, e],
+        [c2, c2, c1, c1, c1, c2, c2, e],
+        [c2, c1, c1, c1, c1, c1, c2, e],
+      ];
+    } else if (type == 'tall_bamboo') {
+      color1 = Colors.greenAccent;
+      color2 = Colors.teal;
+      pixels = [
+        [e, e, c1, c2, e, e],
+        [e, e, c1, c2, e, e],
+        [e, c1, c1, c2, c2, e],
+        [e, e, c1, c2, e, e],
+        [e, e, c1, c2, e, e],
+        [e, e, c1, c2, e, e],
+        [e, c1, c1, c2, c2, e],
+        [e, e, c1, c2, e, e],
+        [e, e, c1, c2, e, e],
+        [e, e, c1, c2, e, e],
+        [e, c1, c1, c2, c2, e],
+        [e, e, c1, c2, e, e],
+      ];
+    } else if (type == 'golden_leaf') {
+      color1 = Colors.amber;
+      color2 = Colors.orange;
+      pixels = [
+        [e, e, c1, c2, e, e, e],
+        [e, c1, c1, c2, c2, e, e],
+        [e, e, c1, c2, e, e, e],
+        [e, c2, c1, c1, c1, e, e],
+        [c2, c2, c1, c2, c1, c1, e],
+        [e, e, c1, c2, e, e, e],
+        [e, c1, c1, c1, c2, e, e],
+        [c1, c1, c2, c1, c2, c2, e],
+        [e, e, c1, c2, e, e, e],
+      ];
     } else {
       // green_algae (default)
       color1 = Colors.green;
@@ -146,10 +218,11 @@ class PixelSeaweedPainter extends CustomPainter {
 
         // 🌱 수초가 물결에 따라 살랑거리는 픽셀 애니메이션 (위쪽일수록 좌우로 더 흔들림)
         double sway = 0;
-        if (y < 7) {
+        int bottomY = pixels.length - 1;
+        if (y < bottomY) {
           sway =
               sin(time * pi * 2 - y * 0.4) *
-              (7 - y) *
+              (bottomY - y) *
               0.15; // 💡 픽셀 스냅 대신 소수점 단위의 부드러운 웨이브 적용
         }
 
