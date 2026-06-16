@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
@@ -20,7 +18,7 @@ import 'slot_machine.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const GachaTodoApp());
 }
 
