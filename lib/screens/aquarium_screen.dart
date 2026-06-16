@@ -249,9 +249,10 @@ class _AquariumScreenState extends State<AquariumScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -279,9 +280,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                       elevation: 0,
                       backgroundColor: Colors.grey[300],
                       foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -356,9 +360,10 @@ class _AquariumScreenState extends State<AquariumScreen>
               height: 320,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05), // 물 밖의 빈 유리 느낌
+                borderRadius: BorderRadius.circular(6),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: const Color(0xFF333333).withValues(alpha: 0.1),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -374,7 +379,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                     right: 4,
                     bottom: 4,
                     child: Container(
-                      color: Colors.lightBlueAccent.withValues(alpha: 0.15),
+                      decoration: BoxDecoration(
+                        color: Colors.lightBlueAccent.withValues(alpha: 0.15),
+                        borderRadius: const BorderRadius.vertical(
+                          bottom: Radius.circular(4),
+                        ),
+                      ),
                     ),
                   ),
                   // 🧊 도트 수조 테두리 및 텍스처 모래 바닥
@@ -771,6 +781,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black87,
+                  borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: Colors.yellowAccent, width: 2),
                 ),
                 child: const Text(
@@ -798,7 +809,7 @@ class PixelArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final outlinePaint = Paint()..color = Colors.black;
+    final outlinePaint = Paint()..color = const Color(0xFF333333);
     final fillPaint = Paint()..color = Colors.white;
     const double p = 2.0; // 픽셀 크기
 
@@ -1025,11 +1036,15 @@ class _PixelButtonState extends State<PixelButton> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: widget.color,
-          border: Border.all(color: Colors.black, width: 3), // 두꺼운 픽셀 테두리
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: const Color(0xFF333333),
+            width: 3,
+          ), // 두꺼운 픽셀 테두리
           boxShadow: _isPressed
               ? []
               : const [
-                  BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
                 ], // 도트 그림자
         ),
         child: DefaultTextStyle(

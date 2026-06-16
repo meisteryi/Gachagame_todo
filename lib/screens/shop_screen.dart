@@ -102,9 +102,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -132,9 +133,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       elevation: 0,
                       backgroundColor: Colors.grey[300],
                       foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -203,9 +207,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(6, 6)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -247,7 +252,11 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.lightBlueAccent.withValues(alpha: 0.2),
-                      border: Border.all(color: Colors.black, width: 3),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: const Color(0xFF333333),
+                        width: 3,
+                      ),
                     ),
                     child: Transform.scale(
                       scale: 1.5,
@@ -284,7 +293,11 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                       alpha: 0.2,
                                     )
                                   : Colors.grey[200],
-                              border: Border.all(color: Colors.black, width: 2),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: const Color(0xFF333333),
+                                width: 2,
+                              ),
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -343,9 +356,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                               elevation: 0,
                               backgroundColor: Colors.grey[300],
                               foregroundColor: Colors.black,
-                              shape: const RoundedRectangleBorder(
-                                side: BorderSide(color: Colors.black, width: 3),
-                                borderRadius: BorderRadius.zero,
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                  color: Color(0xFF333333),
+                                  width: 3,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                             ),
                             onPressed: () => Navigator.of(context).pop(),
@@ -371,12 +387,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                 elevation: 0,
                                 backgroundColor: const Color(0xFFFFB7B2),
                                 foregroundColor: Colors.white,
-                                shape: const RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    color: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                    color: Color(0xFF333333),
                                     width: 3,
                                   ),
-                                  borderRadius: BorderRadius.zero,
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
                               onPressed: () {
@@ -439,9 +455,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           backgroundColor: const Color(0xFFFFDAB9),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: const RoundedRectangleBorder(
-            side: BorderSide(color: Colors.black, width: 4),
-            borderRadius: BorderRadius.zero,
+          shape: RoundedRectangleBorder(
+            side: const BorderSide(color: Color(0xFF333333), width: 4),
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
         onPressed: () => _confirmBuyFeed(title, cost, amount),
@@ -475,9 +491,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -501,9 +518,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey[300],
                           foregroundColor: Colors.black,
-                          shape: const RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black, width: 2),
-                            borderRadius: BorderRadius.zero,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: Colors.black,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                         onPressed: () => Navigator.pop(context),
@@ -520,7 +540,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           backgroundColor: const Color(0xFFA8E6CF),
                           foregroundColor: Colors.black,
                           shape: const RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black, width: 2),
+                            side: BorderSide(
+                              color: Color(0xFF333333),
+                              width: 2,
+                            ),
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
@@ -564,7 +587,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           height: double.infinity,
           decoration: BoxDecoration(
             color: bgColor,
-            border: Border.all(color: Colors.black, width: 4),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: const Color(0xFF333333), width: 4),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -578,7 +602,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
-                  shadows: [Shadow(color: Colors.black, offset: Offset(2, 2))],
+                  shadows: [
+                    Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                  ],
                 ),
               ),
             ],
@@ -593,6 +619,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: Colors.grey[400]!, width: 4),
       ),
       child: const Center(
@@ -624,7 +651,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       foreground: Paint()
                         ..style = PaintingStyle.stroke
                         ..strokeWidth = 6
-                        ..color = Colors.black,
+                        ..color = const Color(0xFF333333),
                     ),
                   ),
                   const Text(
@@ -635,7 +662,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       letterSpacing: 2,
                       color: Color(0xFFFFF3B0),
                       shadows: [
-                        Shadow(color: Colors.black, offset: Offset(4, 4)),
+                        Shadow(color: Color(0xFF333333), offset: Offset(4, 4)),
                       ],
                     ),
                   ),
@@ -760,8 +787,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
+                                    borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: Colors.black,
+                                      color: const Color(0xFF333333),
                                       width: 3,
                                     ),
                                   ),

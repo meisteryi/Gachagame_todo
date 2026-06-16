@@ -157,9 +157,10 @@ class _MissionScreenState extends State<MissionScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -187,9 +188,12 @@ class _MissionScreenState extends State<MissionScreen>
                       elevation: 0,
                       backgroundColor: Colors.grey[300],
                       foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -234,10 +238,11 @@ class _MissionScreenState extends State<MissionScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isClaimed ? Colors.grey[200] : Colors.white,
-        border: Border.all(color: Colors.black, width: 3),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF333333), width: 3),
         boxShadow: isClaimed
             ? null
-            : const [BoxShadow(color: Colors.black, offset: Offset(4, 4))],
+            : const [BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2))],
       ),
       child: Row(
         children: [
@@ -283,9 +288,9 @@ class _MissionScreenState extends State<MissionScreen>
                       : Colors.grey[300], // 비활성 배경색 지정
                   foregroundColor: Colors.black,
                   disabledForegroundColor: Colors.black54, // 비활성 상태일 때 글씨 색상
-                  shape: const RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.zero,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Color(0xFF333333), width: 2),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   elevation: 0,
                 ),

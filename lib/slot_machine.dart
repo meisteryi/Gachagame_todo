@@ -184,7 +184,7 @@ class _SlotMachineState extends State<SlotMachine> {
                     foreground: Paint()
                       ..style = PaintingStyle.stroke
                       ..strokeWidth = 6
-                      ..color = Colors.black,
+                      ..color = const Color(0xFF333333),
                   ),
                 ),
                 const Text(
@@ -195,7 +195,7 @@ class _SlotMachineState extends State<SlotMachine> {
                     letterSpacing: 2,
                     color: Colors.pinkAccent,
                     shadows: [
-                      Shadow(color: Colors.black, offset: Offset(3, 3)),
+                      Shadow(color: Color(0xFF333333), offset: Offset(3, 3)),
                     ],
                   ),
                 ),
@@ -222,12 +222,16 @@ class _SlotMachineState extends State<SlotMachine> {
                       color: widget.gachaType == 'seaweed'
                           ? const Color(0xFF85CAC5)
                           : const Color(0xFFFFB7B2), // 부드러운 기계 색상
+                      borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: Colors.black,
+                        color: const Color(0xFF333333),
                         width: 6,
                       ), // 검정 픽셀 테두리
                       boxShadow: const [
-                        BoxShadow(color: Colors.black, offset: Offset(8, 8)),
+                        BoxShadow(
+                          color: Color(0xFF333333),
+                          offset: Offset(4, 4),
+                        ),
                       ],
                     ),
                     child: Column(
@@ -241,8 +245,9 @@ class _SlotMachineState extends State<SlotMachine> {
                           ),
                           decoration: BoxDecoration(
                             color: Colors.black,
+                            borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: Colors.yellowAccent,
+                              color: const Color(0xFF333333),
                               width: 2,
                             ),
                           ),
@@ -262,9 +267,11 @@ class _SlotMachineState extends State<SlotMachine> {
                             margin: const EdgeInsets.fromLTRB(10, 0, 10, 15),
                             decoration: BoxDecoration(
                               color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: Colors.black, width: 6),
                             ),
                             child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
                               child: Row(
                                 children: [
                                   _buildSlotColumn(_ctrl1),
@@ -300,11 +307,15 @@ class _SlotMachineState extends State<SlotMachine> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: Colors.grey[700],
-                              border: Border.all(color: Colors.black, width: 4),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: const Color(0xFF333333),
+                                width: 4,
+                              ),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.black,
-                                  offset: Offset(4, 4),
+                                  color: Color(0xFF333333),
+                                  offset: Offset(2, 2),
                                 ),
                               ],
                             ),
@@ -331,14 +342,15 @@ class _SlotMachineState extends State<SlotMachine> {
                                     height: 36,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFFB7B2),
+                                      borderRadius: BorderRadius.circular(4),
                                       border: Border.all(
-                                        color: Colors.black,
+                                        color: const Color(0xFF333333),
                                         width: 4,
                                       ),
                                       boxShadow: const [
                                         BoxShadow(
-                                          color: Colors.black,
-                                          offset: Offset(4, 4),
+                                          color: Color(0xFF333333),
+                                          offset: Offset(2, 2),
                                         ),
                                       ],
                                     ),
@@ -351,11 +363,11 @@ class _SlotMachineState extends State<SlotMachine> {
                                       color: Colors.grey,
                                       border: Border(
                                         left: BorderSide(
-                                          color: Colors.black,
+                                          color: Color(0xFF333333),
                                           width: 4,
                                         ),
                                         right: BorderSide(
-                                          color: Colors.black,
+                                          color: Color(0xFF333333),
                                           width: 4,
                                         ),
                                       ),
@@ -394,9 +406,12 @@ class _SlotMachineState extends State<SlotMachine> {
                         vertical: 16,
                       ),
                       elevation: 0,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 4),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 4,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     child: Column(
@@ -442,9 +457,12 @@ class _SlotMachineState extends State<SlotMachine> {
                         vertical: 16,
                       ),
                       elevation: 0,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 4),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 4,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     child: Column(

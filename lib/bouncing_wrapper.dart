@@ -34,10 +34,10 @@ class _BouncingWrapperState extends State<BouncingWrapper> {
           // 1. 고정된 그림자 (위젯의 형태를 그대로 본따 검은색으로 우하단에 고정)
           if (widget.showShadow)
             Transform.translate(
-              offset: const Offset(4, 4),
+              offset: const Offset(2, 2),
               child: ColorFiltered(
                 colorFilter: const ColorFilter.mode(
-                  Colors.black,
+                  Color(0xFF333333),
                   BlendMode.srcIn,
                 ),
                 child: widget.child,
@@ -47,8 +47,8 @@ class _BouncingWrapperState extends State<BouncingWrapper> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 50),
             transform: Matrix4.translationValues(
-              _isPressed ? 4.0 : 0.0,
-              _isPressed ? 4.0 : 0.0,
+              _isPressed ? 2.0 : 0.0,
+              _isPressed ? 2.0 : 0.0,
               0.0,
             ),
             child: widget.child,

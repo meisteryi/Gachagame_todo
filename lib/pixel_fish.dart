@@ -277,7 +277,7 @@ class PixelFishPainter extends CustomPainter {
         } else if (pixels[y][x] == w) {
           paint.color = Colors.white;
         } else if (pixels[y][x] == b) {
-          paint.color = Colors.black;
+          paint.color = const Color(0xFF333333);
         } else if (pixels[y][x] == a) {
           paint.color = Colors.lightBlueAccent;
         }

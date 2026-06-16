@@ -3,9 +3,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/services.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
@@ -98,7 +98,7 @@ class SplashScreen extends StatelessWidget {
                   fontSize: 28,
                   color: Colors.white,
                   shadows: const [
-                    Shadow(color: Colors.black, offset: Offset(3, 3)),
+                    Shadow(color: Color(0xFF333333), offset: Offset(3, 3)),
                   ],
                 ),
               ),
@@ -239,9 +239,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -269,9 +270,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       elevation: 0,
                       backgroundColor: Colors.grey[300],
                       foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -318,7 +322,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       curve: Curves.easeInOut,
     );
     Future.delayed(const Duration(milliseconds: 150), () {
-      if (mounted) _showStorage();
+      if (mounted) {
+        _showStorage();
+      }
     });
   }
 
@@ -333,9 +339,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -363,14 +370,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFB4D8E7),
                       foregroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    onPressed: _backupData,
+                    onPressed: _saveToCloud,
                     child: const Text(
-                      '데이터 백업 (코드 복사)',
+                      '클라우드에 저장 ☁️',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -391,9 +401,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.zero,
                       ),
                     ),
-                    onPressed: _restoreData,
+                    onPressed: _loadFromCloud,
                     child: const Text(
-                      '데이터 복구 (코드 입력)',
+                      '클라우드에서 불러오기 ☁️',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -432,39 +442,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
   }
 
-  Future<void> _backupData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final Map<String, dynamic> allData = {
-      'ownedFishes': prefs.getString('ownedFishes'),
-      'ownedSeaweeds': prefs.getString('ownedSeaweeds'),
-      'swimmingFish': prefs.getString('swimmingFish'),
-      'plantedSeaweeds': prefs.getString('plantedSeaweeds'),
-      'coins': prefs.getInt('coins'),
-      'feedCount': prefs.getInt('feedCount'),
-      'todos': prefs.getString('todos'),
-      'categories': prefs.getString('categories'),
-      'mission_data': prefs.getString('mission_data'),
-    };
-
-    // 데이터 용량 압축을 위해 null 값 제거
-    allData.removeWhere((key, value) => value == null);
-
-    // 데이터를 JSON으로 만들고 암호화(Base64)하여 코드로 변환
-    final String jsonStr = jsonEncode(allData);
-    final String base64Str = base64Encode(utf8.encode(jsonStr));
-
-    await Clipboard.setData(ClipboardData(text: base64Str)); // 클립보드에 복사
-    if (mounted) {
-      Navigator.pop(context); // 설정 창 닫기
-      _showNoticeDialog(
-        '백업 코드가 클립보드에 복사되었습니다!\n업데이트 후, 캐시를 지우고 복구 코드로 사용하세요. 💾',
-      );
-    }
-  }
-
-  void _restoreData() {
+  // ☁️ 파이어베이스 REST API: 클라우드 저장
+  void _saveToCloud() {
     Navigator.pop(context); // 설정 창 닫기
-    String inputCode = '';
+    String userId = '';
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -474,27 +455,30 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(4, 4)),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  '데이터 복구',
+                  '클라우드 저장',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  onChanged: (val) => inputCode = val,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: '여기에 복사해둔 코드를 붙여넣으세요',
+                  onChanged: (val) => userId = val,
+                  decoration: InputDecoration(
+                    hintText: '사용할 아이디 (영문/숫자)',
                     border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 2),
-                      borderRadius: BorderRadius.zero,
+                      borderSide: const BorderSide(
+                        color: Color(0xFF333333),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
@@ -506,9 +490,155 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey[300],
                           foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: Color(0xFF333333),
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB4D8E7),
+                          foregroundColor: Colors.black,
                           shape: const RoundedRectangleBorder(
                             side: BorderSide(color: Colors.black, width: 3),
                             borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (userId.trim().isEmpty) return;
+
+                          try {
+                            final prefs = await SharedPreferences.getInstance();
+                            final Map<String, dynamic> allData = {
+                              'ownedFishes': prefs.getString('ownedFishes'),
+                              'ownedSeaweeds': prefs.getString('ownedSeaweeds'),
+                              'swimmingFish': prefs.getString('swimmingFish'),
+                              'plantedSeaweeds': prefs.getString(
+                                'plantedSeaweeds',
+                              ),
+                              'coins': prefs.getInt('coins'),
+                              'feedCount': prefs.getInt('feedCount'),
+                              'todos': prefs.getString('todos'),
+                              'categories': prefs.getString('categories'),
+                              'mission_data': prefs.getString('mission_data'),
+                            };
+                            allData.removeWhere((key, value) => value == null);
+
+                            // 🚨 주의: 아래 주소를 본인의 파이어베이스 Realtime DB 주소로 교체하세요!
+                            final String dbUrl =
+                                "https://gachatodo-23081-default-rtdb.firebaseio.com/users/${userId.trim()}.json";
+
+                            final response = await http.put(
+                              Uri.parse(dbUrl),
+                              body: jsonEncode(allData),
+                            );
+
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+
+                            if (response.statusCode == 200 && mounted) {
+                              _showNoticeDialog(
+                                '데이터가 클라우드에 저장되었습니다! ☁️\n아이디: ${userId.trim()}',
+                              );
+                            } else if (mounted) {
+                              _showNoticeDialog(
+                                '저장에 실패했습니다.\n상태 코드: ${response.statusCode}',
+                              );
+                            }
+                          } catch (e) {
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+                            if (mounted) {
+                              _showNoticeDialog(
+                                '저장 중 오류가 발생했습니다.\n인터넷 연결을 확인해 주세요. 🥲',
+                              );
+                            }
+                          }
+                        },
+                        child: const Text(
+                          '저장',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ☁️ 파이어베이스 REST API: 클라우드 불러오기
+  void _loadFromCloud() {
+    Navigator.pop(context); // 설정 창 닫기
+    String userId = '';
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
+              boxShadow: const [
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '클라우드 불러오기',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  onChanged: (val) => userId = val,
+                  decoration: InputDecoration(
+                    hintText: '저장했던 아이디 입력',
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0xFF333333),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: Color(0xFF333333),
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                         onPressed: () => Navigator.pop(dialogContext),
@@ -530,72 +660,90 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           ),
                         ),
                         onPressed: () async {
-                          try {
-                            // 코드 해독 및 복구 진행
-                            final String jsonStr = utf8.decode(
-                              base64Decode(inputCode.trim()),
-                            );
-                            final Map<String, dynamic> allData = jsonDecode(
-                              jsonStr,
-                            );
-                            final prefs = await SharedPreferences.getInstance();
+                          if (userId.trim().isEmpty) return;
 
-                            if (allData.containsKey('ownedFishes')) {
-                              await prefs.setString(
-                                'ownedFishes',
-                                allData['ownedFishes'],
-                              );
-                            }
-                            if (allData.containsKey('ownedSeaweeds')) {
-                              await prefs.setString(
-                                'ownedSeaweeds',
-                                allData['ownedSeaweeds'],
-                              );
-                            }
-                            if (allData.containsKey('swimmingFish')) {
-                              await prefs.setString(
-                                'swimmingFish',
-                                allData['swimmingFish'],
-                              );
-                            }
-                            if (allData.containsKey('plantedSeaweeds')) {
-                              await prefs.setString(
-                                'plantedSeaweeds',
-                                allData['plantedSeaweeds'],
-                              );
-                            }
-                            if (allData.containsKey('coins')) {
-                              await prefs.setInt('coins', allData['coins']);
-                            }
-                            if (allData.containsKey('feedCount')) {
-                              await prefs.setInt(
-                                'feedCount',
-                                allData['feedCount'],
-                              );
-                            }
-                            if (allData.containsKey('todos')) {
-                              await prefs.setString('todos', allData['todos']);
-                            }
-                            if (allData.containsKey('categories')) {
-                              await prefs.setString(
-                                'categories',
-                                allData['categories'],
-                              );
-                            }
-                            if (allData.containsKey('mission_data')) {
-                              await prefs.setString(
-                                'mission_data',
-                                allData['mission_data'],
-                              );
-                            }
+                          try {
+                            // 🚨 주의: 아래 주소를 본인의 파이어베이스 Realtime DB 주소로 교체하세요!
+                            final String dbUrl =
+                                "https://gachatodo-23081-default-rtdb.firebaseio.com/users/${userId.trim()}.json";
+
+                            final response = await http.get(Uri.parse(dbUrl));
 
                             if (dialogContext.mounted) {
                               Navigator.pop(dialogContext);
                             }
-                            if (mounted) {
-                              _showNoticeDialog(
-                                '데이터 복구 성공! 🎉\n완벽한 적용을 위해 브라우저를 새로고침(F5) 해주세요.',
+
+                            if (response.statusCode == 200 &&
+                                response.body != 'null') {
+                              final Map<String, dynamic> allData = jsonDecode(
+                                response.body,
                               );
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+
+                              if (allData.containsKey('ownedFishes')) {
+                                await prefs.setString(
+                                  'ownedFishes',
+                                  allData['ownedFishes'],
+                                );
+                              }
+                              if (allData.containsKey('ownedSeaweeds')) {
+                                await prefs.setString(
+                                  'ownedSeaweeds',
+                                  allData['ownedSeaweeds'],
+                                );
+                              }
+                              if (allData.containsKey('swimmingFish')) {
+                                await prefs.setString(
+                                  'swimmingFish',
+                                  allData['swimmingFish'],
+                                );
+                              }
+                              if (allData.containsKey('plantedSeaweeds')) {
+                                await prefs.setString(
+                                  'plantedSeaweeds',
+                                  allData['plantedSeaweeds'],
+                                );
+                              }
+                              if (allData.containsKey('coins')) {
+                                await prefs.setInt('coins', allData['coins']);
+                              }
+                              if (allData.containsKey('feedCount')) {
+                                await prefs.setInt(
+                                  'feedCount',
+                                  allData['feedCount'],
+                                );
+                              }
+                              if (allData.containsKey('todos')) {
+                                await prefs.setString(
+                                  'todos',
+                                  allData['todos'],
+                                );
+                              }
+                              if (allData.containsKey('categories')) {
+                                await prefs.setString(
+                                  'categories',
+                                  allData['categories'],
+                                );
+                              }
+                              if (allData.containsKey('mission_data')) {
+                                await prefs.setString(
+                                  'mission_data',
+                                  allData['mission_data'],
+                                );
+                              }
+
+                              if (mounted) {
+                                _showNoticeDialog(
+                                  '클라우드 복구 성공! 🎉\n완벽한 적용을 위해 앱을 완전히 껐다 켜주세요.',
+                                );
+                              }
+                            } else {
+                              if (mounted) {
+                                _showNoticeDialog(
+                                  '해당 아이디의 데이터를 찾을 수 없습니다. 🥲\n(입력한 아이디: ${userId.trim()})',
+                                );
+                              }
                             }
                           } catch (e) {
                             if (dialogContext.mounted) {
@@ -603,7 +751,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             }
                             if (mounted) {
                               _showNoticeDialog(
-                                '잘못된 코드입니다.\n코드를 다시 확인해 주세요. 🥲',
+                                '불러오기 중 오류가 발생했습니다.\n인터넷 연결을 확인해 주세요. 🥲',
                               );
                             }
                           }
@@ -641,7 +789,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             width: double.infinity,
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,7 +862,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                 _swimmingFishType ==
                                                     fish['type']
                                                 ? Colors.redAccent
-                                                : Colors.black,
+                                                : const Color(0xFF333333),
                                             width:
                                                 _swimmingFishType ==
                                                     fish['type']
@@ -722,7 +870,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                 : 2,
                                           ),
                                           borderRadius: BorderRadius.circular(
-                                            12,
+                                            4,
                                           ),
                                         ),
                                         clipBehavior: Clip.antiAlias,
@@ -832,7 +980,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       seaweed['type'],
                                                 )
                                                 ? Colors.greenAccent
-                                                : Colors.black,
+                                                : const Color(0xFF333333),
                                             width:
                                                 _plantedSeaweeds.any(
                                                   (s) =>
@@ -843,7 +991,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                 : 2,
                                           ),
                                           borderRadius: BorderRadius.circular(
-                                            12,
+                                            4,
                                           ),
                                         ),
                                         clipBehavior: Clip.antiAlias,
@@ -981,8 +1129,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFDAB9),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.black, width: 2),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFF333333), width: 2),
               ),
               child: Row(
                 children: [
@@ -995,7 +1143,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       fontSize: 16,
                       color: Colors.white,
                       shadows: [
-                        Shadow(color: Colors.black, offset: Offset(1, 1)),
+                        Shadow(color: Color(0xFF333333), offset: Offset(1, 1)),
                       ],
                     ),
                   ),
@@ -1014,8 +1162,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFDAB9),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFF333333),
+                      width: 2,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -1028,7 +1179,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           fontSize: 16,
                           color: Colors.white,
                           shadows: [
-                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                            Shadow(
+                              color: Color(0xFF333333),
+                              offset: Offset(1, 1),
+                            ),
                           ],
                         ),
                       ),
@@ -1043,8 +1197,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD166),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFF333333),
+                      width: 2,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -1057,7 +1214,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           fontSize: 16,
                           color: Colors.white,
                           shadows: [
-                            Shadow(color: Colors.black, offset: Offset(1, 1)),
+                            Shadow(
+                              color: Color(0xFF333333),
+                              offset: Offset(1, 1),
+                            ),
                           ],
                         ),
                       ),
@@ -1151,7 +1311,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(color: Colors.black, width: 2),
+            top: BorderSide(color: Color(0xFF333333), width: 2),
           ), // 💡 상단 테두리 얇게 수정
         ),
         child: SafeArea(

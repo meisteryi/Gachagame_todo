@@ -218,9 +218,10 @@ class _TodoScreenState extends State<TodoScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 4),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF333333), width: 4),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -248,9 +249,12 @@ class _TodoScreenState extends State<TodoScreen>
                       elevation: 0,
                       backgroundColor: Colors.grey[300],
                       foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          color: Color(0xFF333333),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -336,14 +340,20 @@ class _TodoScreenState extends State<TodoScreen>
                     const SizedBox(height: 16),
                     TextFormField(
                       initialValue: newTask,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 2),
-                          borderRadius: BorderRadius.zero,
+                          borderSide: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 3),
-                          borderRadius: BorderRadius.zero,
+                          borderSide: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         labelText: '할 일을 입력하세요',
                       ),
@@ -357,11 +367,11 @@ class _TodoScreenState extends State<TodoScreen>
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             side: const BorderSide(
-                              color: Colors.black,
+                              color: Color(0xFF333333),
                               width: 2,
                             ),
                             foregroundColor: Colors.black,
@@ -423,11 +433,11 @@ class _TodoScreenState extends State<TodoScreen>
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               side: const BorderSide(
-                                color: Colors.black,
+                                color: Color(0xFF333333),
                                 width: 2,
                               ),
                               foregroundColor: Colors.black,
@@ -464,14 +474,20 @@ class _TodoScreenState extends State<TodoScreen>
                     // --- 📍 장소 및 📝 메모 ---
                     TextFormField(
                       initialValue: newLocation,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 2),
-                          borderRadius: BorderRadius.zero,
+                          borderSide: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 3),
-                          borderRadius: BorderRadius.zero,
+                          borderSide: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         labelText: '장소 (선택)',
                         prefixIcon: Icon(
@@ -485,14 +501,20 @@ class _TodoScreenState extends State<TodoScreen>
                     TextFormField(
                       initialValue: newMemo,
                       maxLines: 2,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 2),
-                          borderRadius: BorderRadius.zero,
+                          borderSide: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 3),
-                          borderRadius: BorderRadius.zero,
+                          borderSide: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         labelText: '메모 (선택)',
                         prefixIcon: Icon(Icons.notes, color: Colors.black),
@@ -526,6 +548,10 @@ class _TodoScreenState extends State<TodoScreen>
                           },
                           selectedColor: Colors.black, // 선택 시 검은색 배경
                           backgroundColor: Colors.grey[200],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            side: const BorderSide(color: Colors.transparent),
+                          ),
                         );
                       }).toList(),
                     ),
@@ -542,12 +568,12 @@ class _TodoScreenState extends State<TodoScreen>
                                   elevation: 0,
                                   backgroundColor: Colors.grey[300],
                                   foregroundColor: Colors.black,
-                                  shape: const RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      color: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                      color: Color(0xFF333333),
                                       width: 2,
                                     ),
-                                    borderRadius: BorderRadius.zero,
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
                                 ),
                                 onPressed: () => Navigator.pop(context),
@@ -575,7 +601,7 @@ class _TodoScreenState extends State<TodoScreen>
                                   foregroundColor: Colors.white,
                                   shape: const RoundedRectangleBorder(
                                     side: BorderSide(
-                                      color: Colors.black,
+                                      color: Color(0xFF333333),
                                       width: 2,
                                     ),
                                     borderRadius:
@@ -694,7 +720,11 @@ class _TodoScreenState extends State<TodoScreen>
                       color:
                           _categoryColors[todo['category']?.toString()] ??
                           Colors.grey,
-                      border: Border.all(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: const Color(0xFF333333),
+                        width: 2,
+                      ),
                     ),
                     child: Text(
                       todo['category']?.toString() ?? '',
@@ -794,9 +824,12 @@ class _TodoScreenState extends State<TodoScreen>
                             elevation: 0,
                             backgroundColor: Colors.redAccent,
                             foregroundColor: Colors.white,
-                            shape: const RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.black, width: 2),
-                              borderRadius: BorderRadius.zero,
+                            shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                           ),
                           icon: const Icon(Icons.delete),
@@ -829,9 +862,12 @@ class _TodoScreenState extends State<TodoScreen>
                             elevation: 0,
                             backgroundColor: Colors.black,
                             foregroundColor: Colors.white,
-                            shape: const RoundedRectangleBorder(
-                              side: BorderSide(color: Colors.black, width: 2),
-                              borderRadius: BorderRadius.zero,
+                            shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                           ),
                           icon: const Icon(Icons.edit),
@@ -922,9 +958,12 @@ class _TodoScreenState extends State<TodoScreen>
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         backgroundColor: entry.value,
-                        shape: const RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black, width: 2),
-                          borderRadius: BorderRadius.zero,
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                            color: Color(0xFF333333),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         deleteIcon: const Icon(Icons.close, size: 18),
                         onDeleted: () {
@@ -951,7 +990,9 @@ class _TodoScreenState extends State<TodoScreen>
                   const SizedBox(height: 12),
                   TextField(
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                      ),
                       labelText: '새 카테고리 이름',
                     ),
                     onChanged: (val) => newCategoryName = val,
@@ -968,6 +1009,7 @@ class _TodoScreenState extends State<TodoScreen>
                           height: 36,
                           decoration: BoxDecoration(
                             color: color,
+                            borderRadius: BorderRadius.circular(4),
                             border: Border.all(
                               color: selectedColor == color
                                   ? Colors.black
@@ -997,9 +1039,12 @@ class _TodoScreenState extends State<TodoScreen>
                           elevation: 0,
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black, width: 2),
-                            borderRadius: BorderRadius.zero,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              color: Color(0xFF333333),
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                         onPressed: () {
@@ -1100,7 +1145,11 @@ class _TodoScreenState extends State<TodoScreen>
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: Colors.black, width: 2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: const Color(0xFF333333),
+                          width: 2,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -1146,9 +1195,10 @@ class _TodoScreenState extends State<TodoScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.black, width: 3),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: const Color(0xFF333333), width: 3),
               boxShadow: const [
-                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
               ],
             ),
             child: Column(
@@ -1245,8 +1295,9 @@ class _TodoScreenState extends State<TodoScreen>
                               ),
                               decoration: BoxDecoration(
                                 color: _categoryColors[category] ?? Colors.grey,
+                                borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: Colors.black,
+                                  color: const Color(0xFF333333),
                                   width: 2,
                                 ),
                               ),
@@ -1301,8 +1352,9 @@ class _TodoScreenState extends State<TodoScreen>
                                     color: isDone
                                         ? Colors.grey[200]
                                         : Colors.white,
+                                    borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: Colors.black,
+                                      color: const Color(0xFF333333),
                                       width: 2,
                                     ),
                                   ),
@@ -1519,9 +1571,9 @@ class _TodoScreenState extends State<TodoScreen>
                 heroTag: 'categoryBtn',
                 onPressed: _showCategoryManagerBottomSheet,
                 backgroundColor: Colors.lightGreenAccent,
-                shape: const RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.black, width: 3),
-                  borderRadius: BorderRadius.zero,
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(color: Color(0xFF333333), width: 3),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 elevation: 0,
                 child: const Icon(
@@ -1537,9 +1589,9 @@ class _TodoScreenState extends State<TodoScreen>
                 heroTag: 'addTodoBtn',
                 onPressed: () => _showTodoEditorBottomSheet(),
                 backgroundColor: Colors.yellowAccent,
-                shape: const RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.black, width: 3),
-                  borderRadius: BorderRadius.zero,
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(color: Color(0xFF333333), width: 3),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 elevation: 0,
                 child: const Icon(Icons.add, color: Colors.black, size: 28),
@@ -1567,17 +1619,21 @@ class PixelProgressBar extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        border: Border.all(color: Colors.black, width: 3),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF333333), width: 3),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Stack(
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeOutCubic,
-                width: constraints.maxWidth * progress.clamp(0.0, 1.0),
-                color: Colors.greenAccent,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOutCubic,
+                  width: constraints.maxWidth * progress.clamp(0.0, 1.0),
+                  color: Colors.greenAccent,
+                ),
               ),
             ],
           );
@@ -1607,10 +1663,13 @@ class PixelCheckbox extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           color: isDone ? Colors.yellowAccent : Colors.white,
-          border: Border.all(color: Colors.black, width: 3),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0xFF333333), width: 3),
           boxShadow: isDone
               ? null // 체크되면 눌린 것처럼 그림자 제거
-              : const [BoxShadow(color: Colors.black, offset: Offset(3, 3))],
+              : const [
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                ],
         ),
         child: isDone ? CustomPaint(painter: PixelCheckPainter()) : null,
       ),
@@ -1622,7 +1681,7 @@ class PixelCheckbox extends StatelessWidget {
 class PixelCheckPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black;
+    final paint = Paint()..color = const Color(0xFF333333);
 
     // 8x6 해상도의 V자 체크마크 매트릭스 패턴
     final List<List<int>> pixels = [
@@ -1714,9 +1773,10 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: Colors.black, width: 4),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFF333333), width: 4),
           boxShadow: const [
-            BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+            BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
           ],
         ),
         child: Column(
@@ -1813,6 +1873,7 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
                     margin: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: bgColor,
+                      borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                         color: isSelected ? Colors.black : Colors.transparent,
                         width: 2,
@@ -1863,7 +1924,7 @@ class PixelTrophyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paintGold = Paint()..color = Colors.yellowAccent;
-    final paintBlack = Paint()..color = Colors.black;
+    final paintBlack = Paint()..color = const Color(0xFF333333);
 
     // 7x7 해상도 미니 픽셀 트로피
     final List<List<int>> pixels = [
