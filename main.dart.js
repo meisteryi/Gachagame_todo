@@ -91490,8 +91490,8 @@ p=l?c*0.1+s:c*0.9-s
 n=!l}else{n=!1
 i=a==="shark"||a==="mackerel"||a==="tuna"
 h=a==="stingray"||a==="turtle"||a==="axolotl"
-g=i?B.d.aN(b*1.8,1):b
-if(h)g=B.d.aN(b*0.7,1)
+g=i?B.d.aN(b*2,1):b
+if(h)g=B.d.aN(b,1)
 if(g<0.1){f=g*10
 p=c*0.8*f
 o=d/2+Math.sin(f*3.141592653589793*2)*20}else if(g<0.2){f=(g-0.1)*10
@@ -92532,15 +92532,16 @@ return}if(n.length!==0){n=p.b
 s=p.d
 n.S(new A.ave(o,n,s,p.e))
 n.ju()
+r=p.c
+A.c7(r,!1).dl(null)
 if(o.e&&o.d!=null){o=o.d
 o.toString
-r=p.c
 q=A.bL(r,B.Q,t.v)
 q.toString
 A.a7(r,B.b7,t.w).toString
 o=q.n3(o,!1)
 s=s?"\uc218\uc815":"\uc124\uc815"
-n.yQ(o+"\uc5d0 \uc54c\ub9bc\uc774 "+s+"\ub418\uc5c8\uc2b5\ub2c8\ub2e4! \ud83d\udd14")}A.c7(p.c,!1).dl(null)}},
+n.yQ(o+"\uc5d0 \uc54c\ub9bc\uc774 "+s+"\ub418\uc5c8\uc2b5\ub2c8\ub2e4! \ud83d\udd14")}}},
 $S:0}
 A.ave.prototype={
 $0(){var s=this,r=s.b,q=s.a,p=q.a,o=r.w
