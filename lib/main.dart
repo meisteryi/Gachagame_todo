@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
@@ -17,6 +20,7 @@ import 'slot_machine.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const GachaTodoApp());
 }
 
@@ -35,7 +39,7 @@ class _GachaTodoAppState extends State<GachaTodoApp> {
     return MaterialApp(
       title: 'Gacha Todo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFB7B2)),
         useMaterial3: true,
         // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
         fontFamily: kIsWeb ? '-apple-system' : null,
@@ -77,7 +81,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF81D4FA), // 시원한 물색 배경
+      backgroundColor: const Color(0xFFB4D8E7), // 귀여운 파스텔 하늘색 배경
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onSkip, // 💡 화면 터치 시 상태를 변경하여 부드럽게 MainScreen으로 교체
@@ -318,6 +322,308 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     Future.delayed(const Duration(milliseconds: 150), () {
       if (mounted) _showStorage();
     });
+  }
+
+  // 💡 설정 및 데이터 백업/복구 다이얼로그
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.settings, size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      '게임 설정',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB4D8E7),
+                      foregroundColor: Colors.white,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 3),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    onPressed: _backupData,
+                    child: const Text(
+                      '데이터 백업 (코드 복사)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFA8E6CF),
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 3),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    onPressed: _restoreData,
+                    child: const Text(
+                      '데이터 복구 (코드 입력)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[300],
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black, width: 3),
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      '닫기',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _backupData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final Map<String, dynamic> allData = {
+      'ownedFishes': prefs.getString('ownedFishes'),
+      'ownedSeaweeds': prefs.getString('ownedSeaweeds'),
+      'swimmingFish': prefs.getString('swimmingFish'),
+      'plantedSeaweeds': prefs.getString('plantedSeaweeds'),
+      'coins': prefs.getInt('coins'),
+      'feedCount': prefs.getInt('feedCount'),
+      'todos': prefs.getString('todos'),
+      'categories': prefs.getString('categories'),
+      'mission_data': prefs.getString('mission_data'),
+    };
+
+    // 데이터 용량 압축을 위해 null 값 제거
+    allData.removeWhere((key, value) => value == null);
+
+    // 데이터를 JSON으로 만들고 암호화(Base64)하여 코드로 변환
+    final String jsonStr = jsonEncode(allData);
+    final String base64Str = base64Encode(utf8.encode(jsonStr));
+
+    await Clipboard.setData(ClipboardData(text: base64Str)); // 클립보드에 복사
+    if (mounted) {
+      Navigator.pop(context); // 설정 창 닫기
+      _showNoticeDialog(
+        '백업 코드가 클립보드에 복사되었습니다!\n업데이트 후, 캐시를 지우고 복구 코드로 사용하세요. 💾',
+      );
+    }
+  }
+
+  void _restoreData() {
+    Navigator.pop(context); // 설정 창 닫기
+    String inputCode = '';
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 4),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '데이터 복구',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  onChanged: (val) => inputCode = val,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    hintText: '여기에 복사해둔 코드를 붙여넣으세요',
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 2),
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.black, width: 3),
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.greenAccent,
+                          foregroundColor: Colors.black,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.black, width: 3),
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        onPressed: () async {
+                          try {
+                            // 코드 해독 및 복구 진행
+                            final String jsonStr = utf8.decode(
+                              base64Decode(inputCode.trim()),
+                            );
+                            final Map<String, dynamic> allData = jsonDecode(
+                              jsonStr,
+                            );
+                            final prefs = await SharedPreferences.getInstance();
+
+                            if (allData.containsKey('ownedFishes')) {
+                              await prefs.setString(
+                                'ownedFishes',
+                                allData['ownedFishes'],
+                              );
+                            }
+                            if (allData.containsKey('ownedSeaweeds')) {
+                              await prefs.setString(
+                                'ownedSeaweeds',
+                                allData['ownedSeaweeds'],
+                              );
+                            }
+                            if (allData.containsKey('swimmingFish')) {
+                              await prefs.setString(
+                                'swimmingFish',
+                                allData['swimmingFish'],
+                              );
+                            }
+                            if (allData.containsKey('plantedSeaweeds')) {
+                              await prefs.setString(
+                                'plantedSeaweeds',
+                                allData['plantedSeaweeds'],
+                              );
+                            }
+                            if (allData.containsKey('coins')) {
+                              await prefs.setInt('coins', allData['coins']);
+                            }
+                            if (allData.containsKey('feedCount')) {
+                              await prefs.setInt(
+                                'feedCount',
+                                allData['feedCount'],
+                              );
+                            }
+                            if (allData.containsKey('todos')) {
+                              await prefs.setString('todos', allData['todos']);
+                            }
+                            if (allData.containsKey('categories')) {
+                              await prefs.setString(
+                                'categories',
+                                allData['categories'],
+                              );
+                            }
+                            if (allData.containsKey('mission_data')) {
+                              await prefs.setString(
+                                'mission_data',
+                                allData['mission_data'],
+                              );
+                            }
+
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+                            if (mounted) {
+                              _showNoticeDialog(
+                                '데이터 복구 성공! 🎉\n완벽한 적용을 위해 브라우저를 새로고침(F5) 해주세요.',
+                              );
+                            }
+                          } catch (e) {
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+                            if (mounted) {
+                              _showNoticeDialog(
+                                '잘못된 코드입니다.\n코드를 다시 확인해 주세요. 🥲',
+                              );
+                            }
+                          }
+                        },
+                        child: const Text(
+                          '복구',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // 통합 보관함(물고기 & 수초) 열기
@@ -626,7 +932,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          color: isSelected ? Colors.yellowAccent : Colors.grey[300],
+          color: isSelected ? const Color(0xFFFFF3B0) : Colors.grey[200],
           padding: const EdgeInsets.only(top: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -656,6 +962,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 48, // 상단바 두께 축소 (기본값 56)
+        leading:
+            _selectedIndex ==
+                1 // 💡 할 일 탭에서만 톱니바퀴 표시
+            ? IconButton(
+                icon: const Icon(Icons.settings, color: Colors.black),
+                onPressed: _showSettingsDialog, // 💡 설정 및 데이터 백업 버튼
+                tooltip: '설정',
+              )
+            : null,
         title: Text(
           'Gacha TODO!',
           style: GoogleFonts.pressStart2p(fontSize: 16),
@@ -667,7 +982,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orangeAccent,
+                color: const Color(0xFFFFDAB9),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.black, width: 2),
               ),
@@ -700,7 +1015,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.orangeAccent,
+                    color: const Color(0xFFFFDAB9),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.black, width: 2),
                   ),
@@ -729,7 +1044,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.yellow[700],
+                    color: const Color(0xFFFFD166),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.black, width: 2),
                   ),
