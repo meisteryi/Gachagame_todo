@@ -635,13 +635,13 @@ class _TodoScreenState extends State<TodoScreen>
                                       }
                                     });
                                     _saveData(); // 추가/수정 완료 시 저장
+                                    Navigator.pop(context); // 💡 바텀 시트를 먼저 닫음
                                     if (isAlarmOn &&
                                         selectedAlarmTime != null) {
                                       _showNoticeDialog(
                                         '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
                                       );
                                     }
-                                    Navigator.pop(context);
                                   }
                                 },
                                 child: Text(

@@ -114,8 +114,12 @@ class _AquariumScreenState extends State<AquariumScreen>
       bool isBottom =
           type == 'stingray' || type == 'turtle' || type == 'axolotl';
 
-      if (isFast) timeV = (v * 1.8) % 1.0; // 날쌘 친구들은 거의 2배 속도
-      if (isBottom) timeV = (v * 0.7) % 1.0; // 느긋한 친구들은 0.7배 속도
+      if (isFast) {
+        timeV = (v * 2.0) % 1.0; // 💡 애니메이션 루프가 끊기지 않도록 정수배(2.0배)로 수정
+      }
+      if (isBottom) {
+        timeV = (v * 1.0) % 1.0; // 💡 애니메이션 루프가 끊기지 않도록 정수배(1.0배)로 수정
+      }
 
       if (timeV < 0.1) {
         final t = timeV * 10;
