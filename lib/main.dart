@@ -98,7 +98,7 @@ class SplashScreen extends StatelessWidget {
                   fontSize: 28,
                   color: Colors.white,
                   shadows: const [
-                    Shadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                    Shadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
                   ],
                 ),
               ),
@@ -239,10 +239,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -265,19 +265,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '닫기',
@@ -339,10 +328,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -366,18 +355,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB4D8E7),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: const Color(0xFFB4D8E7),
+                    foregroundColor: Colors.white,
                     onPressed: _saveToCloud,
                     child: const Text(
                       '클라우드에 저장 ☁️',
@@ -392,15 +372,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFA8E6CF),
-                      foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: const Color(0xFFA8E6CF),
                     onPressed: _loadFromCloud,
                     child: const Text(
                       '클라우드에서 불러오기 ☁️',
@@ -415,15 +388,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black, width: 3),
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '닫기',
@@ -455,10 +421,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -476,9 +442,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Color(0xFF333333),
-                        width: 2,
+                        width: 1,
                       ),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
@@ -486,18 +452,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              color: Color(0xFF333333),
-                              width: 3,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: Colors.grey[300]!,
                         onPressed: () => Navigator.pop(dialogContext),
                         child: const Text(
                           '취소',
@@ -507,15 +463,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB4D8E7),
-                          foregroundColor: Colors.black,
-                          shape: const RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black, width: 3),
-                            borderRadius: BorderRadius.zero,
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: const Color(0xFFB4D8E7),
                         onPressed: () async {
                           if (userId.trim().isEmpty) return;
 
@@ -598,10 +547,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -619,9 +568,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Color(0xFF333333),
-                        width: 2,
+                        width: 1,
                       ),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
@@ -629,18 +578,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              color: Color(0xFF333333),
-                              width: 3,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: Colors.grey[300]!,
                         onPressed: () => Navigator.pop(dialogContext),
                         child: const Text(
                           '취소',
@@ -650,15 +589,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.greenAccent,
-                          foregroundColor: Colors.black,
-                          shape: const RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black, width: 3),
-                            borderRadius: BorderRadius.zero,
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: Colors.greenAccent,
                         onPressed: () async {
                           if (userId.trim().isEmpty) return;
 
@@ -789,7 +721,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             width: double.infinity,
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,11 +798,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                             width:
                                                 _swimmingFishType ==
                                                     fish['type']
-                                                ? 4
-                                                : 2,
+                                                ? 2
+                                                : 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
-                                            4,
+                                            12,
                                           ),
                                         ),
                                         clipBehavior: Clip.antiAlias,
@@ -987,11 +919,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       s['type'] ==
                                                       seaweed['type'],
                                                 )
-                                                ? 4
-                                                : 2,
+                                                ? 2
+                                                : 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
-                                            4,
+                                            12,
                                           ),
                                         ),
                                         clipBehavior: Clip.antiAlias,
@@ -1129,8 +1061,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFDAB9),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFF333333), width: 2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFF333333), width: 1),
               ),
               child: Row(
                 children: [
@@ -1162,10 +1094,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFDAB9),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: const Color(0xFF333333),
-                      width: 2,
+                      width: 1,
                     ),
                   ),
                   child: Row(
@@ -1197,10 +1129,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD166),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: const Color(0xFF333333),
-                      width: 2,
+                      width: 1,
                     ),
                   ),
                   child: Row(
@@ -1311,7 +1243,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(color: Color(0xFF333333), width: 2),
+            top: BorderSide(color: Color(0xFF333333), width: 1),
           ), // 💡 상단 테두리 얇게 수정
         ),
         child: SafeArea(

@@ -183,7 +183,7 @@ class _SlotMachineState extends State<SlotMachine> {
                     letterSpacing: 2,
                     foreground: Paint()
                       ..style = PaintingStyle.stroke
-                      ..strokeWidth = 6
+                      ..strokeWidth = 3
                       ..color = const Color(0xFF333333),
                   ),
                 ),
@@ -195,7 +195,10 @@ class _SlotMachineState extends State<SlotMachine> {
                     letterSpacing: 2,
                     color: Colors.pinkAccent,
                     shadows: [
-                      Shadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                      Shadow(
+                        color: Color(0xFF333333),
+                        offset: Offset(1.5, 1.5),
+                      ),
                     ],
                   ),
                 ),
@@ -222,15 +225,15 @@ class _SlotMachineState extends State<SlotMachine> {
                       color: widget.gachaType == 'seaweed'
                           ? const Color(0xFF85CAC5)
                           : const Color(0xFFFFB7B2), // 부드러운 기계 색상
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: const Color(0xFF333333),
-                        width: 6,
+                        width: 2,
                       ), // 검정 픽셀 테두리
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0xFF333333),
-                          offset: Offset(4, 4),
+                          offset: Offset(2, 2),
                         ),
                       ],
                     ),
@@ -245,10 +248,10 @@ class _SlotMachineState extends State<SlotMachine> {
                           ),
                           decoration: BoxDecoration(
                             color: Colors.black,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: const Color(0xFF333333),
-                              width: 2,
+                              width: 1,
                             ),
                           ),
                           child: const Text(
@@ -267,11 +270,14 @@ class _SlotMachineState extends State<SlotMachine> {
                             margin: const EdgeInsets.fromLTRB(10, 0, 10, 15),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.black, width: 6),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1.5,
+                              ),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(10),
                               child: Row(
                                 children: [
                                   _buildSlotColumn(_ctrl1),
@@ -307,15 +313,15 @@ class _SlotMachineState extends State<SlotMachine> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: Colors.grey[700],
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: const Color(0xFF333333),
-                                width: 4,
+                                width: 1.5,
                               ),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Color(0xFF333333),
-                                  offset: Offset(2, 2),
+                                  offset: Offset(1.5, 1.5),
                                 ),
                               ],
                             ),
@@ -342,15 +348,15 @@ class _SlotMachineState extends State<SlotMachine> {
                                     height: 36,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFFB7B2),
-                                      borderRadius: BorderRadius.circular(4),
+                                      borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: const Color(0xFF333333),
-                                        width: 4,
+                                        width: 1.5,
                                       ),
                                       boxShadow: const [
                                         BoxShadow(
                                           color: Color(0xFF333333),
-                                          offset: Offset(2, 2),
+                                          offset: Offset(1.5, 1.5),
                                         ),
                                       ],
                                     ),
@@ -364,11 +370,11 @@ class _SlotMachineState extends State<SlotMachine> {
                                       border: Border(
                                         left: BorderSide(
                                           color: Color(0xFF333333),
-                                          width: 4,
+                                          width: 1.5,
                                         ),
                                         right: BorderSide(
                                           color: Color(0xFF333333),
-                                          width: 4,
+                                          width: 1.5,
                                         ),
                                       ),
                                     ),
@@ -392,28 +398,20 @@ class _SlotMachineState extends State<SlotMachine> {
               alignment: WrapAlignment.center,
               children: [
                 BouncingWrapper(
-                  child: ElevatedButton(
-                    onPressed: () => _spin(count: 1),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isSpinning
-                          ? Colors.grey
-                          : (widget.gachaType == 'seaweed'
-                                ? const Color(0xFFA8D8B9)
-                                : const Color(0xFFFFC6D3)),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 4,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                  child: RetroGradientButton(
+                    color: _isSpinning
+                        ? Colors.grey
+                        : (widget.gachaType == 'seaweed'
+                              ? const Color(0xFFA8D8B9)
+                              : const Color(0xFFFFC6D3)),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
+                    borderRadius: BorderRadius.circular(12),
+                    borderWidth: 1.5,
+                    onPressed: () => _spin(count: 1),
                     child: Column(
                       children: [
                         const Text(
@@ -443,28 +441,20 @@ class _SlotMachineState extends State<SlotMachine> {
                   ),
                 ),
                 BouncingWrapper(
-                  child: ElevatedButton(
-                    onPressed: () => _spin(count: 10),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isSpinning
-                          ? Colors.grey
-                          : (widget.gachaType == 'seaweed'
-                                ? const Color(0xFF85CAC5)
-                                : const Color(0xFFFFAAA5)),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 4,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                  child: RetroGradientButton(
+                    color: _isSpinning
+                        ? Colors.grey
+                        : (widget.gachaType == 'seaweed'
+                              ? const Color(0xFF85CAC5)
+                              : const Color(0xFFFFAAA5)),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
+                    borderRadius: BorderRadius.circular(12),
+                    borderWidth: 1.5,
+                    onPressed: () => _spin(count: 10),
                     child: Column(
                       children: [
                         const Text(

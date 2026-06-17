@@ -102,10 +102,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -128,19 +128,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '닫기',
@@ -207,10 +196,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -252,10 +241,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.lightBlueAccent.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: const Color(0xFF333333),
-                        width: 3,
+                        width: 1,
                       ),
                     ),
                     child: Transform.scale(
@@ -293,10 +282,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                       alpha: 0.2,
                                     )
                                   : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: const Color(0xFF333333),
-                                width: 2,
+                                width: 1,
                               ),
                             ),
                             child: Column(
@@ -351,19 +340,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       child: BouncingWrapper(
                         child: SizedBox(
                           height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Colors.grey[300],
-                              foregroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                  color: Color(0xFF333333),
-                                  width: 3,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
+                          child: RetroGradientButton(
+                            color: Colors.grey[300]!,
                             onPressed: () => Navigator.of(context).pop(),
                             child: const Text(
                               '닫기',
@@ -382,19 +360,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         child: BouncingWrapper(
                           child: SizedBox(
                             height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                backgroundColor: const Color(0xFFFFB7B2),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  side: const BorderSide(
-                                    color: Color(0xFF333333),
-                                    width: 3,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
+                            child: RetroGradientButton(
+                              color: const Color(0xFFFFB7B2),
+                              foregroundColor: Colors.white,
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 setState(
@@ -450,16 +418,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
 
   Widget _buildBuyFeedButton(String title, int cost, int amount) {
     return BouncingWrapper(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFDAB9),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Color(0xFF333333), width: 4),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
+      child: RetroGradientButton(
+        color: const Color(0xFFFFDAB9),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        borderRadius: BorderRadius.circular(12),
+        borderWidth: 1.5,
         onPressed: () => _confirmBuyFeed(title, cost, amount),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -491,10 +455,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -514,18 +478,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: Colors.grey[300]!,
                         onPressed: () => Navigator.pop(context),
                         child: const Text(
                           '취소',
@@ -535,18 +489,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFA8E6CF),
-                          foregroundColor: Colors.black,
-                          shape: const RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: Color(0xFF333333),
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.zero,
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: const Color(0xFFA8E6CF),
                         onPressed: () {
                           Navigator.pop(context);
                           if (widget.coins >= cost) {
@@ -586,9 +530,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: const Color(0xFF333333), width: 4),
+            gradient: getRetroGradient(bgColor),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF333333), width: 1.5),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -618,9 +562,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   Widget _buildEmptyShopItem() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey[400]!, width: 4),
+        gradient: getRetroGradient(Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[400]!, width: 1.5),
       ),
       child: const Center(
         child: Icon(Icons.lock, color: Colors.grey, size: 40),
@@ -634,7 +578,16 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
       children: [
         // --- 1. 상점 메인 화면 (배경에 항상 고정) ---
         Container(
-          color: const Color(0xFFFFFDF9), // 따뜻하고 귀여운 배경
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFFFDF9),
+                Color(0xFFF2EBE1),
+              ], // 💡 아주 옅은 웜톤 그라데이션
+            ),
+          ),
           width: double.infinity,
           height: double.infinity,
           child: Column(
@@ -650,7 +603,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       letterSpacing: 2,
                       foreground: Paint()
                         ..style = PaintingStyle.stroke
-                        ..strokeWidth = 6
+                        ..strokeWidth = 3
                         ..color = const Color(0xFF333333),
                     ),
                   ),
@@ -662,7 +615,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       letterSpacing: 2,
                       color: Color(0xFFFFF3B0),
                       shadows: [
-                        Shadow(color: Color(0xFF333333), offset: Offset(4, 4)),
+                        Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
                       ],
                     ),
                   ),
@@ -752,7 +705,16 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
               child: Stack(
                 children: [
                   Container(
-                    color: const Color(0xFFFFFDF9),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFFFFFDF9),
+                          Color(0xFFF2EBE1),
+                        ], // 💡 오버레이도 동일한 그라데이션 적용
+                      ),
+                    ),
                     width: double.infinity,
                     height: double.infinity,
                     child: Stack(
@@ -786,11 +748,11 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
+                                    gradient: getRetroGradient(Colors.white),
+                                    borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
                                       color: const Color(0xFF333333),
-                                      width: 3,
+                                      width: 1,
                                     ),
                                   ),
                                   child: const Text(

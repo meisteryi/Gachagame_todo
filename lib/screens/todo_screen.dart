@@ -117,32 +117,8 @@ class _TodoScreenState extends State<TodoScreen>
   }
 
   void _setInitialData() {
-    final todayStr = _formatDate(DateTime.now());
     setState(() {
       _todoList.clear();
-      _todoList.addAll([
-        {
-          'task': '물 2L 마시기',
-          'isDone': true,
-          'category': '일상',
-          'date': todayStr,
-          'isAlarmOn': false,
-        },
-        {
-          'task': '영단어 50개 암기',
-          'isDone': false,
-          'category': '공부',
-          'date': todayStr,
-          'isAlarmOn': false,
-        },
-        {
-          'task': '팔굽혀펴기 30회',
-          'isDone': false,
-          'category': '운동',
-          'date': todayStr,
-          'isAlarmOn': false,
-        },
-      ]);
     });
     _saveData();
   }
@@ -218,10 +194,10 @@ class _TodoScreenState extends State<TodoScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -244,19 +220,8 @@ class _TodoScreenState extends State<TodoScreen>
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '닫기',
@@ -344,16 +309,16 @@ class _TodoScreenState extends State<TodoScreen>
                         enabledBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 2,
+                            width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 3,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         labelText: '할 일을 입력하세요',
                       ),
@@ -365,22 +330,8 @@ class _TodoScreenState extends State<TodoScreen>
                       showShadow: false,
                       child: SizedBox(
                         width: double.infinity,
-                        child: OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            side: const BorderSide(
-                              color: Color(0xFF333333),
-                              width: 2,
-                            ),
-                            foregroundColor: Colors.black,
-                          ),
-                          icon: const Icon(Icons.access_time, size: 18),
-                          label: Text(
-                            selectedTime?.format(context) ?? '시간 설정',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                        child: RetroGradientButton(
+                          color: Colors.white,
                           onPressed: () async {
                             final time = await showTimePicker(
                               context: context,
@@ -393,6 +344,19 @@ class _TodoScreenState extends State<TodoScreen>
                               });
                             }
                           },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.access_time, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                selectedTime?.format(context) ?? '시간 설정',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -431,27 +395,8 @@ class _TodoScreenState extends State<TodoScreen>
                         showShadow: false,
                         child: SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              side: const BorderSide(
-                                color: Color(0xFF333333),
-                                width: 2,
-                              ),
-                              foregroundColor: Colors.black,
-                            ),
-                            icon: const Icon(
-                              Icons.notifications_active,
-                              size: 18,
-                            ),
-                            label: Text(
-                              selectedAlarmTime?.format(context) ?? '알림 설정',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          child: RetroGradientButton(
+                            color: Colors.white,
                             onPressed: () async {
                               final time = await showTimePicker(
                                 context: context,
@@ -466,6 +411,22 @@ class _TodoScreenState extends State<TodoScreen>
                                 });
                               }
                             },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.notifications_active,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  selectedAlarmTime?.format(context) ?? '알림 설정',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -478,16 +439,16 @@ class _TodoScreenState extends State<TodoScreen>
                         enabledBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 2,
+                            width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 3,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         labelText: '장소 (선택)',
                         prefixIcon: Icon(
@@ -505,16 +466,16 @@ class _TodoScreenState extends State<TodoScreen>
                         enabledBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 2,
+                            width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 3,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         labelText: '메모 (선택)',
                         prefixIcon: Icon(Icons.notes, color: Colors.black),
@@ -549,7 +510,7 @@ class _TodoScreenState extends State<TodoScreen>
                           selectedColor: Colors.black, // 선택 시 검은색 배경
                           backgroundColor: Colors.grey[200],
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(8),
                             side: const BorderSide(color: Colors.transparent),
                           ),
                         );
@@ -563,19 +524,8 @@ class _TodoScreenState extends State<TodoScreen>
                             child: SizedBox(
                               height: 50,
                               width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: Colors.grey[300],
-                                  foregroundColor: Colors.black,
-                                  shape: RoundedRectangleBorder(
-                                    side: const BorderSide(
-                                      color: Color(0xFF333333),
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
+                              child: RetroGradientButton(
+                                color: Colors.grey[300]!,
                                 onPressed: () => Navigator.pop(context),
                                 child: const Text(
                                   '취소하기',
@@ -594,20 +544,9 @@ class _TodoScreenState extends State<TodoScreen>
                             child: SizedBox(
                               height: 50,
                               width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: Colors.black,
-                                  foregroundColor: Colors.white,
-                                  shape: const RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      color: Color(0xFF333333),
-                                      width: 2,
-                                    ),
-                                    borderRadius:
-                                        BorderRadius.zero, // 레트로 느낌의 네모난 버튼
-                                  ),
-                                ),
+                              child: RetroGradientButton(
+                                color: Colors.black,
+                                foregroundColor: Colors.white,
                                 onPressed: () {
                                   // 💡 개발자 치트키 로직
                                   if (newTask.trim() == 'showmethemoney') {
@@ -720,10 +659,10 @@ class _TodoScreenState extends State<TodoScreen>
                       color:
                           _categoryColors[todo['category']?.toString()] ??
                           Colors.grey,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: const Color(0xFF333333),
-                        width: 2,
+                        width: 1,
                       ),
                     ),
                     child: Text(
@@ -819,27 +758,9 @@ class _TodoScreenState extends State<TodoScreen>
                       child: SizedBox(
                         height: 50,
                         width: double.infinity,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor: Colors.redAccent,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                color: Colors.black,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          icon: const Icon(Icons.delete),
-                          label: const Text(
-                            '삭제하기',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: RetroGradientButton(
+                          color: Colors.redAccent,
+                          foregroundColor: Colors.white,
                           onPressed: () {
                             Navigator.pop(context); // 상세 뷰를 닫고
                             setState(() {
@@ -847,6 +768,20 @@ class _TodoScreenState extends State<TodoScreen>
                             });
                             _saveData(); // 삭제 후 저장
                           },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.delete, size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                '삭제하기',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -857,33 +792,29 @@ class _TodoScreenState extends State<TodoScreen>
                       child: SizedBox(
                         height: 50,
                         width: double.infinity,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                color: Colors.black,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          icon: const Icon(Icons.edit),
-                          label: const Text(
-                            '수정하기',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: RetroGradientButton(
+                          color: Colors.black,
+                          foregroundColor: Colors.white,
                           onPressed: () {
                             Navigator.pop(context); // 상세 뷰를 닫고
                             _showTodoEditorBottomSheet(
                               editIndex: originalIndex,
                             ); // 에디터 열기
                           },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                '수정하기',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -961,9 +892,9 @@ class _TodoScreenState extends State<TodoScreen>
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 2,
+                            width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         deleteIcon: const Icon(Icons.close, size: 18),
                         onDeleted: () {
@@ -991,7 +922,7 @@ class _TodoScreenState extends State<TodoScreen>
                   TextField(
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
                       labelText: '새 카테고리 이름',
                     ),
@@ -1009,12 +940,12 @@ class _TodoScreenState extends State<TodoScreen>
                           height: 36,
                           decoration: BoxDecoration(
                             color: color,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: selectedColor == color
                                   ? Colors.black
                                   : Colors.transparent,
-                              width: 3,
+                              width: 1.5,
                             ),
                             boxShadow: selectedColor == color
                                 ? const [
@@ -1034,19 +965,9 @@ class _TodoScreenState extends State<TodoScreen>
                     child: SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              color: Color(0xFF333333),
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
+                      child: RetroGradientButton(
+                        color: Colors.black,
+                        foregroundColor: Colors.white,
                         onPressed: () {
                           if (newCategoryName.trim().isNotEmpty &&
                               !_categoryColors.containsKey(
@@ -1107,372 +1028,315 @@ class _TodoScreenState extends State<TodoScreen>
     final progress = total == 0 ? 0.0 : done / total;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          // --- 1. 날짜 선택기 (Date Navigator) ---
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                BouncingWrapper(
-                  showShadow: false,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
-                    icon: const Icon(Icons.arrow_back_ios, size: 20),
-                    onPressed: () {
-                      final newDate = _selectedDate.subtract(
-                        const Duration(days: 1),
-                      );
-                      _datePageController.animateToPage(
-                        _dateToIndex(newDate),
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
-                ),
-                BouncingWrapper(
-                  child: GestureDetector(
-                    onTap: _showPixelCalendar,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: const Color(0xFF333333),
-                          width: 2,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_month, size: 16),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFFFFFF), Color(0xFFE8E8E8)], // 💡 아주 옅은 그라데이션 배경
+          ),
+        ),
+        child: Column(
+          children: [
+            // --- 1. 날짜 선택기 (Date Navigator) ---
+            Container(
+              color: Colors.transparent, // 💡 단색 흰색을 투명하게 변경하여 배경이 비치게 함
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  BouncingWrapper(
+                    showShadow: false,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
+                      icon: const Icon(Icons.arrow_back_ios, size: 20),
+                      onPressed: () {
+                        final newDate = _selectedDate.subtract(
+                          const Duration(days: 1),
+                        );
+                        _datePageController.animateToPage(
+                          _dateToIndex(newDate),
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                     ),
                   ),
-                ),
-                BouncingWrapper(
-                  showShadow: false,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
-                    icon: const Icon(Icons.arrow_forward_ios, size: 20),
-                    onPressed: () {
-                      final newDate = _selectedDate.add(
-                        const Duration(days: 1),
-                      );
-                      _datePageController.animateToPage(
-                        _dateToIndex(newDate),
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // --- 2. 하루 계획 통계 및 픽셀 달성률 (Progress Bar) ---
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: const Color(0xFF333333), width: 3),
-              boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '오늘의 달성률 ',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                  BouncingWrapper(
+                    child: GestureDetector(
+                      onTap: _showPixelCalendar,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: getRetroGradient(Colors.white),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF333333),
+                            width: 1,
                           ),
                         ),
-                        PixelEmoji('trophy', size: 16),
-                      ],
-                    ),
-                    Text(
-                      '$done / $total 완료',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                PixelProgressBar(progress: progress),
-              ],
-            ),
-          ),
-
-          // --- 3. 카테고리별 할 일 리스트 ---
-          Expanded(
-            child: PageView.builder(
-              controller: _datePageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _selectedDate = _indexToDate(index);
-                });
-              },
-              itemBuilder: (context, index) {
-                final pageDate = _indexToDate(index);
-                final pageTodos = _getTodosForDate(pageDate);
-
-                final Map<String, List<Map<String, dynamic>>> pageGroupedTodos =
-                    {};
-                for (var todo in pageTodos) {
-                  final cat = todo['category']?.toString() ?? '미지정';
-                  pageGroupedTodos.putIfAbsent(cat, () => []).add(todo);
-                }
-                final pageSortedCategories = pageGroupedTodos.keys.toList()
-                  ..sort();
-
-                if (pageTodos.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.only(
-                    bottom: 100,
-                  ), // 💡 플로팅 버튼에 가리지 않게 하단 여백 추가
-                  itemCount: pageSortedCategories.length,
-                  itemBuilder: (context, catIndex) {
-                    final category = pageSortedCategories[catIndex];
-                    final catTodos = pageGroupedTodos[category]!;
-
-                    return Theme(
-                      data: Theme.of(context).copyWith(
-                        dividerColor: Colors.transparent, // 💡 확장 타일 위아래 선 제거
-                      ),
-                      child: ExpansionTile(
-                        initiallyExpanded: true,
-                        // 💡 날짜별, 카테고리별로 접힘 상태를 기기가 기억하게 함
-                        key: PageStorageKey(
-                          'cat_${_formatDate(pageDate)}_$category',
-                        ),
-                        title: Row(
+                        child: Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _categoryColors[category] ?? Colors.grey,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: const Color(0xFF333333),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Text(
-                                category,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
+                            const Icon(Icons.calendar_month, size: 16),
+                            const SizedBox(width: 6),
                             Text(
-                              '${catTodos.where((t) => t['isDone'] == true).length}/${catTodos.length} 완료',
+                              '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
                               style: const TextStyle(
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                                fontSize: 14,
                               ),
                             ),
                           ],
                         ),
-                        children: catTodos.map((todo) {
-                          final originalIndex = _todoList.indexOf(todo);
+                      ),
+                    ),
+                  ),
+                  BouncingWrapper(
+                    showShadow: false,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
+                      icon: const Icon(Icons.arrow_forward_ios, size: 20),
+                      onPressed: () {
+                        final newDate = _selectedDate.add(
+                          const Duration(days: 1),
+                        );
+                        _datePageController.animateToPage(
+                          _dateToIndex(newDate),
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-                          // 💡 에러 방지: 분석기가 헷갈리지 않도록 모든 데이터를 미리 변수로 안전하게 추출합니다.
-                          final bool isDone = todo['isDone'] == true;
-                          final String task = todo['task']?.toString() ?? '';
-                          final TimeOfDay? timeObj = todo['time'] as TimeOfDay?;
-                          final TimeOfDay? alarmObj =
-                              todo['alarmTime'] as TimeOfDay?;
-                          final bool isAlarmOn = todo['isAlarmOn'] == true;
-                          final String location =
-                              todo['location']?.toString() ?? '';
-                          final String memo = todo['memo']?.toString() ?? '';
-
-                          final bool hasTime = timeObj != null;
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4, // 💡 간격을 살짝 좁힘
+            // --- 2. 하루 계획 통계 및 픽셀 달성률 (Progress Bar) ---
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF333333), width: 1.5),
+                boxShadow: const [
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '오늘의 달성률 ',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                            child: BouncingWrapper(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () =>
-                                    _showTodoDetailBottomSheet(originalIndex),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: isDone
-                                        ? Colors.grey[200]
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: const Color(0xFF333333),
-                                      width: 2,
-                                    ),
+                          ),
+                          PixelEmoji('trophy', size: 16),
+                        ],
+                      ),
+                      Text(
+                        '$done / $total 완료',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  PixelProgressBar(progress: progress),
+                ],
+              ),
+            ),
+
+            // --- 3. 카테고리별 할 일 리스트 ---
+            Expanded(
+              child: PageView.builder(
+                controller: _datePageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _selectedDate = _indexToDate(index);
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final pageDate = _indexToDate(index);
+                  final pageTodos = _getTodosForDate(pageDate);
+
+                  final Map<String, List<Map<String, dynamic>>>
+                  pageGroupedTodos = {};
+                  for (var todo in pageTodos) {
+                    final cat = todo['category']?.toString() ?? '미지정';
+                    pageGroupedTodos.putIfAbsent(cat, () => []).add(todo);
+                  }
+                  final pageSortedCategories = pageGroupedTodos.keys.toList()
+                    ..sort();
+
+                  if (pageTodos.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(
+                      bottom: 100,
+                    ), // 💡 플로팅 버튼에 가리지 않게 하단 여백 추가
+                    itemCount: pageSortedCategories.length,
+                    itemBuilder: (context, catIndex) {
+                      final category = pageSortedCategories[catIndex];
+                      final catTodos = pageGroupedTodos[category]!;
+
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          dividerColor: Colors.transparent, // 💡 확장 타일 위아래 선 제거
+                        ),
+                        child: ExpansionTile(
+                          initiallyExpanded: true,
+                          // 💡 날짜별, 카테고리별로 접힘 상태를 기기가 기억하게 함
+                          key: PageStorageKey(
+                            'cat_${_formatDate(pageDate)}_$category',
+                          ),
+                          title: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      _categoryColors[category] ?? Colors.grey,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: const Color(0xFF333333),
+                                    width: 1,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      // --- 🌟 도트 그래픽 픽셀 체크박스 ---
-                                      PixelCheckbox(
-                                        isDone: isDone,
-                                        onChanged: (val) =>
-                                            _toggleTodo(originalIndex, val),
+                                ),
+                                child: Text(
+                                  category,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${catTodos.where((t) => t['isDone'] == true).length}/${catTodos.length} 완료',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          children: catTodos.map((todo) {
+                            final originalIndex = _todoList.indexOf(todo);
+
+                            // 💡 에러 방지: 분석기가 헷갈리지 않도록 모든 데이터를 미리 변수로 안전하게 추출합니다.
+                            final bool isDone = todo['isDone'] == true;
+                            final String task = todo['task']?.toString() ?? '';
+                            final TimeOfDay? timeObj =
+                                todo['time'] as TimeOfDay?;
+                            final TimeOfDay? alarmObj =
+                                todo['alarmTime'] as TimeOfDay?;
+                            final bool isAlarmOn = todo['isAlarmOn'] == true;
+                            final String location =
+                                todo['location']?.toString() ?? '';
+                            final String memo = todo['memo']?.toString() ?? '';
+
+                            final bool hasTime = timeObj != null;
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4, // 💡 간격을 살짝 좁힘
+                              ),
+                              child: BouncingWrapper(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () =>
+                                      _showTodoDetailBottomSheet(originalIndex),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: isDone
+                                          ? Colors.grey[200]
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: const Color(0xFF333333),
+                                        width: 1,
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // 할 일 텍스트
-                                            Text(
-                                              task,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                decoration: isDone
-                                                    ? TextDecoration.lineThrough
-                                                    : null,
-                                                color: isDone
-                                                    ? Colors.grey[600]
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
-                                            if (hasTime ||
-                                                location.isNotEmpty ||
-                                                memo.isNotEmpty)
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 8.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // --- 🌟 도트 그래픽 픽셀 체크박스 ---
+                                        PixelCheckbox(
+                                          isDone: isDone,
+                                          onChanged: (val) =>
+                                              _toggleTodo(originalIndex, val),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // 할 일 텍스트
+                                              Text(
+                                                task,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration: isDone
+                                                      ? TextDecoration
+                                                            .lineThrough
+                                                      : null,
+                                                  color: isDone
+                                                      ? Colors.grey[600]
+                                                      : Colors.black,
                                                 ),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    if (hasTime)
-                                                      Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons.access_time,
-                                                            size: 14,
-                                                            color: isDone
-                                                                ? Colors
-                                                                      .grey[500]
-                                                                : Colors
-                                                                      .grey[700],
-                                                          ),
-                                                          const SizedBox(
-                                                            width: 4,
-                                                          ),
-                                                          Text.rich(
-                                                            TextSpan(
-                                                              children: [
-                                                                TextSpan(
-                                                                  text: timeObj
-                                                                      .format(
-                                                                        context,
-                                                                      ),
-                                                                ),
-                                                                if (isAlarmOn &&
-                                                                    alarmObj !=
-                                                                        null) ...[
-                                                                  const TextSpan(
-                                                                    text:
-                                                                        ' (알림 ',
-                                                                  ),
-                                                                  const WidgetSpan(
-                                                                    alignment:
-                                                                        PlaceholderAlignment
-                                                                            .middle,
-                                                                    child: Padding(
-                                                                      padding: EdgeInsets.symmetric(
-                                                                        horizontal:
-                                                                            2,
-                                                                      ),
-                                                                      child: PixelEmoji(
-                                                                        'bell',
-                                                                        size:
-                                                                            10,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  TextSpan(
-                                                                    text:
-                                                                        ' ${alarmObj.format(context)})',
-                                                                  ),
-                                                                ],
-                                                              ],
-                                                            ),
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: isDone
-                                                                  ? Colors
-                                                                        .grey[500]
-                                                                  : Colors
-                                                                        .grey[800],
-                                                            ),
-                                                          ),
-                                                        ],
+                                              ),
+                                              // --- 상세 정보(시간, 알림, 장소, 메모) 표시 ---
+                                              if (hasTime ||
+                                                  location.isNotEmpty ||
+                                                  memo.isNotEmpty)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        top: 8.0,
                                                       ),
-                                                    if (location.isNotEmpty)
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                              top: 4.0,
-                                                            ),
-                                                        child: Row(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      if (hasTime)
+                                                        Row(
                                                           children: [
                                                             Icon(
-                                                              Icons.location_on,
+                                                              Icons.access_time,
                                                               size: 14,
                                                               color: isDone
                                                                   ? Colors
@@ -1483,8 +1347,45 @@ class _TodoScreenState extends State<TodoScreen>
                                                             const SizedBox(
                                                               width: 4,
                                                             ),
-                                                            Text(
-                                                              location,
+                                                            Text.rich(
+                                                              TextSpan(
+                                                                children: [
+                                                                  TextSpan(
+                                                                    text: timeObj
+                                                                        .format(
+                                                                          context,
+                                                                        ),
+                                                                  ),
+                                                                  if (isAlarmOn &&
+                                                                      alarmObj !=
+                                                                          null) ...[
+                                                                    const TextSpan(
+                                                                      text:
+                                                                          ' (알림 ',
+                                                                    ),
+                                                                    const WidgetSpan(
+                                                                      alignment:
+                                                                          PlaceholderAlignment
+                                                                              .middle,
+                                                                      child: Padding(
+                                                                        padding: EdgeInsets.symmetric(
+                                                                          horizontal:
+                                                                              2,
+                                                                        ),
+                                                                        child: PixelEmoji(
+                                                                          'bell',
+                                                                          size:
+                                                                              10,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    TextSpan(
+                                                                      text:
+                                                                          ' ${alarmObj.format(context)})',
+                                                                    ),
+                                                                  ],
+                                                                ],
+                                                              ),
                                                               style: TextStyle(
                                                                 fontSize: 12,
                                                                 color: isDone
@@ -1496,33 +1397,29 @@ class _TodoScreenState extends State<TodoScreen>
                                                             ),
                                                           ],
                                                         ),
-                                                      ),
-                                                    if (memo.isNotEmpty)
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                              top: 4.0,
-                                                            ),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Icon(
-                                                              Icons.notes,
-                                                              size: 14,
-                                                              color: isDone
-                                                                  ? Colors
-                                                                        .grey[500]
-                                                                  : Colors
-                                                                        .grey[700],
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 4,
-                                                            ),
-                                                            Expanded(
-                                                              child: Text(
-                                                                memo,
+                                                      if (location.isNotEmpty)
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                top: 4.0,
+                                                              ),
+                                                          child: Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .location_on,
+                                                                size: 14,
+                                                                color: isDone
+                                                                    ? Colors
+                                                                          .grey[500]
+                                                                    : Colors
+                                                                          .grey[700],
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Text(
+                                                                location,
                                                                 style: TextStyle(
                                                                   fontSize: 12,
                                                                   color: isDone
@@ -1532,31 +1429,72 @@ class _TodoScreenState extends State<TodoScreen>
                                                                             .grey[800],
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ],
+                                                            ],
+                                                          ),
                                                         ),
-                                                      ),
-                                                  ],
+                                                      if (memo.isNotEmpty)
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                top: 4.0,
+                                                              ),
+                                                          child: Row(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Icon(
+                                                                Icons.notes,
+                                                                size: 14,
+                                                                color: isDone
+                                                                    ? Colors
+                                                                          .grey[500]
+                                                                    : Colors
+                                                                          .grey[700],
+                                                              ),
+                                                              const SizedBox(
+                                                                width: 4,
+                                                              ),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  memo,
+                                                                  style: TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color:
+                                                                        isDone
+                                                                        ? Colors
+                                                                              .grey[500]
+                                                                        : Colors
+                                                                              .grey[800],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  },
-                );
-              },
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
 
       // 카테고리 관리 & 할 일 추가 플로팅 버튼 (도트 스타일 적용)
@@ -1572,8 +1510,8 @@ class _TodoScreenState extends State<TodoScreen>
                 onPressed: _showCategoryManagerBottomSheet,
                 backgroundColor: Colors.lightGreenAccent,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(color: Color(0xFF333333), width: 3),
-                  borderRadius: BorderRadius.circular(4),
+                  side: const BorderSide(color: Color(0xFF333333), width: 1.5),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 0,
                 child: const Icon(
@@ -1590,8 +1528,8 @@ class _TodoScreenState extends State<TodoScreen>
                 onPressed: () => _showTodoEditorBottomSheet(),
                 backgroundColor: Colors.yellowAccent,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(color: Color(0xFF333333), width: 3),
-                  borderRadius: BorderRadius.circular(4),
+                  side: const BorderSide(color: Color(0xFF333333), width: 1.5),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 0,
                 child: const Icon(Icons.add, color: Colors.black, size: 28),
@@ -1619,15 +1557,15 @@ class PixelProgressBar extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF333333), width: 3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF333333), width: 1),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return Stack(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(4),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeOutCubic,
@@ -1663,12 +1601,12 @@ class PixelCheckbox extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           color: isDone ? Colors.yellowAccent : Colors.white,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: const Color(0xFF333333), width: 3),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFF333333), width: 1),
           boxShadow: isDone
               ? null // 체크되면 눌린 것처럼 그림자 제거
               : const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
                 ],
         ),
         child: isDone ? CustomPaint(painter: PixelCheckPainter()) : null,
@@ -1773,10 +1711,10 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFF333333), width: 4),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF333333), width: 1.5),
           boxShadow: const [
-            BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+            BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
           ],
         ),
         child: Column(
@@ -1873,10 +1811,10 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
                     margin: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: bgColor,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: isSelected ? Colors.black : Colors.transparent,
-                        width: 2,
+                        width: 1,
                       ),
                     ),
                     child: Stack(

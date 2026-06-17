@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
 import '../pixel_emoji.dart';
+import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
 
 class AquariumScreen extends StatefulWidget {
   final String swimmingFishType;
@@ -249,10 +250,10 @@ class _AquariumScreenState extends State<AquariumScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -275,19 +276,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '닫기',
@@ -360,12 +350,12 @@ class _AquariumScreenState extends State<AquariumScreen>
               height: 320,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05), // 물 밖의 빈 유리 느낌
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF333333).withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    spreadRadius: 2,
+                    blurRadius: 15,
+                    spreadRadius: 0,
                   ),
                 ],
               ),
@@ -382,7 +372,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                       decoration: BoxDecoration(
                         color: Colors.lightBlueAccent.withValues(alpha: 0.15),
                         borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(4),
+                          bottom: Radius.circular(24),
                         ),
                       ),
                     ),
@@ -781,8 +771,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black87,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.yellowAccent, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.yellowAccent, width: 1),
                 ),
                 child: const Text(
                   '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.',
@@ -1030,21 +1020,21 @@ class _PixelButtonState extends State<PixelButton> {
         duration: const Duration(milliseconds: 50),
         // 눌렸을 때 아래로 4픽셀 이동하는 효과
         margin: EdgeInsets.only(
-          top: _isPressed ? 4 : 0,
-          bottom: _isPressed ? 0 : 4,
+          top: _isPressed ? 1.5 : 0,
+          bottom: _isPressed ? 0 : 1.5,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(4),
+          gradient: getRetroGradient(widget.color), // 💡 그라데이션 적용
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: const Color(0xFF333333),
-            width: 3,
+            width: 1.5,
           ), // 두꺼운 픽셀 테두리
           boxShadow: _isPressed
               ? []
               : const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
                 ], // 도트 그림자
         ),
         child: DefaultTextStyle(

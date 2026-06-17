@@ -157,10 +157,10 @@ class _MissionScreenState extends State<MissionScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF333333), width: 4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -183,19 +183,8 @@ class _MissionScreenState extends State<MissionScreen>
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          color: Color(0xFF333333),
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '닫기',
@@ -238,11 +227,13 @@ class _MissionScreenState extends State<MissionScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isClaimed ? Colors.grey[200] : Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF333333), width: 3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF333333), width: 1.5),
         boxShadow: isClaimed
             ? null
-            : const [BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2))],
+            : const [
+                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+              ],
       ),
       child: Row(
         children: [
@@ -278,22 +269,11 @@ class _MissionScreenState extends State<MissionScreen>
                 !(isCompleted && !isClaimed), // 💡 보상을 받을 상태가 아니면 터치 완전 무시
             child: BouncingWrapper(
               showShadow: isCompleted && !isClaimed,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isClaimed
-                      ? Colors.grey
-                      : (isCompleted ? Colors.yellowAccent : Colors.grey[300]),
-                  disabledBackgroundColor: isClaimed
-                      ? Colors.grey
-                      : Colors.grey[300], // 비활성 배경색 지정
-                  foregroundColor: Colors.black,
-                  disabledForegroundColor: Colors.black54, // 비활성 상태일 때 글씨 색상
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: Color(0xFF333333), width: 2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  elevation: 0,
-                ),
+              child: RetroGradientButton(
+                color: isCompleted ? Colors.yellowAccent : Colors.grey[300]!,
+                disabledColor: isClaimed ? Colors.grey : Colors.grey[300]!,
+                foregroundColor: Colors.black,
+                disabledForegroundColor: Colors.black54,
                 onPressed: (isCompleted && !isClaimed) ? onClaim : null,
                 child: Text(
                   isClaimed
@@ -323,62 +303,71 @@ class _MissionScreenState extends State<MissionScreen>
         _missionData['weekly_all_clear_progress'] ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            '🔥 일일 미션',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFFFFFF), Color(0xFFE8E8E8)], // 💡 아주 옅은 그라데이션 배경
           ),
-          const SizedBox(height: 16),
-          _buildMissionCard(
-            title: '오늘도 출석체크!',
-            desc: '앱에 접속하기',
-            reward: 1,
-            isCompleted: true,
-            isClaimed: _missionData['daily_attendance_claimed'] == true,
-            progressText: '1/1',
-            onClaim: () => _claimReward('daily_attendance_claimed', 1),
-          ),
-          _buildMissionCard(
-            title: '오늘의 할 일 끝!',
-            desc: '오늘의 모든 할 일 완료',
-            reward: 2,
-            isCompleted: dailyClearCompleted,
-            isClaimed: _missionData['daily_all_clear_claimed'] == true,
-            progressText: _todayTodoTotal > 0
-                ? '$_todayTodoDone/$_todayTodoTotal'
-                : '할 일 없음',
-            onClaim: () => _claimReward('daily_all_clear_claimed', 2),
-          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Text(
+              '🔥 일일 미션',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 16),
+            _buildMissionCard(
+              title: '오늘도 출석체크!',
+              desc: '앱에 접속하기',
+              reward: 1,
+              isCompleted: true,
+              isClaimed: _missionData['daily_attendance_claimed'] == true,
+              progressText: '1/1',
+              onClaim: () => _claimReward('daily_attendance_claimed', 1),
+            ),
+            _buildMissionCard(
+              title: '오늘의 할 일 끝!',
+              desc: '오늘의 모든 할 일 완료',
+              reward: 2,
+              isCompleted: dailyClearCompleted,
+              isClaimed: _missionData['daily_all_clear_claimed'] == true,
+              progressText: _todayTodoTotal > 0
+                  ? '$_todayTodoDone/$_todayTodoTotal'
+                  : '할 일 없음',
+              onClaim: () => _claimReward('daily_all_clear_claimed', 2),
+            ),
 
-          const SizedBox(height: 24),
-          const Text(
-            '🏅 주간 미션',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 16),
-          _buildMissionCard(
-            title: '성실한 개근상',
-            desc: '일주일 내내 출석',
-            reward: 10,
-            isCompleted: weeklyAttProgress >= 7,
-            isClaimed: _missionData['weekly_attendance_claimed'] == true,
-            progressText: '$weeklyAttProgress/7',
-            onClaim: () => _claimReward('weekly_attendance_claimed', 10),
-          ),
-          _buildMissionCard(
-            title: '완벽한 일주일',
-            desc: '일주일 내내 할 일 모두 완료',
-            reward: 20,
-            isCompleted: weeklyClearProgress >= 7,
-            isClaimed: _missionData['weekly_all_clear_claimed'] == true,
-            progressText: '$weeklyClearProgress/7',
-            onClaim: () => _claimReward('weekly_all_clear_claimed', 20),
-          ),
-          const SizedBox(height: 40),
-        ],
+            const SizedBox(height: 24),
+            const Text(
+              '🏅 주간 미션',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 16),
+            _buildMissionCard(
+              title: '성실한 개근상',
+              desc: '일주일 내내 출석',
+              reward: 10,
+              isCompleted: weeklyAttProgress >= 7,
+              isClaimed: _missionData['weekly_attendance_claimed'] == true,
+              progressText: '$weeklyAttProgress/7',
+              onClaim: () => _claimReward('weekly_attendance_claimed', 10),
+            ),
+            _buildMissionCard(
+              title: '완벽한 일주일',
+              desc: '일주일 내내 할 일 모두 완료',
+              reward: 20,
+              isCompleted: weeklyClearProgress >= 7,
+              isClaimed: _missionData['weekly_all_clear_claimed'] == true,
+              progressText: '$weeklyClearProgress/7',
+              onClaim: () => _claimReward('weekly_all_clear_claimed', 20),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
