@@ -90,9 +90,13 @@ class _SlotMachineState extends State<SlotMachine> {
   }
 
   Future<void> _spin({int count = 1}) async {
-    if (_isSpinning) return; // 이미 돌고 있으면 무시
+    if (_isSpinning) {
+      return;
+    } // 이미 돌고 있으면 무시
 
-    if (!widget.onSpinStart(count)) return; // 코인 부족 시 취소
+    if (!widget.onSpinStart(count)) {
+      return;
+    } // 코인 부족 시 취소
 
     setState(() {
       _isSpinning = true;
@@ -101,7 +105,9 @@ class _SlotMachineState extends State<SlotMachine> {
 
     // 1. 레버 당기는 애니메이션 짧게 대기 후 원상복구
     await Future.delayed(const Duration(milliseconds: 250));
-    if (!mounted) return; // 💡 비동기 대기 후 화면이 파괴되었으면 실행 취소
+    if (!mounted) {
+      return;
+    } // 💡 비동기 대기 후 화면이 파괴되었으면 실행 취소
 
     setState(() {
       _isPulling = false;
@@ -156,7 +162,9 @@ class _SlotMachineState extends State<SlotMachine> {
       curve: Curves.easeOutCubic,
     );
 
-    if (!mounted) return; // 💡 애니메이션이 끝난 후 화면이 파괴되었으면 실행 취소
+    if (!mounted) {
+      return;
+    } // 💡 애니메이션이 끝난 후 화면이 파괴되었으면 실행 취소
 
     setState(() {
       _isSpinning = false;

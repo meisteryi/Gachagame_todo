@@ -209,7 +209,9 @@ class _MissionScreenState extends State<MissionScreen>
     await prefs.setString('mission_data', jsonEncode(_missionData));
     widget.onAddCoin(reward);
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     _showNoticeDialog('보상 $reward코인을 획득했습니다! 🪙');
   }
 

@@ -7,7 +7,7 @@ import '../pixel_emoji.dart';
 import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
 
 class AquariumScreen extends StatefulWidget {
-  final String swimmingFishType;
+  final Map<String, dynamic> swimmingFish;
   final List<Map<String, dynamic>> plantedSeaweeds;
   final int feedCount;
   final VoidCallback onFeed;
@@ -16,7 +16,7 @@ class AquariumScreen extends StatefulWidget {
 
   const AquariumScreen({
     super.key,
-    required this.swimmingFishType,
+    required this.swimmingFish,
     required this.plantedSeaweeds,
     required this.feedCount,
     required this.onFeed,
@@ -37,6 +37,7 @@ class _AquariumScreenState extends State<AquariumScreen>
   double _feedStartX = 0;
   double _feedStartY = 0;
   bool _isEditMode = false; // 🌟 수초 편집 모드
+  bool _showStatus = false; // 🌟 물고기 상태창 표시 여부
 
   @override
   void initState() {
@@ -317,7 +318,7 @@ class _AquariumScreenState extends State<AquariumScreen>
     final double h = 320.0 - 40.0 - 30.0;
 
     final (startOffset, _) = _getNormalFishPosAndFlip(
-      widget.swimmingFishType,
+      widget.swimmingFish['type'] ?? 'puffer',
       v,
       w,
       h,
@@ -330,463 +331,614 @@ class _AquariumScreenState extends State<AquariumScreen>
     });
   }
 
+  // 💡 수조 하단에 표시되는 물고기 상태 패널
+  Widget _buildFishStatusPanel() {
+    final fish = widget.swimmingFish;
+    final int level = fish['level'] ?? 1;
+    final int exp = fish['exp'] ?? 0;
+    final int maxExp = level * 100;
+    final String mood = fish['mood'] ?? '보통';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: getRetroGradient(Colors.white),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF333333), width: 1.5),
+        boxShadow: const [
+          BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${fish['name']} (Lv.$level)',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                '기분: $mood',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Text(
+                'EXP',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFF333333),
+                      width: 1,
+                    ),
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeOutCubic,
+                              width:
+                                  constraints.maxWidth *
+                                  (exp / maxExp).clamp(0.0, 1.0),
+                              color: Colors.greenAccent,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$exp / $maxExp',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF81D4FA), Color(0xFF0288D1)],
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05), // 물 밖의 빈 유리 느낌
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF333333).withValues(alpha: 0.1),
-                    blurRadius: 15,
-                    spreadRadius: 0,
-                  ),
-                ],
+    return GestureDetector(
+      onTap: () {
+        if (_showStatus) setState(() => _showStatus = false); // 배경 터치 시 상태창 닫기
+      },
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF81D4FA), Color(0xFF0288D1)],
               ),
-              child: Stack(
-                clipBehavior: Clip.none, // 💡 수조 밖에서 떨어지는 먹이가 잘리지 않게 설정
-                children: [
-                  // 수면 및 물 표현 (도트 수조에 맞게 둥근 모서리 제거)
-                  Positioned(
-                    top: 40,
-                    left: 4, // 도트 테두리 두께(4)만큼 안쪽으로
-                    right: 4,
-                    bottom: 4,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.lightBlueAccent.withValues(alpha: 0.15),
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(24),
+            ),
+            child: Center(
+              child: Container(
+                width: 320,
+                height: 320,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05), // 물 밖의 빈 유리 느낌
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF333333).withValues(alpha: 0.1),
+                      blurRadius: 15,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none, // 💡 수조 밖에서 떨어지는 먹이가 잘리지 않게 설정
+                  children: [
+                    // 수면 및 물 표현 (도트 수조에 맞게 둥근 모서리 제거)
+                    Positioned(
+                      top: 40,
+                      left: 4, // 도트 테두리 두께(4)만큼 안쪽으로
+                      right: 4,
+                      bottom: 4,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.lightBlueAccent.withValues(alpha: 0.15),
+                          borderRadius: const BorderRadius.vertical(
+                            bottom: Radius.circular(24),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  // 🧊 도트 수조 테두리 및 텍스처 모래 바닥
-                  Positioned.fill(
-                    child: CustomPaint(painter: PixelTankPainter()),
-                  ),
-                  // 🌱 여러 개의 수초를 바닥에 배치 및 편집 가능하게 구성
-                  if (_fishController != null)
-                    ...widget.plantedSeaweeds.asMap().entries.map((entry) {
-                      final int idx = entry.key;
-                      final Map<String, dynamic> seaweed = entry.value;
-                      final double x =
-                          (seaweed['x'] as num?)?.toDouble() ?? 140.0;
+                    // 🧊 도트 수조 테두리 및 텍스처 모래 바닥
+                    Positioned.fill(
+                      child: CustomPaint(painter: PixelTankPainter()),
+                    ),
+                    // 🌱 여러 개의 수초를 바닥에 배치 및 편집 가능하게 구성
+                    if (_fishController != null)
+                      ...widget.plantedSeaweeds.asMap().entries.map((entry) {
+                        final int idx = entry.key;
+                        final Map<String, dynamic> seaweed = entry.value;
+                        final double x =
+                            (seaweed['x'] as num?)?.toDouble() ?? 140.0;
 
-                      return Positioned(
-                        key: ObjectKey(
-                          seaweed,
-                        ), // 💡 순서가 바뀌어도 드래그가 끊기지 않도록 고유 키 부여
-                        bottom: 25,
-                        left: x,
-                        child: Listener(
-                          onPointerDown: _isEditMode
-                              ? (_) {
-                                  // 💡 터치 시 해당 수초를 배열 맨 끝으로 보내서 화면 맨 앞(위)으로 렌더링
-                                  if (idx !=
-                                      widget.plantedSeaweeds.length - 1) {
-                                    setState(() {
-                                      widget.plantedSeaweeds.remove(seaweed);
-                                      widget.plantedSeaweeds.add(seaweed);
-                                    });
-                                    widget.onUpdateSeaweeds(
+                        return Positioned(
+                          key: ObjectKey(
+                            seaweed,
+                          ), // 💡 순서가 바뀌어도 드래그가 끊기지 않도록 고유 키 부여
+                          bottom: 25,
+                          left: x,
+                          child: Listener(
+                            onPointerDown: _isEditMode
+                                ? (_) {
+                                    // 💡 터치 시 해당 수초를 배열 맨 끝으로 보내서 화면 맨 앞(위)으로 렌더링
+                                    if (idx !=
+                                        widget.plantedSeaweeds.length - 1) {
+                                      setState(() {
+                                        widget.plantedSeaweeds.remove(seaweed);
+                                        widget.plantedSeaweeds.add(seaweed);
+                                      });
+                                      widget.onUpdateSeaweeds(
+                                        widget.plantedSeaweeds,
+                                      );
+                                    }
+                                  }
+                                : null,
+                            child: GestureDetector(
+                              onPanUpdate: _isEditMode
+                                  ? (details) {
+                                      setState(() {
+                                        seaweed['x'] = (x + details.delta.dx)
+                                            .clamp(10.0, 280.0); // 어항 범위 제한
+                                      });
+                                    }
+                                  : null,
+                              onPanEnd: _isEditMode
+                                  ? (_) => widget.onUpdateSeaweeds(
                                       widget.plantedSeaweeds,
-                                    );
-                                  }
-                                }
-                              : null,
-                          child: GestureDetector(
-                            onPanUpdate: _isEditMode
-                                ? (details) {
-                                    setState(() {
-                                      seaweed['x'] = (x + details.delta.dx)
-                                          .clamp(10.0, 280.0); // 어항 범위 제한
-                                    });
-                                  }
-                                : null,
-                            onPanEnd: _isEditMode
-                                ? (_) => widget.onUpdateSeaweeds(
-                                    widget.plantedSeaweeds,
-                                  )
-                                : null,
-                            onDoubleTap: _isEditMode
-                                ? () {
-                                    setState(() {
-                                      widget.plantedSeaweeds.remove(
-                                        seaweed,
-                                      ); // 💡 바뀐 순서에 맞춰 안전하게 객체로 삭제
-                                    });
-                                    widget.onUpdateSeaweeds(
-                                      widget.plantedSeaweeds,
-                                    );
-                                  }
-                                : null,
+                                    )
+                                  : null,
+                              onDoubleTap: _isEditMode
+                                  ? () {
+                                      setState(() {
+                                        widget.plantedSeaweeds.remove(
+                                          seaweed,
+                                        ); // 💡 바뀐 순서에 맞춰 안전하게 객체로 삭제
+                                      });
+                                      widget.onUpdateSeaweeds(
+                                        widget.plantedSeaweeds,
+                                      );
+                                    }
+                                  : null,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    color:
+                                        Colors.transparent, // 💡 드래그 터치 영역 확보
+                                    child: Container(
+                                      decoration: _isEditMode
+                                          ? BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.redAccent,
+                                                width: 2,
+                                              ),
+                                              color: Colors.redAccent
+                                                  .withValues(alpha: 0.2),
+                                            )
+                                          : null,
+                                      child: Transform.scale(
+                                        alignment: Alignment.bottomCenter,
+                                        scale: 1.5,
+                                        child: PixelSeaweed(
+                                          type:
+                                              seaweed['type'] ?? 'green_algae',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // 💡 왼쪽 도트 화살표
+                                  if (_isEditMode)
+                                    Positioned(
+                                      left: -12,
+                                      child: CustomPaint(
+                                        size: const Size(6, 10),
+                                        painter: PixelArrowPainter(
+                                          isLeft: true,
+                                        ),
+                                      ),
+                                    ),
+                                  // 💡 오른쪽 도트 화살표
+                                  if (_isEditMode)
+                                    Positioned(
+                                      right: -12,
+                                      child: CustomPaint(
+                                        size: const Size(6, 10),
+                                        painter: PixelArrowPainter(
+                                          isLeft: false,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    // 헤엄치는 2D 도트 물고기 & 떨어지는 먹이 효과 결합
+                    if (_fishController != null && _feedController != null)
+                      AnimatedBuilder(
+                        animation: Listenable.merge([
+                          _fishController!,
+                          _feedController!,
+                        ]),
+                        builder: (context, child) {
+                          final double w = 320.0 - 60.0; // 어항 가로 - 물고기 가로 길이
+                          final double h =
+                              320.0 - 40.0 - 30.0; // 어항 세로 - 물고기 - 모래
+                          List<Widget> effectWidgets =
+                              []; // 3개의 먹이 조각 + 하트 이펙트 리스트
+
+                          final fishV = _fishController!.value;
+                          final feedV = _isFeeding
+                              ? _feedController!.value
+                              : 0.0;
+
+                          final currentPose = _getFishPose(
+                            widget.swimmingFish['type'] ?? 'puffer',
+                            _isFeeding,
+                            fishV,
+                            feedV,
+                            w,
+                            h,
+                          );
+                          final double x = currentPose.$1;
+                          final double y = currentPose.$2;
+                          final bool flipX = currentPose.$3;
+
+                          // 🌟 방향에 맞게 기울기(회전 각도) 계산을 위해 아주 살짝 미래의 위치를 구함
+                          final nextFishV = (fishV + 0.005) % 1.0;
+                          final nextFeedV = _isFeeding
+                              ? min(1.0, feedV + 0.005)
+                              : 0.0;
+                          final nextPose = _getFishPose(
+                            widget.swimmingFish['type'] ?? 'puffer',
+                            _isFeeding,
+                            nextFishV,
+                            nextFeedV,
+                            w,
+                            h,
+                          );
+
+                          double tiltAngle = 0.0;
+                          if (_isFeeding && feedV >= 0.4 && feedV < 0.7) {
+                            tiltAngle = -0.2; // 먹이를 먹을 땐 살짝 위를 향함
+                          } else if (_isFeeding && feedV < 0.2) {
+                            tiltAngle = 0.0; // 먹이 떨어지길 대기할 땐 평형 유지
+                          } else {
+                            double dx = nextPose.$1 - x;
+                            double dy = nextPose.$2 - y;
+                            // 움직임이 있을 때만 각도 계산
+                            if (dx.abs() > 0.01 || dy.abs() > 0.01) {
+                              tiltAngle = flipX
+                                  ? atan2(dy, -dx)
+                                  : atan2(dy, dx);
+                            }
+                          }
+
+                          // 💡 해파리, 해마처럼 수직으로 서서 다니는 생물은 회전(기울기)을 제한합니다.
+                          if (widget.swimmingFish['type'] == 'jellyfish' ||
+                              widget.swimmingFish['type'] == 'seahorse') {
+                            tiltAngle = 0.0;
+                          }
+                          // 새우는 바닥 기어다니거나 뒤로 펄쩍 뛰므로 각도를 약간만 줌
+                          if (widget.swimmingFish['type'] == 'shrimp') {
+                            tiltAngle *= 0.3;
+                          }
+
+                          if (_isFeeding) {
+                            final targetX = w / 2; // 수면 중앙 위치
+                            final targetY = 20.0; // 수면 높이
+                            final waterSurfaceY = 37.0; // 수면 경계선의 Y 위치
+
+                            // 🌟 시간차를 두고 떨어지는 개별 먹이 UI 함수
+                            Widget buildFood(
+                              double delay,
+                              double dropEnd,
+                              double eatTime,
+                              double offsetX,
+                              Color color,
+                            ) {
+                              if (feedV > eatTime) {
+                                return const SizedBox.shrink(); // 다 먹으면 사라짐
+                              }
+
+                              double currentY;
+                              if (feedV < delay) {
+                                currentY = -150.0; // 아직 떨어지기 전 (수조 밖 대기)
+                              } else if (feedV < dropEnd) {
+                                final fallT =
+                                    (feedV - delay) / (dropEnd - delay);
+                                // 포물선을 그리며 중력에 의해 떨어짐
+                                currentY =
+                                    -150.0 +
+                                    (waterSurfaceY - (-150.0)) *
+                                        (fallT * fallT);
+                              } else {
+                                // 수면에 도달하여 동동 떠다님 (도트 느낌으로 4px 단위 스냅)
+                                currentY =
+                                    waterSurfaceY +
+                                    (sin((feedV - dropEnd) * pi * 8) > 0
+                                        ? 4.0
+                                        : 0.0);
+                              }
+
+                              return Positioned(
+                                left: 157 + offsetX, // 수조 폭(320)/2 = 160 근처 배치
+                                top: currentY,
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  color: color,
+                                ),
+                              );
+                            }
+
+                            // 💖 먹이를 먹고 난 뒤 떠오르는 광택 픽셀 하트 UI 함수
+                            Widget buildHeart(
+                              double delay,
+                              double duration,
+                              double offsetX,
+                            ) {
+                              if (feedV < delay) {
+                                return const SizedBox.shrink();
+                              }
+                              double progress = (feedV - delay) / duration;
+                              if (progress > 1.0) {
+                                return const SizedBox.shrink();
+                              }
+
+                              double currentY =
+                                  targetY -
+                                  5 -
+                                  (progress * 40); // 입 주변에서 위로 둥둥 떠오름
+                              double currentX =
+                                  targetX +
+                                  25 +
+                                  offsetX +
+                                  sin(progress * pi * 4) * 6; // 좌우로 살짝 흔들림
+
+                              return Positioned(
+                                left: currentX,
+                                top: currentY,
+                                child: CustomPaint(
+                                  size: const Size(15, 15),
+                                  painter: PixelHeartPainter(
+                                    (1.0 - progress).clamp(0.0, 1.0),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            // 높이(시간) 차이를 두고 3조각 생성
+                            effectWidgets.add(
+                              buildFood(
+                                0.0,
+                                0.15,
+                                0.45,
+                                -12,
+                                const Color.fromARGB(255, 202, 119, 94),
+                              ),
+                            );
+                            effectWidgets.add(
+                              buildFood(
+                                0.05,
+                                0.20,
+                                0.55,
+                                0,
+                                const Color.fromARGB(255, 189, 128, 115),
+                              ),
+                            );
+                            effectWidgets.add(
+                              buildFood(
+                                0.10,
+                                0.25,
+                                0.65,
+                                12,
+                                Colors.brown[900]!,
+                              ),
+                            );
+
+                            // 밥을 먹는 타이밍에 맞춰 하트 3개 뿅뿅 발사
+                            effectWidgets.add(buildHeart(0.40, 0.4, -15));
+                            effectWidgets.add(buildHeart(0.48, 0.4, 5));
+                            effectWidgets.add(buildHeart(0.55, 0.4, -5));
+                          }
+
+                          // 💡 Stack 내부가 Positioned 자식만 있어서 크기가 0이 되어 잘리는 현상 해결!
+                          return SizedBox.expand(
                             child: Stack(
                               clipBehavior: Clip.none,
-                              alignment: Alignment.center,
                               children: [
-                                Container(
-                                  color: Colors.transparent, // 💡 드래그 터치 영역 확보
-                                  child: Container(
-                                    decoration: _isEditMode
-                                        ? BoxDecoration(
-                                            border: Border.all(
-                                              color: Colors.redAccent,
-                                              width: 2,
-                                            ),
-                                            color: Colors.redAccent.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                          )
-                                        : null,
-                                    child: Transform.scale(
-                                      alignment: Alignment.bottomCenter,
-                                      scale: 1.5,
-                                      child: PixelSeaweed(
-                                        type: seaweed['type'] ?? 'green_algae',
+                                // 🌊 흔들리는 도트 수면 효과 애니메이션 연동
+                                Positioned(
+                                  top: 36,
+                                  left: 0,
+                                  right: 0,
+                                  height: 16,
+                                  child: CustomPaint(
+                                    painter: PixelWaterSurfacePainter(
+                                      _fishController!.value,
+                                    ),
+                                  ),
+                                ),
+                                ...effectWidgets, // 먹이 조각과 하트 이펙트 일괄 배치
+                                Positioned(
+                                  left: x,
+                                  top: y,
+                                  child: Transform(
+                                    alignment: Alignment.center,
+                                    transform: Matrix4.diagonal3Values(
+                                      flipX ? -1.0 : 1.0, // 좌우 반전 적용
+                                      1.0,
+                                      1.0,
+                                    )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {
+                                        setState(() {
+                                          _showStatus =
+                                              !_showStatus; // 💡 물고기 터치 시 상태창 토글
+                                        });
+                                      },
+                                      child: Transform.scale(
+                                        scale: 0.5, // 💡 물고기 크기 절반으로 축소
+                                        child: child!,
                                       ),
                                     ),
                                   ),
                                 ),
-                                // 💡 왼쪽 도트 화살표
-                                if (_isEditMode)
-                                  Positioned(
-                                    left: -12,
-                                    child: CustomPaint(
-                                      size: const Size(6, 10),
-                                      painter: PixelArrowPainter(isLeft: true),
-                                    ),
-                                  ),
-                                // 💡 오른쪽 도트 화살표
-                                if (_isEditMode)
-                                  Positioned(
-                                    right: -12,
-                                    child: CustomPaint(
-                                      size: const Size(6, 10),
-                                      painter: PixelArrowPainter(isLeft: false),
-                                    ),
-                                  ),
                               ],
                             ),
-                          ),
+                          );
+                        },
+                        child: PixelFish(
+                          type: widget.swimmingFish['type'] ?? 'puffer',
                         ),
-                      );
-                    }),
-                  // 헤엄치는 2D 도트 물고기 & 떨어지는 먹이 효과 결합
-                  if (_fishController != null && _feedController != null)
-                    AnimatedBuilder(
-                      animation: Listenable.merge([
-                        _fishController!,
-                        _feedController!,
-                      ]),
-                      builder: (context, child) {
-                        final double w = 320.0 - 60.0; // 어항 가로 - 물고기 가로 길이
-                        final double h =
-                            320.0 - 40.0 - 30.0; // 어항 세로 - 물고기 - 모래
-                        List<Widget> effectWidgets =
-                            []; // 3개의 먹이 조각 + 하트 이펙트 리스트
-
-                        final fishV = _fishController!.value;
-                        final feedV = _isFeeding ? _feedController!.value : 0.0;
-
-                        final currentPose = _getFishPose(
-                          widget.swimmingFishType,
-                          _isFeeding,
-                          fishV,
-                          feedV,
-                          w,
-                          h,
-                        );
-                        final double x = currentPose.$1;
-                        final double y = currentPose.$2;
-                        final bool flipX = currentPose.$3;
-
-                        // 🌟 방향에 맞게 기울기(회전 각도) 계산을 위해 아주 살짝 미래의 위치를 구함
-                        final nextFishV = (fishV + 0.005) % 1.0;
-                        final nextFeedV = _isFeeding
-                            ? min(1.0, feedV + 0.005)
-                            : 0.0;
-                        final nextPose = _getFishPose(
-                          widget.swimmingFishType,
-                          _isFeeding,
-                          nextFishV,
-                          nextFeedV,
-                          w,
-                          h,
-                        );
-
-                        double tiltAngle = 0.0;
-                        if (_isFeeding && feedV >= 0.4 && feedV < 0.7) {
-                          tiltAngle = -0.2; // 먹이를 먹을 땐 살짝 위를 향함
-                        } else if (_isFeeding && feedV < 0.2) {
-                          tiltAngle = 0.0; // 먹이 떨어지길 대기할 땐 평형 유지
-                        } else {
-                          double dx = nextPose.$1 - x;
-                          double dy = nextPose.$2 - y;
-                          // 움직임이 있을 때만 각도 계산
-                          if (dx.abs() > 0.01 || dy.abs() > 0.01) {
-                            tiltAngle = flipX ? atan2(dy, -dx) : atan2(dy, dx);
-                          }
-                        }
-
-                        // 💡 해파리, 해마처럼 수직으로 서서 다니는 생물은 회전(기울기)을 제한합니다.
-                        if (widget.swimmingFishType == 'jellyfish' ||
-                            widget.swimmingFishType == 'seahorse') {
-                          tiltAngle = 0.0;
-                        }
-                        // 새우는 바닥 기어다니거나 뒤로 펄쩍 뛰므로 각도를 약간만 줌
-                        if (widget.swimmingFishType == 'shrimp') {
-                          tiltAngle *= 0.3;
-                        }
-
-                        if (_isFeeding) {
-                          final targetX = w / 2; // 수면 중앙 위치
-                          final targetY = 20.0; // 수면 높이
-                          final waterSurfaceY = 37.0; // 수면 경계선의 Y 위치
-
-                          // 🌟 시간차를 두고 떨어지는 개별 먹이 UI 함수
-                          Widget buildFood(
-                            double delay,
-                            double dropEnd,
-                            double eatTime,
-                            double offsetX,
-                            Color color,
-                          ) {
-                            if (feedV > eatTime) {
-                              return const SizedBox.shrink(); // 다 먹으면 사라짐
-                            }
-
-                            double currentY;
-                            if (feedV < delay) {
-                              currentY = -150.0; // 아직 떨어지기 전 (수조 밖 대기)
-                            } else if (feedV < dropEnd) {
-                              final fallT = (feedV - delay) / (dropEnd - delay);
-                              // 포물선을 그리며 중력에 의해 떨어짐
-                              currentY =
-                                  -150.0 +
-                                  (waterSurfaceY - (-150.0)) * (fallT * fallT);
-                            } else {
-                              // 수면에 도달하여 동동 떠다님 (도트 느낌으로 4px 단위 스냅)
-                              currentY =
-                                  waterSurfaceY +
-                                  (sin((feedV - dropEnd) * pi * 8) > 0
-                                      ? 4.0
-                                      : 0.0);
-                            }
-
-                            return Positioned(
-                              left: 157 + offsetX, // 수조 폭(320)/2 = 160 근처 배치
-                              top: currentY,
-                              child: Container(
-                                width: 6,
-                                height: 6,
-                                color: color,
-                              ),
-                            );
-                          }
-
-                          // 💖 먹이를 먹고 난 뒤 떠오르는 광택 픽셀 하트 UI 함수
-                          Widget buildHeart(
-                            double delay,
-                            double duration,
-                            double offsetX,
-                          ) {
-                            if (feedV < delay) return const SizedBox.shrink();
-                            double progress = (feedV - delay) / duration;
-                            if (progress > 1.0) return const SizedBox.shrink();
-
-                            double currentY =
-                                targetY -
-                                5 -
-                                (progress * 40); // 입 주변에서 위로 둥둥 떠오름
-                            double currentX =
-                                targetX +
-                                25 +
-                                offsetX +
-                                sin(progress * pi * 4) * 6; // 좌우로 살짝 흔들림
-
-                            return Positioned(
-                              left: currentX,
-                              top: currentY,
-                              child: CustomPaint(
-                                size: const Size(15, 15),
-                                painter: PixelHeartPainter(
-                                  (1.0 - progress).clamp(0.0, 1.0),
-                                ),
-                              ),
-                            );
-                          }
-
-                          // 높이(시간) 차이를 두고 3조각 생성
-                          effectWidgets.add(
-                            buildFood(
-                              0.0,
-                              0.15,
-                              0.45,
-                              -12,
-                              const Color.fromARGB(255, 202, 119, 94),
-                            ),
-                          );
-                          effectWidgets.add(
-                            buildFood(
-                              0.05,
-                              0.20,
-                              0.55,
-                              0,
-                              const Color.fromARGB(255, 189, 128, 115),
-                            ),
-                          );
-                          effectWidgets.add(
-                            buildFood(0.10, 0.25, 0.65, 12, Colors.brown[900]!),
-                          );
-
-                          // 밥을 먹는 타이밍에 맞춰 하트 3개 뿅뿅 발사
-                          effectWidgets.add(buildHeart(0.40, 0.4, -15));
-                          effectWidgets.add(buildHeart(0.48, 0.4, 5));
-                          effectWidgets.add(buildHeart(0.55, 0.4, -5));
-                        }
-
-                        // 💡 Stack 내부가 Positioned 자식만 있어서 크기가 0이 되어 잘리는 현상 해결!
-                        return SizedBox.expand(
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              // 🌊 흔들리는 도트 수면 효과 애니메이션 연동
-                              Positioned(
-                                top: 36,
-                                left: 0,
-                                right: 0,
-                                height: 16,
-                                child: CustomPaint(
-                                  painter: PixelWaterSurfacePainter(
-                                    _fishController!.value,
-                                  ),
-                                ),
-                              ),
-                              ...effectWidgets, // 먹이 조각과 하트 이펙트 일괄 배치
-                              Positioned(
-                                left: x,
-                                top: y,
-                                child: Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.diagonal3Values(
-                                    flipX ? -1.0 : 1.0, // 좌우 반전 적용
-                                    1.0,
-                                    1.0,
-                                  )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
-                                  child: child!,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: PixelFish(type: widget.swimmingFishType),
-                    ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: PixelButton(
+              color: Colors.white,
+              textColor: Colors.black,
+              onPressed: widget.onShowStorage,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PixelEmoji('box', size: 18),
+                  SizedBox(width: 6),
+                  Text('보관함'),
                 ],
               ),
             ),
           ),
-        ),
-        Positioned(
-          bottom: 20,
-          right: 20,
-          child: PixelButton(
-            color: Colors.white,
-            textColor: Colors.black,
-            onPressed: widget.onShowStorage,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PixelEmoji('box', size: 18),
-                SizedBox(width: 6),
-                Text('보관함'),
-              ],
-            ),
-          ),
-        ),
-        // 먹이 주기 버튼 (왼쪽 배치)
-        Positioned(
-          bottom: 20,
-          left: 20,
-          child: PixelButton(
-            color: Colors.orangeAccent,
-            textColor: Colors.white,
-            onPressed: _startFeeding,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PixelEmoji('meat', size: 18),
-                SizedBox(width: 6),
-                Text('먹이 주기'),
-              ],
-            ),
-          ),
-        ),
-        // 🌿 수초 꾸미기 편집 모드 토글 버튼 (상단 우측)
-        Positioned(
-          top: 16,
-          right: 16,
-          child: PixelButton(
-            color: _isEditMode ? Colors.greenAccent : Colors.white,
-            textColor: Colors.black,
-            onPressed: () => setState(() => _isEditMode = !_isEditMode),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(_isEditMode ? Icons.check : Icons.edit, size: 18),
-                const SizedBox(width: 6),
-                Text(_isEditMode ? '편집 완료' : '수초 편집'),
-              ],
-            ),
-          ),
-        ),
-        // 💡 편집 모드일 때 안내 메시지
-        if (_isEditMode)
+          // 먹이 주기 버튼 (왼쪽 배치)
           Positioned(
-            top: 80,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.yellowAccent, width: 1),
-                ),
-                child: const Text(
-                  '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+            bottom: 20,
+            left: 20,
+            child: PixelButton(
+              color: Colors.orangeAccent,
+              textColor: Colors.white,
+              onPressed: _startFeeding,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PixelEmoji('meat', size: 18),
+                  SizedBox(width: 6),
+                  Text('먹이 주기'),
+                ],
+              ),
+            ),
+          ),
+          // 🌿 수초 꾸미기 편집 모드 토글 버튼 (상단 우측)
+          Positioned(
+            top: 16,
+            right: 16,
+            child: PixelButton(
+              color: _isEditMode ? Colors.greenAccent : Colors.white,
+              textColor: Colors.black,
+              onPressed: () => setState(() => _isEditMode = !_isEditMode),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(_isEditMode ? Icons.check : Icons.edit, size: 18),
+                  const SizedBox(width: 6),
+                  Text(_isEditMode ? '편집 완료' : '수초 편집'),
+                ],
+              ),
+            ),
+          ),
+          // 💡 편집 모드일 때 안내 메시지
+          if (_isEditMode)
+            Positioned(
+              top: 80,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.yellowAccent, width: 1),
+                  ),
+                  child: const Text(
+                    '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
+          // 💡 수조 하단 물고기 상태창
+          Positioned(
+            bottom: 85,
+            left: 20,
+            right: 20,
+            child: IgnorePointer(
+              ignoring: !_showStatus, // 안 보일 때는 터치를 무시
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200), // 부드러운 투명도 애니메이션
+                opacity: _showStatus ? 1.0 : 0.0,
+                curve: Curves.easeInOut,
+                child: _buildFishStatusPanel(),
+              ),
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -242,9 +242,9 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
-        [e, c1, c1, c1, c1, c1, c1, c1, c1, c1, w, b, e, e],
+        [e, e, e, c1, c1, c1, c1, c1, c1, c1, w, b, e, e],
         [c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e],
-        [e, c1, c1, c1, c1, c1, c1, c1, c1, c1, w, b, e, e],
+        [e, e, e, c1, c1, c1, c1, c1, c1, c1, w, b, e, e],
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
       ];
@@ -268,7 +268,9 @@ class PixelFishPainter extends CustomPainter {
 
     for (int y = 0; y < pixels.length; y++) {
       for (int x = 0; x < pixels[y].length; x++) {
-        if (pixels[y][x] == e) continue;
+        if (pixels[y][x] == e) {
+          continue;
+        }
 
         if (pixels[y][x] == c1) {
           paint.color = color1;

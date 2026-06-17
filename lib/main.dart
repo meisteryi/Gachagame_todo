@@ -161,13 +161,24 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         setState(() {
           _ownedFishes.clear();
           for (var item in decoded) {
-            _ownedFishes.add(Map<String, dynamic>.from(item));
+            final fish = Map<String, dynamic>.from(item);
+            // 💡 기존 데이터에 레벨/경험치/기분이 없다면 기본값 추가 (마이그레이션)
+            fish['level'] ??= 1;
+            fish['exp'] ??= 0;
+            fish['mood'] ??= '보통';
+            _ownedFishes.add(fish);
           }
         });
       } else {
         // 앱 최초 실행 시 기본 물고기 지급
         setState(() {
-          _ownedFishes.add({'type': 'puffer', 'name': '도트 복어'});
+          _ownedFishes.add(<String, dynamic>{
+            'type': 'puffer',
+            'name': '도트 복어',
+            'level': 1,
+            'exp': 0,
+            'mood': '보통',
+          });
         });
       }
 
@@ -288,7 +299,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   // 상점 탭에서 새로운 물고기를 뽑았을 때 호출되는 함수
   void _onAddFish(Map<String, dynamic> drawnFish) {
     setState(() {
-      _ownedFishes.add(drawnFish);
+      _ownedFishes.add(<String, dynamic>{
+        ...drawnFish,
+        'level': 1,
+        'exp': 0,
+        'mood': '좋음', // 💡 새로 뽑은 물고기는 기분이 좋음!
+      });
     });
     _saveMainData();
   }
@@ -1168,7 +1184,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         children: [
           // 1. 내 수조 탭 (전체 화면)
           AquariumScreen(
-            swimmingFishType: _swimmingFishType,
+            swimmingFish: _ownedFishes.firstWhere(
+              (f) => f['type'] == _swimmingFishType,
+              orElse: () => <String, dynamic>{
+                'type': 'puffer',
+                'name': '도트 복어',
+                'level': 1,
+                'exp': 0,
+                'mood': '보통',
+              },
+            ),
             plantedSeaweeds: _plantedSeaweeds,
             feedCount: _feedCount,
             onFeed: () {
@@ -1190,12 +1215,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             onUnlockAllCommand: () {
               setState(() {
                 _ownedFishes.clear();
-                _ownedFishes.add({
+                _ownedFishes.add(<String, dynamic>{
                   'type': 'puffer',
                   'name': '도트 복어',
+                  'level': 1,
+                  'exp': 0,
+                  'mood': '보통',
                 }); // 기본 복어 유지
                 _ownedFishes.addAll(
-                  SlotMachine.fishList.map((e) => Map<String, dynamic>.from(e)),
+                  SlotMachine.fishList.map(
+                    (e) => <String, dynamic>{
+                      ...Map<String, dynamic>.from(e),
+                      'level': 1,
+                      'exp': 0,
+                      'mood': '좋음',
+                    },
+                  ),
                 );
                 _ownedSeaweeds.clear();
                 _ownedSeaweeds.addAll(
