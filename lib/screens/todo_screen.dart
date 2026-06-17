@@ -1617,9 +1617,13 @@ class PixelCheckbox extends StatelessWidget {
 
 // 3. 2D 픽셀 배열로 그리는 수제 도트 체크마크
 class PixelCheckPainter extends CustomPainter {
+  final Color color;
+
+  PixelCheckPainter({this.color = const Color(0xFF333333)});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF333333);
+    final paint = Paint()..color = color;
 
     // 8x6 해상도의 V자 체크마크 매트릭스 패턴
     final List<List<int>> pixels = [

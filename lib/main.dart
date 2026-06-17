@@ -131,10 +131,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   final List<Map<String, dynamic>> _ownedFishes = [];
   final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
-  String _swimmingFishType = 'puffer'; // 수조에서 헤엄치는 기본 물고기
+  List<String> _swimmingFishIds = []; // 💡 수조에서 헤엄치는 여러 마리의 물고기 ID 목록
   List<Map<String, dynamic>> _plantedSeaweeds = []; // 💡 수조에 심어진 여러 수초들의 위치 정보
   int _coins = 0; // 💡 코인 재화 추가
   int _feedCount = 10; // 💡 기본 먹이 개수 (테스트용 10개)
+  int _supplementCount = 5; // 💡 영양제 개수 추가
   final PageController _pageController = PageController(
     initialPage: 1,
   ); // 💡 초기 화면을 '할 일'로 변경
@@ -156,6 +157,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? fishesStr = prefs.getString('ownedFishes');
+      int idGen = 0; // 💡 마이그레이션용 ID 발급기
       if (fishesStr != null) {
         final List<dynamic> decoded = jsonDecode(fishesStr);
         setState(() {
@@ -166,6 +168,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             fish['level'] ??= 1;
             fish['exp'] ??= 0;
             fish['mood'] ??= '보통';
+            fish['id'] ??=
+                'fish_${DateTime.now().millisecondsSinceEpoch}_${idGen++}'; // 💡 고유 ID 부여
             _ownedFishes.add(fish);
           }
         });
@@ -178,6 +182,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             'level': 1,
             'exp': 0,
             'mood': '보통',
+            'id': 'fish_default_0',
           });
         });
       }
@@ -197,6 +202,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       if (plantedSeaweedsStr != null) {
         final List<dynamic> decoded = jsonDecode(plantedSeaweedsStr);
         _plantedSeaweeds = decoded
+            .where((e) => e != null) // 💡 null 값 안전 제거
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
       } else {
@@ -208,9 +214,29 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         }
       }
       setState(() {
-        _swimmingFishType = prefs.getString('swimmingFish') ?? 'puffer';
         _coins = prefs.getInt('coins') ?? 0; // 코인 로드
         _feedCount = prefs.getInt('feedCount') ?? 10; // 먹이 로드
+        _supplementCount = prefs.getInt('supplementCount') ?? 5; // 영양제 로드
+
+        // 💡 수조의 물고기 목록 불러오기 (마이그레이션 포함)
+        final String? swimStr = prefs.getString('swimmingFishIds');
+        if (swimStr != null) {
+          // 💡 리스트 내부에 null이 섞여 있을 경우를 완벽하게 차단
+          _swimmingFishIds = (jsonDecode(swimStr) as List)
+              .where((e) => e != null)
+              .map((e) => e.toString())
+              .toList();
+        } else {
+          final String oldSwim = prefs.getString('swimmingFish') ?? 'puffer';
+          final match = _ownedFishes.firstWhere(
+            (f) => f['type'] == oldSwim,
+            orElse: () => _ownedFishes.first,
+          );
+          if (match['id'] != null) _swimmingFishIds = [match['id'].toString()];
+        }
+        if (_swimmingFishIds.isEmpty && _ownedFishes.isNotEmpty) {
+          _swimmingFishIds.add(_ownedFishes.first['id'].toString());
+        }
       });
     } catch (e) {
       debugPrint('메인 데이터 로드 에러: $e');
@@ -221,10 +247,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('ownedFishes', jsonEncode(_ownedFishes));
     await prefs.setString('ownedSeaweeds', jsonEncode(_ownedSeaweeds));
-    await prefs.setString('swimmingFish', _swimmingFishType);
+    await prefs.setString('swimmingFishIds', jsonEncode(_swimmingFishIds));
     await prefs.setString('plantedSeaweeds', jsonEncode(_plantedSeaweeds));
     await prefs.setInt('coins', _coins); // 코인 저장
     await prefs.setInt('feedCount', _feedCount); // 먹이 저장
+    await prefs.setInt('supplementCount', _supplementCount); // 영양제 저장
   }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
@@ -304,9 +331,35 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         'level': 1,
         'exp': 0,
         'mood': '좋음', // 💡 새로 뽑은 물고기는 기분이 좋음!
+        'id':
+            'fish_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}',
       });
     });
     _saveMainData();
+  }
+
+  // 💡 먹이 및 영양제 경험치 증가 로직
+  void _gainExp(int amount) {
+    bool leveledUp = false;
+    for (var fish in _ownedFishes) {
+      if (_swimmingFishIds.contains(fish['id'])) {
+        fish['exp'] = (fish['exp'] ?? 0) + amount;
+        int level = fish['level'] ?? 1;
+        int maxExp = level * 100;
+        if (fish['exp'] >= maxExp) {
+          fish['level'] = level + 1;
+          fish['exp'] -= maxExp;
+          fish['mood'] = '최고야!';
+          leveledUp = true;
+        }
+      }
+    }
+    if (leveledUp) {
+      // 먹이 애니메이션이 끝날 즈음에 축하 팝업 띄우기
+      Future.delayed(const Duration(milliseconds: 2000), () {
+        if (mounted) _showNoticeDialog('수조의 물고기가 레벨업했습니다! 🎉');
+      });
+    }
   }
 
   void _onAddSeaweed(Map<String, dynamic> drawnSeaweed) {
@@ -489,12 +542,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             final Map<String, dynamic> allData = {
                               'ownedFishes': prefs.getString('ownedFishes'),
                               'ownedSeaweeds': prefs.getString('ownedSeaweeds'),
-                              'swimmingFish': prefs.getString('swimmingFish'),
+                              'swimmingFishIds': prefs.getString(
+                                'swimmingFishIds',
+                              ),
                               'plantedSeaweeds': prefs.getString(
                                 'plantedSeaweeds',
                               ),
                               'coins': prefs.getInt('coins'),
                               'feedCount': prefs.getInt('feedCount'),
+                              'supplementCount': prefs.getInt(
+                                'supplementCount',
+                              ),
                               'todos': prefs.getString('todos'),
                               'categories': prefs.getString('categories'),
                               'mission_data': prefs.getString('mission_data'),
@@ -629,55 +687,64 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               final prefs =
                                   await SharedPreferences.getInstance();
 
-                              if (allData.containsKey('ownedFishes')) {
+                              if (allData['ownedFishes'] != null) {
                                 await prefs.setString(
                                   'ownedFishes',
-                                  allData['ownedFishes'],
+                                  allData['ownedFishes'].toString(),
                                 );
                               }
-                              if (allData.containsKey('ownedSeaweeds')) {
+                              if (allData['ownedSeaweeds'] != null) {
                                 await prefs.setString(
                                   'ownedSeaweeds',
-                                  allData['ownedSeaweeds'],
+                                  allData['ownedSeaweeds'].toString(),
                                 );
                               }
-                              if (allData.containsKey('swimmingFish')) {
+                              if (allData['swimmingFishIds'] != null) {
                                 await prefs.setString(
-                                  'swimmingFish',
-                                  allData['swimmingFish'],
+                                  'swimmingFishIds',
+                                  allData['swimmingFishIds'].toString(),
                                 );
                               }
-                              if (allData.containsKey('plantedSeaweeds')) {
+                              if (allData['plantedSeaweeds'] != null) {
                                 await prefs.setString(
                                   'plantedSeaweeds',
-                                  allData['plantedSeaweeds'],
+                                  allData['plantedSeaweeds'].toString(),
                                 );
                               }
-                              if (allData.containsKey('coins')) {
-                                await prefs.setInt('coins', allData['coins']);
+                              if (allData['coins'] != null) {
+                                await prefs.setInt(
+                                  'coins',
+                                  allData['coins'] as int,
+                                );
                               }
-                              if (allData.containsKey('feedCount')) {
+                              if (allData['feedCount'] != null) {
                                 await prefs.setInt(
                                   'feedCount',
-                                  allData['feedCount'],
+                                  allData['feedCount'] as int,
                                 );
                               }
-                              if (allData.containsKey('todos')) {
+                              if (allData['supplementCount'] != null) {
+                                await prefs.setInt(
+                                  'supplementCount',
+                                  allData['supplementCount'] as int,
+                                );
+                              }
+                              if (allData['todos'] != null) {
                                 await prefs.setString(
                                   'todos',
-                                  allData['todos'],
+                                  allData['todos'].toString(),
                                 );
                               }
-                              if (allData.containsKey('categories')) {
+                              if (allData['categories'] != null) {
                                 await prefs.setString(
                                   'categories',
-                                  allData['categories'],
+                                  allData['categories'].toString(),
                                 );
                               }
-                              if (allData.containsKey('mission_data')) {
+                              if (allData['mission_data'] != null) {
                                 await prefs.setString(
                                   'mission_data',
-                                  allData['mission_data'],
+                                  allData['mission_data'].toString(),
                                 );
                               }
 
@@ -799,6 +866,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                 itemCount: _ownedFishes.length,
                                 itemBuilder: (context, index) {
                                   final fish = _ownedFishes[index];
+                                  final bool isSwimming = _swimmingFishIds
+                                      .contains(fish['id']);
                                   return BouncingWrapper(
                                     child: SizedBox.expand(
                                       child: Card(
@@ -806,16 +875,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
-                                            color:
-                                                _swimmingFishType ==
-                                                    fish['type']
-                                                ? Colors.redAccent
-                                                : const Color(0xFF333333),
-                                            width:
-                                                _swimmingFishType ==
-                                                    fish['type']
-                                                ? 2
-                                                : 1,
+                                            color: const Color(0xFF333333),
+                                            width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             12,
@@ -825,47 +886,84 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         child: InkWell(
                                           onTap: () {
                                             setState(() {
-                                              _swimmingFishType =
-                                                  fish['type']?.toString() ??
-                                                  'puffer';
-                                              _selectedIndex = 0;
+                                              if (isSwimming) {
+                                                if (_swimmingFishIds.length >
+                                                    1) {
+                                                  _swimmingFishIds.remove(
+                                                    fish['id'],
+                                                  );
+                                                } else {
+                                                  _showNoticeDialog(
+                                                    '최소 1마리의 물고기는 수조에 있어야 합니다!',
+                                                  );
+                                                }
+                                              } else {
+                                                if (_swimmingFishIds.length >=
+                                                    5) {
+                                                  _showNoticeDialog(
+                                                    '수조에는 최대 5마리까지만 넣을 수 있습니다!',
+                                                  );
+                                                } else {
+                                                  _swimmingFishIds.add(
+                                                    fish['id']
+                                                        .toString(), // 💡 확실하게 String으로 변환
+                                                  );
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop(); // 💡 물고기를 수조에 넣으면 창 닫기
+                                                }
+                                              }
                                             });
                                             _saveMainData();
-                                            _pageController.animateToPage(
-                                              0,
-                                              duration: const Duration(
-                                                milliseconds: 300,
-                                              ),
-                                              curve: Curves.easeInOut,
-                                            );
-                                            Navigator.of(context).pop();
                                           },
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                          child: Stack(
+                                            alignment: Alignment.center,
                                             children: [
-                                              Transform.scale(
-                                                scale: 1.2,
-                                                child: PixelFish(
-                                                  type:
-                                                      fish['type']
-                                                          ?.toString() ??
-                                                      'puffer',
-                                                  isAnimated:
-                                                      false, // 💡 보관함에서는 가만히 있도록 설정
-                                                ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Transform.scale(
+                                                    scale: 1.2,
+                                                    child: PixelFish(
+                                                      type:
+                                                          fish['type']
+                                                              ?.toString() ??
+                                                          'puffer',
+                                                      isAnimated: false,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    fish['name']?.toString() ??
+                                                        '',
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
                                               ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                fish['name']?.toString() ?? '',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
+                                              if (isSwimming)
+                                                Positioned(
+                                                  top: 8,
+                                                  left: 8,
+                                                  child: SizedBox(
+                                                    width: 16,
+                                                    height: 16,
+                                                    child: CustomPaint(
+                                                      painter:
+                                                          PixelCheckPainter(
+                                                            color: Colors.green,
+                                                          ),
+                                                    ),
+                                                  ),
                                                 ),
-                                                textAlign: TextAlign.center,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
                                             ],
                                           ),
                                         ),
@@ -914,6 +1012,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                 itemCount: _ownedSeaweeds.length,
                                 itemBuilder: (context, index) {
                                   final seaweed = _ownedSeaweeds[index];
+                                  final bool isPlanted = _plantedSeaweeds.any(
+                                    (s) => s['type'] == seaweed['type'],
+                                  );
                                   return BouncingWrapper(
                                     child: SizedBox.expand(
                                       child: Card(
@@ -921,22 +1022,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
-                                            color:
-                                                _plantedSeaweeds.any(
-                                                  (s) =>
-                                                      s['type'] ==
-                                                      seaweed['type'],
-                                                )
-                                                ? Colors.greenAccent
-                                                : const Color(0xFF333333),
-                                            width:
-                                                _plantedSeaweeds.any(
-                                                  (s) =>
-                                                      s['type'] ==
-                                                      seaweed['type'],
-                                                )
-                                                ? 2
-                                                : 1,
+                                            color: const Color(0xFF333333),
+                                            width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             12,
@@ -969,33 +1056,55 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                             );
                                             Navigator.of(context).pop();
                                           },
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                          child: Stack(
+                                            alignment: Alignment.center,
                                             children: [
-                                              Transform.scale(
-                                                scale: 1.1,
-                                                child: PixelSeaweed(
-                                                  type:
-                                                      seaweed['type']
-                                                          ?.toString() ??
-                                                      'green_algae',
-                                                  isAnimated:
-                                                      false, // 💡 보관함에서는 가만히 있도록 설정
-                                                ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Transform.scale(
+                                                    scale: 1.1,
+                                                    child: PixelSeaweed(
+                                                      type:
+                                                          seaweed['type']
+                                                              ?.toString() ??
+                                                          'green_algae',
+                                                      isAnimated: false,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    seaweed['name']
+                                                            ?.toString() ??
+                                                        '',
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
                                               ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                seaweed['name']?.toString() ??
-                                                    '',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
+                                              if (isPlanted)
+                                                Positioned(
+                                                  top: 8,
+                                                  left: 8,
+                                                  child: SizedBox(
+                                                    width: 16,
+                                                    height: 16,
+                                                    child: CustomPaint(
+                                                      painter:
+                                                          PixelCheckPainter(
+                                                            color: Colors.green,
+                                                          ),
+                                                    ),
+                                                  ),
                                                 ),
-                                                textAlign: TextAlign.center,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
                                             ],
                                           ),
                                         ),
@@ -1098,10 +1207,42 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
+          if (_selectedIndex == 0) // 내 수조 탭: 남은 영양제 개수 표시
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFA8E6CF),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFF333333), width: 1),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.medical_services,
+                    color: Colors.black,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$_supplementCount',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      color: Colors.black,
+                      shadows: [
+                        Shadow(color: Colors.white, offset: Offset(1, 1)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           if (_selectedIndex >= 2) // 미션 탭이나 상점 탭일 때는 코인/먹이 표시
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 미션 탭 상단 먹이 표시 유지
                 Container(
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(
@@ -1184,20 +1325,24 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         children: [
           // 1. 내 수조 탭 (전체 화면)
           AquariumScreen(
-            swimmingFish: _ownedFishes.firstWhere(
-              (f) => f['type'] == _swimmingFishType,
-              orElse: () => <String, dynamic>{
-                'type': 'puffer',
-                'name': '도트 복어',
-                'level': 1,
-                'exp': 0,
-                'mood': '보통',
-              },
-            ),
+            swimmingFishes: _ownedFishes
+                .where((f) => _swimmingFishIds.contains(f['id']))
+                .toList(),
             plantedSeaweeds: _plantedSeaweeds,
             feedCount: _feedCount,
+            supplementCount: _supplementCount,
             onFeed: () {
-              setState(() => _feedCount--);
+              setState(() {
+                _feedCount--;
+                _gainExp(10);
+              });
+              _saveMainData(); // 먹이 소모 및 경험치 저장
+            },
+            onSupplement: () {
+              setState(() {
+                _supplementCount--;
+                _gainExp(50);
+              });
               _saveMainData(); // 먹이 소모 시 저장
             },
             onUpdateSeaweeds: (newList) {
@@ -1221,6 +1366,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   'level': 1,
                   'exp': 0,
                   'mood': '보통',
+                  'id': 'fish_default_0',
                 }); // 기본 복어 유지
                 _ownedFishes.addAll(
                   SlotMachine.fishList.map(
@@ -1229,6 +1375,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       'level': 1,
                       'exp': 0,
                       'mood': '좋음',
+                      'id':
+                          'fish_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}',
                     },
                   ),
                 );
@@ -1257,10 +1405,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ownedSeaweeds: _ownedSeaweeds,
             onAddFish: _onAddFish,
             onAddSeaweed: _onAddSeaweed,
-            onBuyFeed: (cost, amount) {
+            onBuyItem: (type, cost, amount) {
               setState(() {
                 _coins -= cost;
-                _feedCount += amount;
+                if (type == 'feed') {
+                  _feedCount += amount;
+                } else if (type == 'supplement') {
+                  _supplementCount += amount;
+                }
               });
               _saveMainData();
             },

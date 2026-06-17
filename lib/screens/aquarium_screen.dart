@@ -7,19 +7,23 @@ import '../pixel_emoji.dart';
 import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
 
 class AquariumScreen extends StatefulWidget {
-  final Map<String, dynamic> swimmingFish;
+  final List<Map<String, dynamic>> swimmingFishes; // 💡 여러 마리 물고기 배열
   final List<Map<String, dynamic>> plantedSeaweeds;
   final int feedCount;
+  final int supplementCount;
   final VoidCallback onFeed;
+  final VoidCallback onSupplement;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final VoidCallback onShowStorage;
 
   const AquariumScreen({
     super.key,
-    required this.swimmingFish,
+    required this.swimmingFishes,
     required this.plantedSeaweeds,
     required this.feedCount,
+    required this.supplementCount,
     required this.onFeed,
+    required this.onSupplement,
     required this.onUpdateSeaweeds,
     required this.onShowStorage,
   });
@@ -34,10 +38,12 @@ class _AquariumScreenState extends State<AquariumScreen>
   AnimationController? _feedController; // 🌟 먹이 애니메이션 전용 컨트롤러 추가
 
   bool _isFeeding = false;
-  double _feedStartX = 0;
-  double _feedStartY = 0;
+  String _feedType = 'feed'; // 'feed' 또는 'supplement'
+  final Map<String, Offset> _feedStartPositions =
+      {}; // 💡 각 물고기별 먹이를 발견했을 때의 위치 기록
   bool _isEditMode = false; // 🌟 수초 편집 모드
   bool _showStatus = false; // 🌟 물고기 상태창 표시 여부
+  String? _selectedFishId; // 🌟 상태창을 띄울 물고기 ID
 
   @override
   void initState() {
@@ -186,7 +192,7 @@ class _AquariumScreenState extends State<AquariumScreen>
 
   // 현재 물고기의 위치와 좌우 반전 상태를 계산하는 통합 함수 (회전각 계산을 위한 미래 위치 예측용)
   (double, double, bool) _getFishPose(
-    String type,
+    Map<String, dynamic> fish,
     bool isFeeding,
     double fishV,
     double feedV,
@@ -196,24 +202,28 @@ class _AquariumScreenState extends State<AquariumScreen>
     double x = 0;
     double y = 0;
     bool flipX = false;
+    String type = fish['type'] ?? 'puffer';
+    String id = fish['id'] ?? '';
 
     if (isFeeding && feedV > 0.0) {
       final targetX = w / 2;
       final targetY = 20.0;
+      final startX = _feedStartPositions[id]?.dx ?? (w / 2);
+      final startY = _feedStartPositions[id]?.dy ?? (h / 2);
 
       if (feedV < 0.2) {
-        x = _feedStartX;
-        y = _feedStartY;
-        flipX = targetX < _feedStartX;
+        x = startX;
+        y = startY;
+        flipX = targetX < startX;
       } else if (feedV < 0.4) {
         final t = (feedV - 0.2) / 0.2;
-        x = _feedStartX + (targetX - _feedStartX) * t;
-        y = _feedStartY + (targetY - _feedStartY) * t;
-        flipX = targetX < _feedStartX;
+        x = startX + (targetX - startX) * t;
+        y = startY + (targetY - startY) * t;
+        flipX = targetX < startX;
       } else if (feedV < 0.7) {
         x = targetX + sin((feedV - 0.4) * pi * 10) * 3;
         y = targetY + sin((feedV - 0.4) * pi * 15) * 3;
-        flipX = targetX < _feedStartX;
+        flipX = targetX < startX;
       } else {
         final t = (feedV - 0.7) / 0.3;
         final (nextOffset, nextFlip) = _getNormalFishPosAndFlip(
@@ -298,33 +308,46 @@ class _AquariumScreenState extends State<AquariumScreen>
   }
 
   // 🐟 먹이 주기 로직
-  void _startFeeding() {
+  void _startFeeding(String type) {
     if (_isFeeding) return; // 이미 먹이를 먹는 중이면 중복 실행 방지
 
-    if (widget.feedCount <= 0) {
-      _showNoticeDialog('남은 먹이가 없습니다! 🍗');
+    if (type == 'feed' && widget.feedCount <= 0) {
+      _showNoticeDialog('남은 먹이가 없습니다! 🍗\n가챠 상점에서 구매하세요.');
+      return;
+    }
+    if (type == 'supplement' && widget.supplementCount <= 0) {
+      _showNoticeDialog('남은 영양제가 없습니다! 💊\n가챠 상점에서 구매하세요.');
       return;
     }
 
-    widget.onFeed(); // 💡 먹이 개수 -1 차감 및 상태 저장 알림
+    if (type == 'feed') {
+      widget.onFeed();
+    } else {
+      widget.onSupplement(); // 💡 먹이 또는 영양제 소모 및 경험치 획득 콜백
+    }
 
     setState(() {
       _isFeeding = true;
+      _feedType = type;
     });
 
-    // 먹이를 주는 순간의 위치를 기록하여 현재 위치에서 자연스럽게 수면으로 향하도록 함
+    // 💡 모든 물고기의 현재 위치를 기록하여 자연스럽게 수면으로 향하도록 함
+    _feedStartPositions.clear();
     final v = _fishController?.value ?? 0.0;
     final double w = 320.0 - 60.0;
     final double h = 320.0 - 40.0 - 30.0;
 
-    final (startOffset, _) = _getNormalFishPosAndFlip(
-      widget.swimmingFish['type'] ?? 'puffer',
-      v,
-      w,
-      h,
-    );
-    _feedStartX = startOffset.dx;
-    _feedStartY = startOffset.dy;
+    for (var fish in widget.swimmingFishes) {
+      double phaseOffset = (fish['id'].hashCode % 1000) / 1000.0;
+      double fishV = (v + phaseOffset) % 1.0;
+      final (startOffset, _) = _getNormalFishPosAndFlip(
+        fish['type'] ?? 'puffer',
+        fishV,
+        w,
+        h,
+      );
+      _feedStartPositions[fish['id'] ?? ''] = startOffset;
+    }
 
     _feedController?.forward(from: 0.0).then((_) {
       if (mounted) setState(() => _isFeeding = false);
@@ -333,7 +356,12 @@ class _AquariumScreenState extends State<AquariumScreen>
 
   // 💡 수조 하단에 표시되는 물고기 상태 패널
   Widget _buildFishStatusPanel() {
-    final fish = widget.swimmingFish;
+    final fish = widget.swimmingFishes.firstWhere(
+      (f) => f['id'] == _selectedFishId,
+      orElse: () => <String, dynamic>{},
+    );
+    if (fish.isEmpty) return const SizedBox.shrink();
+
     final int level = fish['level'] ?? 1;
     final int exp = fish['exp'] ?? 0;
     final int maxExp = level * 100;
@@ -431,7 +459,12 @@ class _AquariumScreenState extends State<AquariumScreen>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (_showStatus) setState(() => _showStatus = false); // 배경 터치 시 상태창 닫기
+        if (_showStatus) {
+          setState(() {
+            _showStatus = false;
+            _selectedFishId = null;
+          }); // 배경 터치 시 상태창 닫기
+        }
       },
       child: Stack(
         children: [
@@ -558,7 +591,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                                           : null,
                                       child: Transform.scale(
                                         alignment: Alignment.bottomCenter,
-                                        scale: 1.5,
+                                        scale:
+                                            0.75, // 💡 수초 크기도 물고기처럼 아담한 사이즈로 0.75배 축소
                                         child: PixelSeaweed(
                                           type:
                                               seaweed['type'] ?? 'green_algae',
@@ -607,63 +641,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                               320.0 - 40.0 - 30.0; // 어항 세로 - 물고기 - 모래
                           List<Widget> effectWidgets =
                               []; // 3개의 먹이 조각 + 하트 이펙트 리스트
+                          List<Widget> fishWidgets = []; // 💡 여러 물고기 위젯 리스트
 
                           final fishV = _fishController!.value;
                           final feedV = _isFeeding
                               ? _feedController!.value
                               : 0.0;
-
-                          final currentPose = _getFishPose(
-                            widget.swimmingFish['type'] ?? 'puffer',
-                            _isFeeding,
-                            fishV,
-                            feedV,
-                            w,
-                            h,
-                          );
-                          final double x = currentPose.$1;
-                          final double y = currentPose.$2;
-                          final bool flipX = currentPose.$3;
-
-                          // 🌟 방향에 맞게 기울기(회전 각도) 계산을 위해 아주 살짝 미래의 위치를 구함
-                          final nextFishV = (fishV + 0.005) % 1.0;
-                          final nextFeedV = _isFeeding
-                              ? min(1.0, feedV + 0.005)
-                              : 0.0;
-                          final nextPose = _getFishPose(
-                            widget.swimmingFish['type'] ?? 'puffer',
-                            _isFeeding,
-                            nextFishV,
-                            nextFeedV,
-                            w,
-                            h,
-                          );
-
-                          double tiltAngle = 0.0;
-                          if (_isFeeding && feedV >= 0.4 && feedV < 0.7) {
-                            tiltAngle = -0.2; // 먹이를 먹을 땐 살짝 위를 향함
-                          } else if (_isFeeding && feedV < 0.2) {
-                            tiltAngle = 0.0; // 먹이 떨어지길 대기할 땐 평형 유지
-                          } else {
-                            double dx = nextPose.$1 - x;
-                            double dy = nextPose.$2 - y;
-                            // 움직임이 있을 때만 각도 계산
-                            if (dx.abs() > 0.01 || dy.abs() > 0.01) {
-                              tiltAngle = flipX
-                                  ? atan2(dy, -dx)
-                                  : atan2(dy, dx);
-                            }
-                          }
-
-                          // 💡 해파리, 해마처럼 수직으로 서서 다니는 생물은 회전(기울기)을 제한합니다.
-                          if (widget.swimmingFish['type'] == 'jellyfish' ||
-                              widget.swimmingFish['type'] == 'seahorse') {
-                            tiltAngle = 0.0;
-                          }
-                          // 새우는 바닥 기어다니거나 뒤로 펄쩍 뛰므로 각도를 약간만 줌
-                          if (widget.swimmingFish['type'] == 'shrimp') {
-                            tiltAngle *= 0.3;
-                          }
 
                           if (_isFeeding) {
                             final targetX = w / 2; // 수면 중앙 위치
@@ -750,38 +733,147 @@ class _AquariumScreenState extends State<AquariumScreen>
                             }
 
                             // 높이(시간) 차이를 두고 3조각 생성
-                            effectWidgets.add(
-                              buildFood(
-                                0.0,
-                                0.15,
-                                0.45,
-                                -12,
-                                const Color.fromARGB(255, 202, 119, 94),
-                              ),
-                            );
-                            effectWidgets.add(
-                              buildFood(
-                                0.05,
-                                0.20,
-                                0.55,
-                                0,
-                                const Color.fromARGB(255, 189, 128, 115),
-                              ),
-                            );
-                            effectWidgets.add(
-                              buildFood(
-                                0.10,
-                                0.25,
-                                0.65,
-                                12,
-                                Colors.brown[900]!,
-                              ),
-                            );
+                            if (_feedType == 'supplement') {
+                              // 영양제 알약 모형으로 생성
+                              effectWidgets.add(
+                                buildFood(
+                                  0.0,
+                                  0.20,
+                                  0.50,
+                                  -3,
+                                  Colors.pinkAccent,
+                                ),
+                              );
+                              effectWidgets.add(
+                                buildFood(0.05, 0.25, 0.55, 3, Colors.white),
+                              );
+                            } else {
+                              effectWidgets.add(
+                                buildFood(
+                                  0.0,
+                                  0.15,
+                                  0.45,
+                                  -12,
+                                  const Color.fromARGB(255, 202, 119, 94),
+                                ),
+                              );
+                              effectWidgets.add(
+                                buildFood(
+                                  0.05,
+                                  0.20,
+                                  0.55,
+                                  0,
+                                  const Color.fromARGB(255, 189, 128, 115),
+                                ),
+                              );
+                              effectWidgets.add(
+                                buildFood(
+                                  0.10,
+                                  0.25,
+                                  0.65,
+                                  12,
+                                  Colors.brown[900]!,
+                                ),
+                              );
+                            }
 
                             // 밥을 먹는 타이밍에 맞춰 하트 3개 뿅뿅 발사
                             effectWidgets.add(buildHeart(0.40, 0.4, -15));
                             effectWidgets.add(buildHeart(0.48, 0.4, 5));
                             effectWidgets.add(buildHeart(0.55, 0.4, -5));
+                          }
+
+                          // 💡 다중 물고기들을 순회하며 각자의 위치와 위상 적용
+                          for (var fish in widget.swimmingFishes) {
+                            double phaseOffset =
+                                (fish['id'].hashCode % 1000) / 1000.0;
+                            double localFishV = (fishV + phaseOffset) % 1.0;
+
+                            final currentPose = _getFishPose(
+                              fish,
+                              _isFeeding,
+                              localFishV,
+                              feedV,
+                              w,
+                              h,
+                            );
+                            final double x = currentPose.$1;
+                            final double y = currentPose.$2;
+                            final bool flipX = currentPose.$3;
+
+                            // 🌟 방향에 맞게 기울기(회전 각도) 계산을 위해 아주 살짝 미래의 위치를 구함
+                            final nextFishV = (localFishV + 0.005) % 1.0;
+                            final nextFeedV = _isFeeding
+                                ? min(1.0, feedV + 0.005)
+                                : 0.0;
+                            final nextPose = _getFishPose(
+                              fish,
+                              _isFeeding,
+                              nextFishV,
+                              nextFeedV,
+                              w,
+                              h,
+                            );
+
+                            double tiltAngle = 0.0;
+                            if (_isFeeding && feedV >= 0.4 && feedV < 0.7) {
+                              tiltAngle = -0.2; // 먹이를 먹을 땐 살짝 위를 향함
+                            } else if (_isFeeding && feedV < 0.2) {
+                              tiltAngle = 0.0; // 먹이 떨어지길 대기할 땐 평형 유지
+                            } else {
+                              double dx = nextPose.$1 - x;
+                              double dy = nextPose.$2 - y;
+                              // 움직임이 있을 때만 각도 계산
+                              if (dx.abs() > 0.01 || dy.abs() > 0.01) {
+                                tiltAngle = flipX
+                                    ? atan2(dy, -dx)
+                                    : atan2(dy, dx);
+                              }
+                            }
+
+                            if (fish['type'] == 'jellyfish' ||
+                                fish['type'] == 'seahorse') {
+                              tiltAngle = 0.0;
+                            }
+                            if (fish['type'] == 'shrimp') {
+                              tiltAngle *= 0.3;
+                            }
+
+                            fishWidgets.add(
+                              Positioned(
+                                left: x,
+                                top: y,
+                                child: Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.diagonal3Values(
+                                    flipX ? -1.0 : 1.0, // 좌우 반전 적용
+                                    1.0,
+                                    1.0,
+                                  )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      setState(() {
+                                        // 💡 터치한 물고기의 ID를 선택하여 상태창을 켬
+                                        if (_selectedFishId == fish['id']) {
+                                          _showStatus = false;
+                                          _selectedFishId = null;
+                                        } else {
+                                          _selectedFishId = fish['id'];
+                                          _showStatus = true;
+                                        }
+                                      });
+                                    },
+                                    child: Transform.scale(
+                                      scale: 0.5, // 💡 물고기 크기 절반으로 축소
+                                      child: PixelFish(
+                                        type: fish['type'] ?? 'puffer',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
                           }
 
                           // 💡 Stack 내부가 Positioned 자식만 있어서 크기가 0이 되어 잘리는 현상 해결!
@@ -802,38 +894,11 @@ class _AquariumScreenState extends State<AquariumScreen>
                                   ),
                                 ),
                                 ...effectWidgets, // 먹이 조각과 하트 이펙트 일괄 배치
-                                Positioned(
-                                  left: x,
-                                  top: y,
-                                  child: Transform(
-                                    alignment: Alignment.center,
-                                    transform: Matrix4.diagonal3Values(
-                                      flipX ? -1.0 : 1.0, // 좌우 반전 적용
-                                      1.0,
-                                      1.0,
-                                    )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
-                                    child: GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () {
-                                        setState(() {
-                                          _showStatus =
-                                              !_showStatus; // 💡 물고기 터치 시 상태창 토글
-                                        });
-                                      },
-                                      child: Transform.scale(
-                                        scale: 0.5, // 💡 물고기 크기 절반으로 축소
-                                        child: child!,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                ...fishWidgets, // 여러 마리의 물고기들을 캔버스에 배치
                               ],
                             ),
                           );
                         },
-                        child: PixelFish(
-                          type: widget.swimmingFish['type'] ?? 'puffer',
-                        ),
                       ),
                   ],
                 ),
@@ -857,20 +922,71 @@ class _AquariumScreenState extends State<AquariumScreen>
               ),
             ),
           ),
-          // 먹이 주기 버튼 (왼쪽 배치)
+          // 💡 먹이 주기 및 영양제 버튼 (왼쪽 하단 나란히 배치)
           Positioned(
             bottom: 20,
             left: 20,
-            child: PixelButton(
-              color: Colors.orangeAccent,
-              textColor: Colors.white,
-              onPressed: _startFeeding,
-              child: const Row(
+            child: Row(
+              children: [
+                PixelButton(
+                  color: Colors.orangeAccent,
+                  textColor: Colors.white,
+                  onPressed: () =>
+                      _startFeeding('feed'), // 💡 올바른 함수 호출 방식으로 변경
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PixelEmoji('meat', size: 16),
+                      SizedBox(width: 4),
+                      Text('먹이'),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                PixelButton(
+                  color: Colors.pinkAccent,
+                  textColor: Colors.white,
+                  onPressed: () =>
+                      _startFeeding('supplement'), // 💡 영양제 주기 버튼 추가
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.medical_services,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 4),
+                      Text('영양제'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 🐟 현재 물고기 수 표시 (좌측 상단)
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: getRetroGradient(Colors.white),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              ),
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  PixelEmoji('meat', size: 18),
-                  SizedBox(width: 6),
-                  Text('먹이 주기'),
+                  const PixelEmoji('fish', size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${widget.swimmingFishes.length} / 5',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             ),

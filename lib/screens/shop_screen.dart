@@ -12,7 +12,7 @@ class ShopScreen extends StatefulWidget {
   final List<Map<String, dynamic>> ownedSeaweeds;
   final void Function(Map<String, dynamic> fish) onAddFish;
   final void Function(Map<String, dynamic> seaweed) onAddSeaweed;
-  final void Function(int cost, int amount) onBuyFeed;
+  final void Function(String type, int cost, int amount) onBuyItem;
   final void Function(int cost) onSpendCoin;
   final VoidCallback onNavigateToAquarium;
 
@@ -23,7 +23,7 @@ class ShopScreen extends StatefulWidget {
     required this.ownedSeaweeds,
     required this.onAddFish,
     required this.onAddSeaweed,
-    required this.onBuyFeed,
+    required this.onBuyItem,
     required this.onSpendCoin,
     required this.onNavigateToAquarium,
   });
@@ -410,24 +410,49 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           const SizedBox(height: 20),
           const PixelEmoji('meat', size: 64),
           const SizedBox(height: 40),
-          _buildBuyFeedButton('일반 먹이 10개', 1, 10),
+          _buildBuyItemButton(
+            '일반 먹이 10개',
+            'feed',
+            1,
+            10,
+            const Color(0xFFFFDAB9),
+            const PixelEmoji('meat', size: 16),
+          ),
+          const SizedBox(height: 16),
+          _buildBuyItemButton(
+            '영양제 5개',
+            'supplement',
+            2,
+            5,
+            const Color(0xFFA8E6CF),
+            const Icon(Icons.medical_services, color: Colors.black, size: 16),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBuyFeedButton(String title, int cost, int amount) {
+  Widget _buildBuyItemButton(
+    String title,
+    String type,
+    int cost,
+    int amount,
+    Color bgColor,
+    Widget icon,
+  ) {
     return BouncingWrapper(
       child: RetroGradientButton(
-        color: const Color(0xFFFFDAB9),
-        foregroundColor: Colors.white,
+        color: bgColor,
+        foregroundColor: type == 'feed' ? Colors.white : Colors.black,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         borderRadius: BorderRadius.circular(12),
         borderWidth: 1.5,
-        onPressed: () => _confirmBuyFeed(title, cost, amount),
+        onPressed: () => _confirmBuyItem(title, type, cost, amount),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            icon,
+            const SizedBox(width: 8),
             Text(
               title,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -445,7 +470,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _confirmBuyFeed(String title, int cost, int amount) {
+  void _confirmBuyItem(String title, String type, int cost, int amount) {
     showDialog(
       context: context,
       builder: (context) {
@@ -494,8 +519,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         onPressed: () {
                           Navigator.pop(context);
                           if (widget.coins >= cost) {
-                            widget.onBuyFeed(cost, amount);
-                            _showNoticeDialog('먹이 구매 완료! 🍗');
+                            widget.onBuyItem(type, cost, amount);
+                            _showNoticeDialog('구매가 완료되었습니다! 🎉');
                           } else {
                             _showNoticeDialog('코인이 부족합니다! 🪙');
                           }

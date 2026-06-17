@@ -23,11 +23,16 @@ class _PixelSeaweedState extends State<PixelSeaweed>
   @override
   void initState() {
     super.initState();
+    final random = Random();
+    // 💡 수초마다 1.5초 ~ 2.5초 사이의 랜덤한 흔들림 주기를 부여합니다.
+    final int randomDurationMs = 1500 + random.nextInt(1000);
+
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000), // 수초가 살랑거리는 속도
+      duration: Duration(milliseconds: randomDurationMs),
     );
     if (widget.isAnimated) {
+      _controller.value = random.nextDouble(); // 💡 흔들리는 타이밍(시작점)도 랜덤하게 흩뿌림
       _controller.repeat();
     }
   }
@@ -213,7 +218,9 @@ class PixelSeaweedPainter extends CustomPainter {
 
     for (int y = 0; y < pixels.length; y++) {
       for (int x = 0; x < pixels[y].length; x++) {
-        if (pixels[y][x] == e) continue;
+        if (pixels[y][x] == e) {
+          continue;
+        }
         paint.color = pixels[y][x] == c1 ? color1 : color2;
 
         // 🌱 수초가 물결에 따라 살랑거리는 픽셀 애니메이션 (위쪽일수록 좌우로 더 흔들림)
