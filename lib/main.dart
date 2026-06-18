@@ -15,6 +15,7 @@ import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
 import 'pixel_emoji.dart';
 import 'slot_machine.dart';
+import 'pixel_supplement.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
@@ -794,333 +795,353 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       isScrollControlled: true, // 화면 비율에 따라 높이를 조정할 수 있게 허용
       backgroundColor: Colors.transparent, // 둥근 모서리 디자인을 위해 투명 처리
       builder: (context) {
-        // SafeArea 추가: 아이폰 하단 홈 바에 UI가 가려지지 않도록 보호
-        return SafeArea(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            height:
-                MediaQuery.of(context).size.height *
-                0.6, // 스크롤을 위해 기기 높이의 60% 사용
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            // SafeArea 추가: 아이폰 하단 홈 바에 UI가 가려지지 않도록 보호
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
+                ),
+                height:
+                    MediaQuery.of(context).size.height *
+                    0.6, // 스크롤을 위해 기기 높이의 60% 사용
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        PixelEmoji('box', size: 24),
-                        SizedBox(width: 8),
-                        Text(
-                          '내 보관함',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        const Row(
+                          children: [
+                            PixelEmoji('box', size: 24),
+                            SizedBox(width: 8),
+                            Text(
+                              '내 보관함',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // --- 물고기 보관함 영역 ---
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  PixelEmoji('fish', size: 16),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '내 물고기',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            _ownedFishes.isEmpty
+                                ? const Text('아직 뽑은 물고기가 없어요!')
+                                : GridView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(), // 스크롤은 부모가 대신함
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 3,
+                                          crossAxisSpacing: 6,
+                                          mainAxisSpacing: 12,
+                                          childAspectRatio: 1.25,
+                                        ),
+                                    itemCount: _ownedFishes.length,
+                                    itemBuilder: (context, index) {
+                                      final fish = _ownedFishes[index];
+                                      final bool isSwimming = _swimmingFishIds
+                                          .contains(fish['id']);
+                                      return BouncingWrapper(
+                                        child: SizedBox.expand(
+                                          child: Card(
+                                            margin: EdgeInsets.zero,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color: const Color(0xFF333333),
+                                                width: 1,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: InkWell(
+                                              onTap: () {
+                                                setSheetState(() {
+                                                  // 💡 팝업창 내부 UI(체크마크 등) 즉시 갱신
+                                                  if (isSwimming) {
+                                                    if (_swimmingFishIds
+                                                            .length >
+                                                        1) {
+                                                      _swimmingFishIds.remove(
+                                                        fish['id'],
+                                                      );
+                                                    } else {
+                                                      _showNoticeDialog(
+                                                        '최소 1마리의 물고기는 수조에 있어야 합니다!',
+                                                      );
+                                                    }
+                                                  } else {
+                                                    if (_swimmingFishIds
+                                                            .length >=
+                                                        5) {
+                                                      _showNoticeDialog(
+                                                        '수조에는 최대 5마리까지만 넣을 수 있습니다!',
+                                                      );
+                                                    } else {
+                                                      _swimmingFishIds.add(
+                                                        fish['id']
+                                                            .toString(), // 💡 확실하게 String으로 변환
+                                                      );
+                                                      Navigator.of(
+                                                        context,
+                                                      ).pop(); // 💡 물고기를 수조에 넣으면 창 닫기
+                                                    }
+                                                  }
+                                                });
+                                                setState(
+                                                  () {},
+                                                ); // 💡 뒤에 깔려있는 메인 수조 화면도 갱신
+                                                _saveMainData();
+                                              },
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Transform.scale(
+                                                        scale: 1.2,
+                                                        child: PixelFish(
+                                                          type:
+                                                              fish['type']
+                                                                  ?.toString() ??
+                                                              'puffer',
+                                                          isAnimated: false,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      Text(
+                                                        fish['name']
+                                                                ?.toString() ??
+                                                            '',
+                                                        style: const TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  if (isSwimming)
+                                                    Positioned(
+                                                      top: 8,
+                                                      left: 8,
+                                                      child: SizedBox(
+                                                        width: 16,
+                                                        height: 16,
+                                                        child: CustomPaint(
+                                                          painter:
+                                                              PixelCheckPainter(
+                                                                color: Colors
+                                                                    .green,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                            const SizedBox(height: 24),
+
+                            // --- 수초 보관함 영역 ---
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  PixelEmoji('seaweed', size: 16),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '내 수초',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            _ownedSeaweeds.isEmpty
+                                ? const Padding(
+                                    padding: EdgeInsets.only(bottom: 20),
+                                    child: Text(
+                                      '아직 뽑은 수초가 없어요!\n가챠 샵에서 수초를 뽑아보세요.',
+                                    ),
+                                  )
+                                : GridView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 3,
+                                          crossAxisSpacing: 6,
+                                          mainAxisSpacing: 12,
+                                          childAspectRatio:
+                                              1.0, // 수초는 세로가 기므로 정방형으로 비율 조정
+                                        ),
+                                    itemCount: _ownedSeaweeds.length,
+                                    itemBuilder: (context, index) {
+                                      final seaweed = _ownedSeaweeds[index];
+                                      final bool isPlanted = _plantedSeaweeds
+                                          .any(
+                                            (s) => s['type'] == seaweed['type'],
+                                          );
+                                      return BouncingWrapper(
+                                        child: SizedBox.expand(
+                                          child: Card(
+                                            margin: EdgeInsets.zero,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                color: const Color(0xFF333333),
+                                                width: 1,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  _plantedSeaweeds.add({
+                                                    'type':
+                                                        seaweed['type']
+                                                            ?.toString() ??
+                                                        'green_algae',
+                                                    'x':
+                                                        140.0 +
+                                                        (Random().nextDouble() *
+                                                                40 -
+                                                            20), // 💡 추가 시 겹치지 않게 위치 살짝 분산
+                                                  });
+                                                  _selectedIndex = 0;
+                                                });
+                                                _saveMainData();
+                                                _pageController.animateToPage(
+                                                  0,
+                                                  duration: const Duration(
+                                                    milliseconds: 300,
+                                                  ),
+                                                  curve: Curves.easeInOut,
+                                                );
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Transform.scale(
+                                                        scale: 1.1,
+                                                        child: PixelSeaweed(
+                                                          type:
+                                                              seaweed['type']
+                                                                  ?.toString() ??
+                                                              'green_algae',
+                                                          isAnimated: false,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      Text(
+                                                        seaweed['name']
+                                                                ?.toString() ??
+                                                            '',
+                                                        style: const TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  if (isPlanted)
+                                                    Positioned(
+                                                      top: 8,
+                                                      left: 8,
+                                                      child: SizedBox(
+                                                        width: 16,
+                                                        height: 16,
+                                                        child: CustomPaint(
+                                                          painter:
+                                                              PixelCheckPainter(
+                                                                color: Colors
+                                                                    .green,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // --- 물고기 보관함 영역 ---
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            children: [
-                              PixelEmoji('fish', size: 16),
-                              SizedBox(width: 8),
-                              Text(
-                                '내 물고기',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _ownedFishes.isEmpty
-                            ? const Text('아직 뽑은 물고기가 없어요!')
-                            : GridView.builder(
-                                shrinkWrap: true,
-                                physics:
-                                    const NeverScrollableScrollPhysics(), // 스크롤은 부모가 대신함
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3,
-                                      crossAxisSpacing: 6,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: 1.25,
-                                    ),
-                                itemCount: _ownedFishes.length,
-                                itemBuilder: (context, index) {
-                                  final fish = _ownedFishes[index];
-                                  final bool isSwimming = _swimmingFishIds
-                                      .contains(fish['id']);
-                                  return BouncingWrapper(
-                                    child: SizedBox.expand(
-                                      child: Card(
-                                        margin: EdgeInsets.zero,
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: const Color(0xFF333333),
-                                            width: 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        clipBehavior: Clip.antiAlias,
-                                        child: InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              if (isSwimming) {
-                                                if (_swimmingFishIds.length >
-                                                    1) {
-                                                  _swimmingFishIds.remove(
-                                                    fish['id'],
-                                                  );
-                                                } else {
-                                                  _showNoticeDialog(
-                                                    '최소 1마리의 물고기는 수조에 있어야 합니다!',
-                                                  );
-                                                }
-                                              } else {
-                                                if (_swimmingFishIds.length >=
-                                                    5) {
-                                                  _showNoticeDialog(
-                                                    '수조에는 최대 5마리까지만 넣을 수 있습니다!',
-                                                  );
-                                                } else {
-                                                  _swimmingFishIds.add(
-                                                    fish['id']
-                                                        .toString(), // 💡 확실하게 String으로 변환
-                                                  );
-                                                  Navigator.of(
-                                                    context,
-                                                  ).pop(); // 💡 물고기를 수조에 넣으면 창 닫기
-                                                }
-                                              }
-                                            });
-                                            _saveMainData();
-                                          },
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Transform.scale(
-                                                    scale: 1.2,
-                                                    child: PixelFish(
-                                                      type:
-                                                          fish['type']
-                                                              ?.toString() ??
-                                                          'puffer',
-                                                      isAnimated: false,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 6),
-                                                  Text(
-                                                    fish['name']?.toString() ??
-                                                        '',
-                                                    style: const TextStyle(
-                                                      fontSize: 11,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ),
-                                              if (isSwimming)
-                                                Positioned(
-                                                  top: 8,
-                                                  left: 8,
-                                                  child: SizedBox(
-                                                    width: 16,
-                                                    height: 16,
-                                                    child: CustomPaint(
-                                                      painter:
-                                                          PixelCheckPainter(
-                                                            color: Colors.green,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                        const SizedBox(height: 24),
-
-                        // --- 수초 보관함 영역 ---
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            children: [
-                              PixelEmoji('seaweed', size: 16),
-                              SizedBox(width: 8),
-                              Text(
-                                '내 수초',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _ownedSeaweeds.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.only(bottom: 20),
-                                child: Text(
-                                  '아직 뽑은 수초가 없어요!\n가챠 샵에서 수초를 뽑아보세요.',
-                                ),
-                              )
-                            : GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3,
-                                      crossAxisSpacing: 6,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio:
-                                          1.0, // 수초는 세로가 기므로 정방형으로 비율 조정
-                                    ),
-                                itemCount: _ownedSeaweeds.length,
-                                itemBuilder: (context, index) {
-                                  final seaweed = _ownedSeaweeds[index];
-                                  final bool isPlanted = _plantedSeaweeds.any(
-                                    (s) => s['type'] == seaweed['type'],
-                                  );
-                                  return BouncingWrapper(
-                                    child: SizedBox.expand(
-                                      child: Card(
-                                        margin: EdgeInsets.zero,
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: const Color(0xFF333333),
-                                            width: 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        clipBehavior: Clip.antiAlias,
-                                        child: InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              _plantedSeaweeds.add({
-                                                'type':
-                                                    seaweed['type']
-                                                        ?.toString() ??
-                                                    'green_algae',
-                                                'x':
-                                                    140.0 +
-                                                    (Random().nextDouble() *
-                                                            40 -
-                                                        20), // 💡 추가 시 겹치지 않게 위치 살짝 분산
-                                              });
-                                              _selectedIndex = 0;
-                                            });
-                                            _saveMainData();
-                                            _pageController.animateToPage(
-                                              0,
-                                              duration: const Duration(
-                                                milliseconds: 300,
-                                              ),
-                                              curve: Curves.easeInOut,
-                                            );
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Transform.scale(
-                                                    scale: 1.1,
-                                                    child: PixelSeaweed(
-                                                      type:
-                                                          seaweed['type']
-                                                              ?.toString() ??
-                                                          'green_algae',
-                                                      isAnimated: false,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 6),
-                                                  Text(
-                                                    seaweed['name']
-                                                            ?.toString() ??
-                                                        '',
-                                                    style: const TextStyle(
-                                                      fontSize: 11,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ),
-                                              if (isPlanted)
-                                                Positioned(
-                                                  top: 8,
-                                                  left: 8,
-                                                  child: SizedBox(
-                                                    width: 16,
-                                                    height: 16,
-                                                    child: CustomPaint(
-                                                      painter:
-                                                          PixelCheckPainter(
-                                                            color: Colors.green,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -1218,11 +1239,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.medical_services,
-                    color: Colors.black,
-                    size: 14,
-                  ),
+                  const PixelSupplement(size: 14),
                   const SizedBox(width: 4),
                   Text(
                     '$_supplementCount',

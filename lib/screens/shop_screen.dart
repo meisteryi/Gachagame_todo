@@ -5,6 +5,7 @@ import '../slot_machine.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
 import '../pixel_emoji.dart';
+import '../pixel_supplement.dart';
 
 class ShopScreen extends StatefulWidget {
   final int coins;
@@ -425,7 +426,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             2,
             5,
             const Color(0xFFA8E6CF),
-            const Icon(Icons.medical_services, color: Colors.black, size: 16),
+            const PixelSupplement(size: 16),
           ),
         ],
       ),

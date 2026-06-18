@@ -5,6 +5,7 @@ import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
 import '../pixel_emoji.dart';
 import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
+import '../pixel_supplement.dart';
 
 class AquariumScreen extends StatefulWidget {
   final List<Map<String, dynamic>> swimmingFishes; // 💡 여러 마리 물고기 배열
@@ -951,11 +952,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.medical_services,
-                        size: 16,
-                        color: Colors.white,
-                      ),
+                      PixelSupplement(size: 16),
                       SizedBox(width: 4),
                       Text('영양제'),
                     ],
