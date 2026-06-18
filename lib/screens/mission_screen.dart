@@ -157,10 +157,9 @@ class _MissionScreenState extends State<MissionScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -229,13 +228,10 @@ class _MissionScreenState extends State<MissionScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isClaimed ? Colors.grey[200] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF333333), width: 1.5),
+        borderRadius: BorderRadius.circular(4),
         boxShadow: isClaimed
             ? null
-            : const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
-              ],
+            : const [BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3))],
       ),
       child: Row(
         children: [

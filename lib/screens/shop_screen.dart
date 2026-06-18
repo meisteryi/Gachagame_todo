@@ -103,10 +103,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -197,10 +196,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -242,11 +240,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.lightBlueAccent.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF333333),
-                        width: 1,
-                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Transform.scale(
                       scale: 1.5,
@@ -283,11 +277,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                       alpha: 0.2,
                                     )
                                   : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: const Color(0xFF333333),
-                                width: 1,
-                              ),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -401,15 +391,22 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            '먹이 상점',
+            '먹이 및 영양제 상점',
             style: TextStyle(
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: FontWeight.w900,
               color: Colors.black,
             ),
           ),
           const SizedBox(height: 20),
-          const PixelEmoji('meat', size: 64),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PixelEmoji('meat', size: 56),
+              SizedBox(width: 20),
+              PixelSupplement(size: 56),
+            ],
+          ),
           const SizedBox(height: 40),
           _buildBuyItemButton(
             '일반 먹이 10개',
@@ -481,10 +478,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -557,8 +553,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           height: double.infinity,
           decoration: BoxDecoration(
             gradient: getRetroGradient(bgColor),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF333333), width: 1.5),
+            borderRadius: BorderRadius.circular(4),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -589,8 +584,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     return Container(
       decoration: BoxDecoration(
         gradient: getRetroGradient(Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[400]!, width: 1.5),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: const Center(
         child: Icon(Icons.lock, color: Colors.grey, size: 40),
@@ -685,8 +679,15 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: _buildShopItem(
-                                '먹이 상점',
-                                const PixelEmoji('meat', size: 36),
+                                '먹이 및\n영양제 상점',
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    PixelEmoji('meat', size: 32),
+                                    SizedBox(width: 8),
+                                    PixelSupplement(size: 32),
+                                  ],
+                                ),
                                 const Color(0xFFFFB7B2),
                                 () => setState(() => _gachaMode = 'feed'),
                               ),
@@ -775,11 +776,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                   ),
                                   decoration: BoxDecoration(
                                     gradient: getRetroGradient(Colors.white),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: const Color(0xFF333333),
-                                      width: 1,
-                                    ),
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: const Text(
                                     '< 뒤로',

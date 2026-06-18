@@ -12,8 +12,8 @@ class AquariumScreen extends StatefulWidget {
   final List<Map<String, dynamic>> plantedSeaweeds;
   final int feedCount;
   final int supplementCount;
-  final VoidCallback onFeed;
-  final VoidCallback onSupplement;
+  final ValueChanged<String> onFeed;
+  final ValueChanged<String> onSupplement;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final VoidCallback onShowStorage;
 
@@ -45,6 +45,7 @@ class _AquariumScreenState extends State<AquariumScreen>
   bool _isEditMode = false; // 🌟 수초 편집 모드
   bool _showStatus = false; // 🌟 물고기 상태창 표시 여부
   String? _selectedFishId; // 🌟 상태창을 띄울 물고기 ID
+  String? _targetFishId; // 🌟 먹이를 줄 목표 물고기 ID
 
   @override
   void initState() {
@@ -206,7 +207,8 @@ class _AquariumScreenState extends State<AquariumScreen>
     String type = fish['type'] ?? 'puffer';
     String id = fish['id'] ?? '';
 
-    if (isFeeding && feedV > 0.0) {
+    // 💡 먹이/영양제를 줄 때 선택한 목표 물고기(_targetFishId)만 반응합니다!
+    if (isFeeding && feedV > 0.0 && id == _targetFishId) {
       final targetX = w / 2;
       final targetY = 20.0;
       final startX = _feedStartPositions[id]?.dx ?? (w / 2);
@@ -263,7 +265,6 @@ class _AquariumScreenState extends State<AquariumScreen>
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
               boxShadow: const [
                 BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
               ],
@@ -321,37 +322,233 @@ class _AquariumScreenState extends State<AquariumScreen>
       return;
     }
 
+    // 💡 수조에 있는 물고기 리스트를 팝업으로 띄워 선택하게 합니다.
+    showDialog<String>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            height: 420, // 💡 팝업창 크기를 고정하여 아이템 개수에 따라 늘어나지 않게 함
+            padding: const EdgeInsets.all(16), // 💡 전체 팝업창 테두리 여백(베젤) 축소
+            decoration: BoxDecoration(
+              color: const Color(0xFFE1F5FE), // 💡 눈이 편안한 옅은 파스텔 블루
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: const [
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+              ],
+            ),
+            child: Column(
+              children: [
+                Text(
+                  type == 'feed' ? '누구에게 먹이를 줄까요?' : '누구에게 영양제를 줄까요?',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  // 💡 남은 공간을 꽉 채워 스크롤 영역 확보, 닫기 버튼은 하단 고정
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: widget.swimmingFishes.map((fish) {
+                        final int level = fish['level'] ?? 1;
+                        final int exp = fish['exp'] ?? 0;
+                        final int maxExp = level * 100;
+                        final String mood = fish['mood'] ?? '보통';
+
+                        String moodEmoji = 'mood_normal';
+                        if (mood == '좋음' || mood == '최고야!') {
+                          moodEmoji = 'mood_good';
+                        } else if (mood == '나쁨') {
+                          moodEmoji = 'mood_bad';
+                        }
+
+                        return GestureDetector(
+                          onTap: () => Navigator.pop(context, fish['id']),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              gradient: getRetroGradient(Colors.white),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: const Color(0xFF333333),
+                                width: 3,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 상단: 물고기 이미지, 이름, 기분
+                                Row(
+                                  children: [
+                                    Transform.scale(
+                                      scale: 0.8,
+                                      child: PixelFish(
+                                        type: fish['type'] ?? 'puffer',
+                                        isAnimated: false,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        fish['name'] ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '$mood ',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        PixelEmoji(moodEmoji, size: 16),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                // 하단: 레벨, 경험치 바
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Lv.$level',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 12,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Container(
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            return Stack(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                  child: Container(
+                                                    width:
+                                                        constraints.maxWidth *
+                                                        (exp / maxExp).clamp(
+                                                          0.0,
+                                                          1.0,
+                                                        ),
+                                                    color: Colors.greenAccent,
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '$exp / $maxExp',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12), // 💡 취소 버튼 위쪽 공간 축소
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ).then((selectedId) {
+      if (selectedId != null) {
+        _executeFeeding(type, selectedId);
+      }
+    });
+  }
+
+  // 💡 선택한 물고기에게 먹이를 주는 실제 애니메이션 및 경험치 부여 실행 함수
+  void _executeFeeding(String type, String targetId) {
     if (type == 'feed') {
-      widget.onFeed();
+      widget.onFeed(targetId);
     } else {
-      widget.onSupplement(); // 💡 먹이 또는 영양제 소모 및 경험치 획득 콜백
+      widget.onSupplement(targetId);
     }
 
     setState(() {
       _isFeeding = true;
       _feedType = type;
+      _targetFishId = targetId;
     });
 
-    // 💡 모든 물고기의 현재 위치를 기록하여 자연스럽게 수면으로 향하도록 함
     _feedStartPositions.clear();
     final v = _fishController?.value ?? 0.0;
     final double w = 320.0 - 60.0;
     final double h = 320.0 - 40.0 - 30.0;
 
-    for (var fish in widget.swimmingFishes) {
-      double phaseOffset = (fish['id'].hashCode % 1000) / 1000.0;
-      double fishV = (v + phaseOffset) % 1.0;
-      final (startOffset, _) = _getNormalFishPosAndFlip(
-        fish['type'] ?? 'puffer',
-        fishV,
-        w,
-        h,
-      );
-      _feedStartPositions[fish['id'] ?? ''] = startOffset;
-    }
+    // 💡 타겟 물고기의 위치만 기록합니다.
+    final targetFish = widget.swimmingFishes.firstWhere(
+      (f) => f['id'] == targetId,
+    );
+    double phaseOffset = (targetFish['id'].hashCode % 1000) / 1000.0;
+    double fishV = (v + phaseOffset) % 1.0;
+    final (startOffset, _) = _getNormalFishPosAndFlip(
+      targetFish['type'] ?? 'puffer',
+      fishV,
+      w,
+      h,
+    );
+    _feedStartPositions[targetId] = startOffset;
 
     _feedController?.forward(from: 0.0).then((_) {
-      if (mounted) setState(() => _isFeeding = false);
+      if (mounted) {
+        setState(() {
+          _isFeeding = false;
+          _targetFishId = null;
+        });
+      }
     });
   }
 
@@ -372,10 +569,10 @@ class _AquariumScreenState extends State<AquariumScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: getRetroGradient(Colors.white),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF333333), width: 1.5),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF333333), width: 3),
         boxShadow: const [
-          BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+          BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
         ],
       ),
       child: Column(
@@ -414,11 +611,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                   height: 14,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF333333),
-                      width: 1,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
@@ -485,11 +678,11 @@ class _AquariumScreenState extends State<AquariumScreen>
                 height: 320,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.05), // 물 밖의 빈 유리 느낌
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
                       color: const Color(0xFF333333).withValues(alpha: 0.1),
-                      blurRadius: 15,
+                      blurRadius: 0,
                       spreadRadius: 0,
                     ),
                   ],
@@ -507,7 +700,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                         decoration: BoxDecoration(
                           color: Colors.lightBlueAccent.withValues(alpha: 0.15),
                           borderRadius: const BorderRadius.vertical(
-                            bottom: Radius.circular(24),
+                            bottom: Radius.circular(4),
                           ),
                         ),
                       ),
@@ -969,8 +1162,7 @@ class _AquariumScreenState extends State<AquariumScreen>
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 gradient: getRetroGradient(Colors.white),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF333333), width: 1.5),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -1020,8 +1212,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                   ),
                   decoration: BoxDecoration(
                     color: Colors.black87,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.yellowAccent, width: 1),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
                     '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.',
@@ -1291,15 +1482,11 @@ class _PixelButtonState extends State<PixelButton> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           gradient: getRetroGradient(widget.color), // 💡 그라데이션 적용
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: const Color(0xFF333333),
-            width: 1.5,
-          ), // 두꺼운 픽셀 테두리
+          borderRadius: BorderRadius.circular(4),
           boxShadow: _isPressed
               ? []
               : const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
                 ], // 도트 그림자
         ),
         child: DefaultTextStyle(

@@ -145,6 +145,50 @@ class _PixelEmojiPainter extends CustomPainter {
         'rrr.....',
         'r.......',
       ],
+      'calendar': [
+        // 📅 달력
+        '.s.ss.s.',
+        'rrrrrrrr',
+        'wwwwwwww',
+        'wkwkkwkw',
+        'wwwwwwww',
+        'wkwkkwkw',
+        'wwwwwwww',
+        '........',
+      ],
+      'mood_good': [
+        // 😄 기분 좋음
+        '..yyyy..',
+        '.yyyyyy.',
+        'ykyykyyy',
+        'yyyyyyyy',
+        'ykyykyyy',
+        'yykkyyyy',
+        '.yyyyyy.',
+        '........',
+      ],
+      'mood_normal': [
+        // 😐 기분 보통
+        '..yyyy..',
+        '.yyyyyy.',
+        'ykyykyyy',
+        'yyyyyyyy',
+        'ykkkkyyy',
+        'yyyyyyyy',
+        '.yyyyyy.',
+        '........',
+      ],
+      'mood_bad': [
+        // ☹️ 기분 나쁨
+        '..yyyy..',
+        '.yyyyyy.',
+        'ykyykyyy',
+        'yyyyyyyy',
+        'yykkyyyy',
+        'ykyykyyy',
+        '.yyyyyy.',
+        '........',
+      ],
     };
 
     // 💡 픽셀 색상 팔레트
@@ -170,11 +214,14 @@ class _PixelEmojiPainter extends CustomPainter {
     final double pw = size.width / 8;
     final double ph = size.height / 8;
     final paint = Paint();
-    final outlinePaint = Paint()..color = Colors.black;
+    final outlinePaint = Paint()..color = const Color(0xFF333333);
 
-    final outlineOffsets = const [
-      Offset(-1, 0), Offset(1, 0), Offset(0, -1), Offset(0, 1),
-      Offset(-1, -1), Offset(1, -1), Offset(-1, 1), Offset(1, 1),
+    // 💡 1px 실선이 아닌, 영양제와 완벽하게 일치하는 픽셀 단위의 두꺼운 레트로 외곽선을 그립니다.
+    final outlineOffsets = [
+      Offset(-pw, 0),
+      Offset(pw, 0),
+      Offset(0, -ph),
+      Offset(0, ph),
     ];
 
     // 1. 얇은 테두리(외곽선) 그리기
@@ -183,7 +230,10 @@ class _PixelEmojiPainter extends CustomPainter {
         final char = data[y][x];
         if (char != '.') {
           for (var offset in outlineOffsets) {
-            canvas.drawRect(Rect.fromLTWH(x * pw + offset.dx, y * ph + offset.dy, pw, ph), outlinePaint);
+            canvas.drawRect(
+              Rect.fromLTWH(x * pw + offset.dx, y * ph + offset.dy, pw, ph),
+              outlinePaint,
+            );
           }
         }
       }

@@ -233,15 +233,11 @@ class _SlotMachineState extends State<SlotMachine> {
                       color: widget.gachaType == 'seaweed'
                           ? const Color(0xFF85CAC5)
                           : const Color(0xFFFFB7B2), // 부드러운 기계 색상
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFF333333),
-                        width: 2,
-                      ), // 검정 픽셀 테두리
+                      borderRadius: BorderRadius.circular(4),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0xFF333333),
-                          offset: Offset(2, 2),
+                          offset: Offset(3, 3),
                         ),
                       ],
                     ),
@@ -256,11 +252,7 @@ class _SlotMachineState extends State<SlotMachine> {
                           ),
                           decoration: BoxDecoration(
                             color: Colors.black,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFF333333),
-                              width: 1,
-                            ),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
                             'LUCKY GACHA',
@@ -278,14 +270,10 @@ class _SlotMachineState extends State<SlotMachine> {
                             margin: const EdgeInsets.fromLTRB(10, 0, 10, 15),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1.5,
-                              ),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(4),
                               child: Row(
                                 children: [
                                   _buildSlotColumn(_ctrl1),
@@ -321,15 +309,11 @@ class _SlotMachineState extends State<SlotMachine> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: Colors.grey[700],
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: const Color(0xFF333333),
-                                width: 1.5,
-                              ),
+                              borderRadius: BorderRadius.circular(4),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Color(0xFF333333),
-                                  offset: Offset(1.5, 1.5),
+                                  offset: Offset(3, 3),
                                 ),
                               ],
                             ),
@@ -356,15 +340,11 @@ class _SlotMachineState extends State<SlotMachine> {
                                     height: 36,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFFB7B2),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: const Color(0xFF333333),
-                                        width: 1.5,
-                                      ),
+                                      borderRadius: BorderRadius.circular(4),
                                       boxShadow: const [
                                         BoxShadow(
                                           color: Color(0xFF333333),
-                                          offset: Offset(1.5, 1.5),
+                                          offset: Offset(3, 3),
                                         ),
                                       ],
                                     ),
@@ -375,16 +355,6 @@ class _SlotMachineState extends State<SlotMachine> {
                                     height: 80,
                                     decoration: const BoxDecoration(
                                       color: Colors.grey,
-                                      border: Border(
-                                        left: BorderSide(
-                                          color: Color(0xFF333333),
-                                          width: 1.5,
-                                        ),
-                                        right: BorderSide(
-                                          color: Color(0xFF333333),
-                                          width: 1.5,
-                                        ),
-                                      ),
                                     ),
                                   ),
                                 ],
@@ -417,8 +387,8 @@ class _SlotMachineState extends State<SlotMachine> {
                       horizontal: 24,
                       vertical: 16,
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                    borderWidth: 1.5,
+                    borderRadius: BorderRadius.circular(4),
+                    borderWidth: 3.0,
                     onPressed: () => _spin(count: 1),
                     child: Column(
                       children: [
@@ -460,8 +430,8 @@ class _SlotMachineState extends State<SlotMachine> {
                       horizontal: 24,
                       vertical: 16,
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                    borderWidth: 1.5,
+                    borderRadius: BorderRadius.circular(4),
+                    borderWidth: 3.0,
                     onPressed: () => _spin(count: 10),
                     child: Column(
                       children: [

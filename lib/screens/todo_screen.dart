@@ -194,10 +194,9 @@ class _TodoScreenState extends State<TodoScreen>
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -307,18 +306,12 @@ class _TodoScreenState extends State<TodoScreen>
                       initialValue: newTask,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         labelText: '할 일을 입력하세요',
                       ),
@@ -437,18 +430,12 @@ class _TodoScreenState extends State<TodoScreen>
                       initialValue: newLocation,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         labelText: '장소 (선택)',
                         prefixIcon: Icon(
@@ -464,18 +451,12 @@ class _TodoScreenState extends State<TodoScreen>
                       maxLines: 2,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         labelText: '메모 (선택)',
                         prefixIcon: Icon(Icons.notes, color: Colors.black),
@@ -510,7 +491,7 @@ class _TodoScreenState extends State<TodoScreen>
                           selectedColor: Colors.black, // 선택 시 검은색 배경
                           backgroundColor: Colors.grey[200],
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(4),
                             side: const BorderSide(color: Colors.transparent),
                           ),
                         );
@@ -659,11 +640,7 @@ class _TodoScreenState extends State<TodoScreen>
                       color:
                           _categoryColors[todo['category']?.toString()] ??
                           Colors.grey,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFF333333),
-                        width: 1,
-                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       todo['category']?.toString() ?? '',
@@ -892,9 +869,9 @@ class _TodoScreenState extends State<TodoScreen>
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(
                             color: Color(0xFF333333),
-                            width: 1,
+                            width: 3,
                           ),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         deleteIcon: const Icon(Icons.close, size: 18),
                         onDeleted: () {
@@ -922,7 +899,8 @@ class _TodoScreenState extends State<TodoScreen>
                   TextField(
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
                       ),
                       labelText: '새 카테고리 이름',
                     ),
@@ -940,13 +918,7 @@ class _TodoScreenState extends State<TodoScreen>
                           height: 36,
                           decoration: BoxDecoration(
                             color: color,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: selectedColor == color
-                                  ? Colors.black
-                                  : Colors.transparent,
-                              width: 1.5,
-                            ),
+                            borderRadius: BorderRadius.circular(4),
                             boxShadow: selectedColor == color
                                 ? const [
                                     BoxShadow(
@@ -1074,15 +1046,11 @@ class _TodoScreenState extends State<TodoScreen>
                         ),
                         decoration: BoxDecoration(
                           gradient: getRetroGradient(Colors.white),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF333333),
-                            width: 1,
-                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_month, size: 16),
+                            const PixelEmoji('calendar', size: 16),
                             const SizedBox(width: 6),
                             Text(
                               '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
@@ -1124,10 +1092,9 @@ class _TodoScreenState extends State<TodoScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF333333), width: 1.5),
+                borderRadius: BorderRadius.circular(4),
                 boxShadow: const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
                 ],
               ),
               child: Column(
@@ -1225,11 +1192,7 @@ class _TodoScreenState extends State<TodoScreen>
                                 decoration: BoxDecoration(
                                   color:
                                       _categoryColors[category] ?? Colors.grey,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: const Color(0xFF333333),
-                                    width: 1,
-                                  ),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   category,
@@ -1283,11 +1246,7 @@ class _TodoScreenState extends State<TodoScreen>
                                       color: isDone
                                           ? Colors.grey[200]
                                           : Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: const Color(0xFF333333),
-                                        width: 1,
-                                      ),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Row(
                                       children: [
@@ -1510,7 +1469,7 @@ class _TodoScreenState extends State<TodoScreen>
                 onPressed: _showCategoryManagerBottomSheet,
                 backgroundColor: Colors.lightGreenAccent,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(color: Color(0xFF333333), width: 1.5),
+                  side: BorderSide.none,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 0,
@@ -1528,7 +1487,7 @@ class _TodoScreenState extends State<TodoScreen>
                 onPressed: () => _showTodoEditorBottomSheet(),
                 backgroundColor: Colors.yellowAccent,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(color: Color(0xFF333333), width: 1.5),
+                  side: BorderSide.none,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 0,
@@ -1557,8 +1516,7 @@ class PixelProgressBar extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF333333), width: 1),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -1601,12 +1559,11 @@ class PixelCheckbox extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           color: isDone ? Colors.yellowAccent : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFF333333), width: 1),
+          borderRadius: BorderRadius.circular(4),
           boxShadow: isDone
               ? null // 체크되면 눌린 것처럼 그림자 제거
               : const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                  BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
                 ],
         ),
         child: isDone ? CustomPaint(painter: PixelCheckPainter()) : null,
@@ -1715,10 +1672,9 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF333333), width: 1.5),
+          borderRadius: BorderRadius.circular(4),
           boxShadow: const [
-            BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+            BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
           ],
         ),
         child: Column(
@@ -1815,11 +1771,7 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
                     margin: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: bgColor,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isSelected ? Colors.black : Colors.transparent,
-                        width: 1,
-                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Stack(
                       children: [

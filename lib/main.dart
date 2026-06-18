@@ -99,7 +99,7 @@ class SplashScreen extends StatelessWidget {
                   fontSize: 28,
                   color: Colors.white,
                   shadows: const [
-                    Shadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                    Shadow(color: Color(0xFF333333), offset: Offset(3, 3)),
                   ],
                 ),
               ),
@@ -278,10 +278,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -340,10 +339,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   // 💡 먹이 및 영양제 경험치 증가 로직
-  void _gainExp(int amount) {
+  void _gainExp(int amount, String targetId) {
     bool leveledUp = false;
     for (var fish in _ownedFishes) {
-      if (_swimmingFishIds.contains(fish['id'])) {
+      if (fish['id'] == targetId) {
         fish['exp'] = (fish['exp'] ?? 0) + amount;
         int level = fish['level'] ?? 1;
         int maxExp = level * 100;
@@ -398,10 +397,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -491,10 +489,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -510,11 +507,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   decoration: InputDecoration(
                     hintText: '사용할 아이디 (영문/숫자)',
                     border: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color(0xFF333333),
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
@@ -622,10 +616,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF333333), width: 1.5),
+              borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -641,11 +634,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   decoration: InputDecoration(
                     hintText: '저장했던 아이디 입력',
                     border: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color(0xFF333333),
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
@@ -810,7 +800,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -880,12 +870,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                             margin: EdgeInsets.zero,
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                color: const Color(0xFF333333),
-                                                width: 1,
-                                              ),
+                                              side: BorderSide.none,
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(4),
                                             ),
                                             clipBehavior: Clip.antiAlias,
                                             child: InkWell(
@@ -979,6 +966,20 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                         ),
                                                       ),
                                                     ),
+                                                  Positioned(
+                                                    top: 8,
+                                                    right: 8,
+                                                    child: Text(
+                                                      'Lv.${fish['level'] ?? 1}',
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        color:
+                                                            Colors.blueAccent,
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -1038,12 +1039,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                             margin: EdgeInsets.zero,
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                color: const Color(0xFF333333),
-                                                width: 1,
-                                              ),
+                                              side: BorderSide.none,
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(4),
                                             ),
                                             clipBehavior: Clip.antiAlias,
                                             child: InkWell(
@@ -1207,8 +1205,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFDAB9),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF333333), width: 1),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
                 children: [
@@ -1221,7 +1218,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       fontSize: 16,
                       color: Colors.white,
                       shadows: [
-                        Shadow(color: Color(0xFF333333), offset: Offset(1, 1)),
+                        Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
                       ],
                     ),
                   ),
@@ -1235,20 +1232,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: const Color(0xFFA8E6CF),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF333333), width: 1),
               ),
               child: Row(
                 children: [
-                  const PixelSupplement(size: 14),
+                  const PixelSupplement(size: 16),
                   const SizedBox(width: 4),
                   Text(
                     '$_supplementCount',
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
-                      color: Colors.black,
+                      color: Colors.white,
                       shadows: [
-                        Shadow(color: Colors.white, offset: Offset(1, 1)),
+                        Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
                       ],
                     ),
                   ),
@@ -1268,11 +1264,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFDAB9),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF333333),
-                      width: 1,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
                     children: [
@@ -1287,7 +1279,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           shadows: [
                             Shadow(
                               color: Color(0xFF333333),
-                              offset: Offset(1, 1),
+                              offset: Offset(2, 2),
                             ),
                           ],
                         ),
@@ -1303,11 +1295,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD166),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF333333),
-                      width: 1,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
                     children: [
@@ -1322,7 +1310,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           shadows: [
                             Shadow(
                               color: Color(0xFF333333),
-                              offset: Offset(1, 1),
+                              offset: Offset(2, 2),
                             ),
                           ],
                         ),
@@ -1348,17 +1336,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             plantedSeaweeds: _plantedSeaweeds,
             feedCount: _feedCount,
             supplementCount: _supplementCount,
-            onFeed: () {
+            onFeed: (fishId) {
               setState(() {
                 _feedCount--;
-                _gainExp(10);
+                _gainExp(10, fishId);
               });
               _saveMainData(); // 먹이 소모 및 경험치 저장
             },
-            onSupplement: () {
+            onSupplement: (fishId) {
               setState(() {
                 _supplementCount--;
-                _gainExp(50);
+                _gainExp(50, fishId);
               });
               _saveMainData(); // 먹이 소모 시 저장
             },
@@ -1444,24 +1432,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ],
       ),
       // 3. 픽셀 스타일 하단 네비게이션 바
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Color(0xFF333333), width: 1),
-          ), // 💡 상단 테두리 얇게 수정
-        ),
-        child: SafeArea(
-          top: false, // 하단 아이폰 홈 바 여백 보호
-          child: SizedBox(
-            height: 56, // IntrinsicHeight 대신 안전하고 렌더링이 빠른 고정 높이 사용
-            child: Row(
-              children: [
-                _buildPixelBottomNavItem(0, 'fish', '내 수조'),
-                _buildPixelBottomNavItem(1, 'memo', '할 일'),
-                _buildPixelBottomNavItem(2, 'trophy', '미션'),
-                _buildPixelBottomNavItem(3, 'coin', '상점'),
-              ],
-            ),
+      bottomNavigationBar: SafeArea(
+        top: false, // 하단 아이폰 홈 바 여백 보호
+        child: SizedBox(
+          height: 56, // IntrinsicHeight 대신 안전하고 렌더링이 빠른 고정 높이 사용
+          child: Row(
+            children: [
+              _buildPixelBottomNavItem(0, 'fish', '내 수조'),
+              _buildPixelBottomNavItem(1, 'memo', '할 일'),
+              _buildPixelBottomNavItem(2, 'trophy', '미션'),
+              _buildPixelBottomNavItem(3, 'coin', '상점'),
+            ],
           ),
         ),
       ),

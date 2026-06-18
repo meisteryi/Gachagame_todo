@@ -52,9 +52,9 @@ class RetroGradientButton extends StatelessWidget {
     this.foregroundColor = Colors.black,
     this.disabledForegroundColor,
     required this.child,
-    this.borderRadius = const BorderRadius.all(Radius.circular(10)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(4)), // 💡 도트 느낌
     this.padding,
-    this.borderWidth = 1.0,
+    this.borderWidth = 3.0, // 💡 두꺼운 외곽선
   });
 
   @override
@@ -71,7 +71,6 @@ class RetroGradientButton extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: getRetroGradient(baseColor),
         borderRadius: borderRadius,
-        border: Border.all(color: const Color(0xFF333333), width: borderWidth),
       ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -125,7 +124,7 @@ class _BouncingWrapperState extends State<BouncingWrapper> {
           // 1. 고정된 그림자 (위젯의 형태를 그대로 본따 검은색으로 우하단에 고정)
           if (widget.showShadow)
             Transform.translate(
-              offset: const Offset(1.5, 1.5),
+              offset: const Offset(3, 3), // 💡 뚜렷한 도트 그림자
               child: ColorFiltered(
                 colorFilter: const ColorFilter.mode(
                   Color(0xFF333333),
@@ -138,8 +137,8 @@ class _BouncingWrapperState extends State<BouncingWrapper> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 50),
             transform: Matrix4.translationValues(
-              _isPressed ? 1.5 : 0.0,
-              _isPressed ? 1.5 : 0.0,
+              _isPressed ? 3.0 : 0.0, // 💡 픽셀 단위로 투박하게 이동
+              _isPressed ? 3.0 : 0.0,
               0.0,
             ),
             child: widget.child,
