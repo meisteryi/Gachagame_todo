@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
+import '../translations.dart';
 
 class TodoScreen extends StatefulWidget {
   final VoidCallback? onSecretCommand;
@@ -154,6 +155,14 @@ class _TodoScreenState extends State<TodoScreen>
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
+  String _formatLocalizedDate(DateTime date) {
+    return '%s년 %s월 %s일'.trArgs([
+      date.year.toString(),
+      date.month.toString(),
+      date.day.toString(),
+    ]);
+  }
+
   // 현재 선택된 날짜의 할 일 (위쪽 프로그레스 바 통계 용도)
   List<Map<String, dynamic>> get _currentTodos =>
       _getTodosForDate(_selectedDate);
@@ -202,8 +211,8 @@ class _TodoScreenState extends State<TodoScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '알림',
+                Text(
+                  '알림'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
@@ -222,8 +231,8 @@ class _TodoScreenState extends State<TodoScreen>
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '닫기',
+                    child: Text(
+                      '닫기'.tr,
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -258,7 +267,9 @@ class _TodoScreenState extends State<TodoScreen>
     String newTask = existingTodo?['task']?.toString() ?? '';
     String selectedCategory =
         existingTodo?['category']?.toString() ??
-        (_categoryColors.keys.isNotEmpty ? _categoryColors.keys.first : '없음');
+        (_categoryColors.keys.isNotEmpty
+            ? _categoryColors.keys.first
+            : '없음'.tr);
     TimeOfDay? selectedTime = existingTodo?['time'] as TimeOfDay?;
     TimeOfDay? selectedAlarmTime = existingTodo?['alarmTime'] as TimeOfDay?;
     bool isAlarmOn = existingTodo?['isAlarmOn'] == true;
@@ -292,7 +303,7 @@ class _TodoScreenState extends State<TodoScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isEdit ? '할 일 수정 ' : '새로운 할 일 ',
+                          isEdit ? '할 일 수정 '.tr : '새로운 할 일 '.tr,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -313,7 +324,7 @@ class _TodoScreenState extends State<TodoScreen>
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        labelText: '할 일을 입력하세요',
+                        labelText: '할 일을 입력하세요'.tr,
                       ),
                       onChanged: (val) => newTask = val,
                     ),
@@ -343,7 +354,7 @@ class _TodoScreenState extends State<TodoScreen>
                               const Icon(Icons.access_time, size: 18),
                               const SizedBox(width: 8),
                               Text(
-                                selectedTime?.format(context) ?? '시간 설정',
+                                selectedTime?.format(context) ?? '시간 설정'.tr,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -359,7 +370,7 @@ class _TodoScreenState extends State<TodoScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '알림 켜기',
+                          '알림 켜기'.tr,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: isAlarmOn ? Colors.black : Colors.grey,
@@ -413,7 +424,8 @@ class _TodoScreenState extends State<TodoScreen>
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  selectedAlarmTime?.format(context) ?? '알림 설정',
+                                  selectedAlarmTime?.format(context) ??
+                                      '알림 설정'.tr,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -437,7 +449,7 @@ class _TodoScreenState extends State<TodoScreen>
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        labelText: '장소 (선택)',
+                        labelText: '장소 (선택)'.tr,
                         prefixIcon: Icon(
                           Icons.location_on,
                           color: Colors.black,
@@ -458,15 +470,15 @@ class _TodoScreenState extends State<TodoScreen>
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        labelText: '메모 (선택)',
+                        labelText: '메모 (선택)'.tr,
                         prefixIcon: Icon(Icons.notes, color: Colors.black),
                       ),
                       onChanged: (val) => newMemo = val,
                     ),
                     const SizedBox(height: 20),
                     // --- 🏷️ 카테고리 ---
-                    const Text(
-                      '카테고리',
+                    Text(
+                      '카테고리'.tr,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -476,7 +488,7 @@ class _TodoScreenState extends State<TodoScreen>
                         final isSelected = selectedCategory == cat;
                         return ChoiceChip(
                           label: Text(
-                            cat,
+                            cat.tr, // 💡 카테고리 이름 번역 (기본 카테고리인 경우)
                             style: TextStyle(
                               color: isSelected ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
@@ -508,8 +520,8 @@ class _TodoScreenState extends State<TodoScreen>
                               child: RetroGradientButton(
                                 color: Colors.grey[300]!,
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text(
-                                  '취소하기',
+                                child: Text(
+                                  '취소하기'.tr,
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -533,7 +545,7 @@ class _TodoScreenState extends State<TodoScreen>
                                   if (newTask.trim() == 'showmethemoney') {
                                     widget.onSecretCommand?.call();
                                     _showNoticeDialog(
-                                      '쇼미더머니! 코인 1,000개가 지급되었습니다. 🪙',
+                                      '쇼미더머니! 코인 1,000개가 지급되었습니다. 🪙'.tr,
                                     );
                                     Navigator.pop(context);
                                     return; // 일정으로 추가하지 않고 종료
@@ -543,7 +555,8 @@ class _TodoScreenState extends State<TodoScreen>
                                   if (newTask.trim() == 'unlockall') {
                                     widget.onUnlockAllCommand?.call();
                                     _showNoticeDialog(
-                                      '도감 100% 달성! 모든 물고기와 수초가 보관함에 추가되었습니다. 🐟🌿',
+                                      '도감 100% 달성! 모든 물고기와 수초가 보관함에 추가되었습니다. 🐟🌿'
+                                          .tr,
                                     );
                                     Navigator.pop(context);
                                     return; // 일정으로 추가하지 않고 종료
@@ -585,13 +598,16 @@ class _TodoScreenState extends State<TodoScreen>
                                     if (isAlarmOn &&
                                         selectedAlarmTime != null) {
                                       _showNoticeDialog(
-                                        '${selectedAlarmTime!.format(context)}에 알림이 ${isEdit ? '수정' : '설정'}되었습니다! 🔔',
+                                        '%s에 알림이 %s되었습니다! 🔔'.trArgs([
+                                          selectedAlarmTime!.format(context),
+                                          isEdit ? '수정'.tr : '설정'.tr,
+                                        ]),
                                       );
                                     }
                                   }
                                 },
                                 child: Text(
-                                  isEdit ? '수정하기' : '추가하기',
+                                  isEdit ? '수정하기'.tr : '추가하기'.tr,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -643,7 +659,7 @@ class _TodoScreenState extends State<TodoScreen>
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      todo['category']?.toString() ?? '',
+                      (todo['category']?.toString() ?? '').tr, // 💡 카테고리명 번역
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -668,7 +684,9 @@ class _TodoScreenState extends State<TodoScreen>
                     const Icon(Icons.access_time, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      '시간: ${(todo['time'] as TimeOfDay).format(context)}',
+                      '시간: %s'.trArgs([
+                        (todo['time'] as TimeOfDay).format(context),
+                      ]), // 💡 시간 표시 번역
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],
@@ -685,7 +703,9 @@ class _TodoScreenState extends State<TodoScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '알림 설정됨 (${(todo['alarmTime'] as TimeOfDay).format(context)})',
+                      '알림 설정됨 (%s)'.trArgs([
+                        (todo['alarmTime'] as TimeOfDay).format(context),
+                      ]),
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.deepOrange,
@@ -703,7 +723,7 @@ class _TodoScreenState extends State<TodoScreen>
                     const Icon(Icons.location_on, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      '장소: ${todo['location']}',
+                      '장소: %s'.trArgs([todo['location']]),
                       style: const TextStyle(fontSize: 16),
                     ),
                   ],
@@ -719,7 +739,7 @@ class _TodoScreenState extends State<TodoScreen>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '메모:\n${todo['memo']}',
+                        '메모:\n%s'.trArgs([todo['memo']]),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -747,12 +767,12 @@ class _TodoScreenState extends State<TodoScreen>
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.delete, size: 18),
-                              SizedBox(width: 8),
+                            children: [
+                              const Icon(Icons.delete, size: 18),
+                              const SizedBox(width: 8),
                               Text(
-                                '삭제하기',
-                                style: TextStyle(
+                                '삭제하기'.tr,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -780,12 +800,12 @@ class _TodoScreenState extends State<TodoScreen>
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.edit, size: 18),
-                              SizedBox(width: 8),
+                            children: [
+                              const Icon(Icons.edit, size: 18),
+                              const SizedBox(width: 8),
                               Text(
-                                '수정하기',
-                                style: TextStyle(
+                                '수정하기'.tr,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -841,11 +861,11 @@ class _TodoScreenState extends State<TodoScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '카테고리 관리 ',
+                        '카테고리 관리 '.tr,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -862,7 +882,7 @@ class _TodoScreenState extends State<TodoScreen>
                     children: _categoryColors.entries.map((entry) {
                       return Chip(
                         label: Text(
-                          entry.key,
+                          entry.key.tr, // 💡 카테고리명 번역
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         backgroundColor: entry.value,
@@ -882,7 +902,7 @@ class _TodoScreenState extends State<TodoScreen>
                             setState(() {}); // 메인 화면도 갱신
                             _saveData(); // 카테고리 삭제 시 저장
                           } else {
-                            _showNoticeDialog('최소 1개의 카테고리는 남겨둬야 합니다!');
+                            _showNoticeDialog('최소 1개의 카테고리는 남겨둬야 합니다!'.tr);
                           }
                         },
                       );
@@ -891,18 +911,18 @@ class _TodoScreenState extends State<TodoScreen>
                   const SizedBox(height: 20),
                   const Divider(color: Colors.black, thickness: 2),
                   const SizedBox(height: 10),
-                  const Text(
-                    '새 카테고리 추가',
+                  Text(
+                    '새 카테고리 추가'.tr,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 12),
                   TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.all(Radius.circular(4)),
                       ),
-                      labelText: '새 카테고리 이름',
+                      labelText: '새 카테고리 이름'.tr,
                     ),
                     onChanged: (val) => newCategoryName = val,
                   ),
@@ -954,8 +974,8 @@ class _TodoScreenState extends State<TodoScreen>
                             Navigator.pop(context);
                           }
                         },
-                        child: const Text(
-                          '카테고리 추가하기',
+                        child: Text(
+                          '카테고리 추가하기'.tr,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1053,7 +1073,9 @@ class _TodoScreenState extends State<TodoScreen>
                             const PixelEmoji('calendar', size: 16),
                             const SizedBox(width: 6),
                             Text(
-                              '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
+                              _formatLocalizedDate(
+                                _selectedDate,
+                              ), // 💡 현지화된 날짜 형식
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -1103,11 +1125,11 @@ class _TodoScreenState extends State<TodoScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Row(
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '오늘의 달성률 ',
+                            '오늘의 달성률 '.tr,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -1117,7 +1139,10 @@ class _TodoScreenState extends State<TodoScreen>
                         ],
                       ),
                       Text(
-                        '$done / $total 완료',
+                        '%s / %s 완료'.trArgs([
+                          done.toString(),
+                          total.toString(),
+                        ]), // 💡 달성률 텍스트 번역
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -1154,9 +1179,9 @@ class _TodoScreenState extends State<TodoScreen>
                     ..sort();
 
                   if (pageTodos.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.',
+                        '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
@@ -1195,7 +1220,7 @@ class _TodoScreenState extends State<TodoScreen>
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  category,
+                                  category.tr, // 💡 카테고리 번역
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -1204,7 +1229,13 @@ class _TodoScreenState extends State<TodoScreen>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                '${catTodos.where((t) => t['isDone'] == true).length}/${catTodos.length} 완료',
+                                '%s / %s 완료'.trArgs([
+                                  catTodos
+                                      .where((t) => t['isDone'] == true)
+                                      .length
+                                      .toString(),
+                                  catTodos.length.toString(),
+                                ]), // 💡 달성률 번역
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey,
@@ -1318,9 +1349,9 @@ class _TodoScreenState extends State<TodoScreen>
                                                                   if (isAlarmOn &&
                                                                       alarmObj !=
                                                                           null) ...[
-                                                                    const TextSpan(
-                                                                      text:
-                                                                          ' (알림 ',
+                                                                    TextSpan(
+                                                                      text: ' (알림 '
+                                                                          .tr,
                                                                     ),
                                                                     const WidgetSpan(
                                                                       alignment:
@@ -1464,34 +1495,30 @@ class _TodoScreenState extends State<TodoScreen>
           children: [
             // 카테고리 관리 버튼 (좌측 하단)
             BouncingWrapper(
-              child: FloatingActionButton(
-                heroTag: 'categoryBtn',
-                onPressed: _showCategoryManagerBottomSheet,
-                backgroundColor: Colors.lightGreenAccent,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide.none,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-                child: const Icon(
-                  Icons.category,
-                  color: Colors.black,
-                  size: 28,
+              child: SizedBox(
+                width: 56,
+                height: 56,
+                child: RetroGradientButton(
+                  color: Colors.lightGreenAccent,
+                  padding: EdgeInsets.zero,
+                  borderRadius: BorderRadius.circular(4), // 💡 네모 반듯한 도트 모서리 적용
+                  onPressed: _showCategoryManagerBottomSheet,
+                  child: const PixelEmoji('shapes', size: 24),
                 ),
               ),
             ),
             // 할 일 추가 버튼 (우측 하단)
             BouncingWrapper(
-              child: FloatingActionButton(
-                heroTag: 'addTodoBtn',
-                onPressed: () => _showTodoEditorBottomSheet(),
-                backgroundColor: Colors.yellowAccent,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide.none,
-                  borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                width: 56,
+                height: 56,
+                child: RetroGradientButton(
+                  color: Colors.yellowAccent,
+                  padding: EdgeInsets.zero,
+                  borderRadius: BorderRadius.circular(4), // 💡 네모 반듯한 도트 모서리 적용
+                  onPressed: () => _showTodoEditorBottomSheet(),
+                  child: const PixelEmoji('plus', size: 24),
                 ),
-                elevation: 0,
-                child: const Icon(Icons.add, color: Colors.black, size: 28),
               ),
             ),
           ],
@@ -1664,7 +1691,15 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
       1,
     ).weekday;
     final int emptyPrefixCount = firstWeekday % 7; // 일요일(7)을 0으로 맞춤
-    final List<String> weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+    final List<String> weekDays = [
+      '일'.tr,
+      '월'.tr,
+      '화'.tr,
+      '수'.tr,
+      '목'.tr,
+      '금'.tr,
+      '토'.tr,
+    ];
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -1689,7 +1724,10 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
                   onPressed: () => _changeMonth(-1),
                 ),
                 Text(
-                  '${_currentMonth.year}년 ${_currentMonth.month}월',
+                  '%s년 %s월'.trArgs([
+                    _currentMonth.year.toString(),
+                    _currentMonth.month.toString(),
+                  ]), // 💡 연월 포맷 번역
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -1712,9 +1750,11 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
                       day,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: day == '일'
+                        color: day == '일'.tr
                             ? Colors.redAccent
-                            : (day == '토' ? Colors.blueAccent : Colors.black),
+                            : (day == '토'.tr
+                                  ? Colors.blueAccent
+                                  : Colors.black),
                       ),
                     ),
                   ),

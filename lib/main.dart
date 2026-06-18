@@ -10,6 +10,7 @@ import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
 import 'screens/mission_screen.dart';
+import 'translations.dart';
 import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
@@ -19,6 +20,7 @@ import 'pixel_supplement.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
+  await Tr.init(); // 💡 언어 설정 초기화
 
   runApp(const GachaTodoApp());
 }
@@ -35,40 +37,47 @@ class _GachaTodoAppState extends State<GachaTodoApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gacha Todo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFB7B2)),
-        useMaterial3: true,
-        // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
-        fontFamily: kIsWeb ? '-apple-system' : null,
-        fontFamilyFallback: kIsWeb
-            ? const [
-                'BlinkMacSystemFont',
-                'Apple Color Emoji',
-                'Segoe UI Emoji',
-              ]
-            : null,
-      ),
-      // 💡 웹/PC 환경에서 화면이 너무 넓게 퍼지지 않도록 모바일 비율(최대 너비 450px)로 고정!
-      builder: (context, child) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 450),
-            child: child,
+    return ValueListenableBuilder<AppLang>(
+      valueListenable: Tr.langNotifier,
+      builder: (context, lang, child) {
+        return MaterialApp(
+          title: 'Gacha Todo',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFFFB7B2),
+            ),
+            useMaterial3: true,
+            // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
+            fontFamily: kIsWeb ? '-apple-system' : null,
+            fontFamilyFallback: kIsWeb
+                ? const [
+                    'BlinkMacSystemFont',
+                    'Apple Color Emoji',
+                    'Segoe UI Emoji',
+                  ]
+                : null,
+          ),
+          // 💡 웹/PC 환경에서 화면이 너무 넓게 퍼지지 않도록 모바일 비율(최대 너비 450px)로 고정!
+          builder: (context, child) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 450),
+                child: child,
+              ),
+            );
+          },
+          // 💡 Navigator 버그를 원천 차단하기 위해 AnimatedSwitcher를 사용한 직접 상태 전환 방식으로 변경!
+          home: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: _showSplash
+                ? SplashScreen(
+                    key: const ValueKey('splash'),
+                    onSkip: () => setState(() => _showSplash = false),
+                  )
+                : const MainScreen(key: ValueKey('main')),
           ),
         );
       },
-      // 💡 Navigator 버그를 원천 차단하기 위해 AnimatedSwitcher를 사용한 직접 상태 전환 방식으로 변경!
-      home: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: _showSplash
-            ? SplashScreen(
-                key: const ValueKey('splash'),
-                onSkip: () => setState(() => _showSplash = false),
-              )
-            : const MainScreen(key: ValueKey('main')),
-      ),
     );
   }
 }
@@ -104,8 +113,8 @@ class SplashScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              const Text(
-                '- 화면을 터치해서 시작 -',
+              Text(
+                '- 화면을 터치해서 시작 -'.tr,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -137,6 +146,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _coins = 0; // 💡 코인 재화 추가
   int _feedCount = 10; // 💡 기본 먹이 개수 (테스트용 10개)
   int _supplementCount = 5; // 💡 영양제 개수 추가
+  bool _isSupplementActive = false; // 💡 영양제 활성화 상태 (다음 먹이 경험치 2배 버프)
   final PageController _pageController = PageController(
     initialPage: 1,
   ); // 💡 초기 화면을 '할 일'로 변경
@@ -218,6 +228,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         _coins = prefs.getInt('coins') ?? 0; // 코인 로드
         _feedCount = prefs.getInt('feedCount') ?? 10; // 먹이 로드
         _supplementCount = prefs.getInt('supplementCount') ?? 5; // 영양제 로드
+        _isSupplementActive = prefs.getBool('isSupplementActive') ?? false;
 
         // 💡 수조의 물고기 목록 불러오기 (마이그레이션 포함)
         final String? swimStr = prefs.getString('swimmingFishIds');
@@ -253,6 +264,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     await prefs.setInt('coins', _coins); // 코인 저장
     await prefs.setInt('feedCount', _feedCount); // 먹이 저장
     await prefs.setInt('supplementCount', _supplementCount); // 영양제 저장
+    await prefs.setBool('isSupplementActive', _isSupplementActive); // 버프 상태 저장
   }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
@@ -286,8 +298,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '알림',
+                Text(
+                  '알림'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
@@ -306,8 +318,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '닫기',
+                    child: Text(
+                      '닫기'.tr,
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -341,9 +353,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   // 💡 먹이 및 영양제 경험치 증가 로직
   void _gainExp(int amount, String targetId) {
     bool leveledUp = false;
+    int finalAmount = amount;
+
+    // 영양제 버프가 활성화되어 있으면 경험치 2배 획득 후 버프 해제
+    if (_isSupplementActive) {
+      finalAmount *= 2;
+      _isSupplementActive = false;
+    }
+
     for (var fish in _ownedFishes) {
       if (fish['id'] == targetId) {
-        fish['exp'] = (fish['exp'] ?? 0) + amount;
+        fish['exp'] = (fish['exp'] ?? 0) + finalAmount;
         int level = fish['level'] ?? 1;
         int maxExp = level * 100;
         if (fish['exp'] >= maxExp) {
@@ -357,7 +377,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (leveledUp) {
       // 먹이 애니메이션이 끝날 즈음에 축하 팝업 띄우기
       Future.delayed(const Duration(milliseconds: 2000), () {
-        if (mounted) _showNoticeDialog('수조의 물고기가 레벨업했습니다! 🎉');
+        if (mounted) _showNoticeDialog('수조의 물고기가 레벨업했습니다! 🎉'.tr);
       });
     }
   }
@@ -391,86 +411,127 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        return ValueListenableBuilder<AppLang>(
+          valueListenable: Tr.langNotifier,
+          builder: (context, lang, _) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.settings, size: 24),
-                    SizedBox(width: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.settings, size: 24),
+                        const SizedBox(width: 8),
+                        Text(
+                          '게임 설정'.tr,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     Text(
-                      '게임 설정',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
+                      '언어 / Language'.tr,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: AppLang.values.map((l) {
+                        final isSelected = l == Tr.lang;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: GestureDetector(
+                            onTap: () => Tr.changeLang(l),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Colors.yellowAccent
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                l.name.toUpperCase(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: RetroGradientButton(
+                        color: const Color(0xFFB4D8E7),
+                        foregroundColor: Colors.white,
+                        onPressed: _saveToCloud,
+                        child: Text(
+                          '클라우드에 저장 ☁️'.tr,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: RetroGradientButton(
+                        color: const Color(0xFFA8E6CF),
+                        onPressed: _loadFromCloud,
+                        child: Text(
+                          '클라우드에서 불러오기 ☁️'.tr,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: RetroGradientButton(
+                        color: Colors.grey[300]!,
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          '닫기'.tr,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: RetroGradientButton(
-                    color: const Color(0xFFB4D8E7),
-                    foregroundColor: Colors.white,
-                    onPressed: _saveToCloud,
-                    child: const Text(
-                      '클라우드에 저장 ☁️',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: RetroGradientButton(
-                    color: const Color(0xFFA8E6CF),
-                    onPressed: _loadFromCloud,
-                    child: const Text(
-                      '클라우드에서 불러오기 ☁️',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: RetroGradientButton(
-                    color: Colors.grey[300]!,
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '닫기',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -497,15 +558,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '클라우드 저장',
+                Text(
+                  '클라우드 저장'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   onChanged: (val) => userId = val,
                   decoration: InputDecoration(
-                    hintText: '사용할 아이디 (영문/숫자)',
+                    hintText: '사용할 아이디 (영문/숫자)'.tr,
                     border: OutlineInputBorder(
                       borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(4),
@@ -519,8 +580,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       child: RetroGradientButton(
                         color: Colors.grey[300]!,
                         onPressed: () => Navigator.pop(dialogContext),
-                        child: const Text(
-                          '취소',
+                        child: Text(
+                          '취소'.tr,
                           style: TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -548,6 +609,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               'supplementCount': prefs.getInt(
                                 'supplementCount',
                               ),
+                              'isSupplementActive': prefs.getBool(
+                                'isSupplementActive',
+                              ),
                               'todos': prefs.getString('todos'),
                               'categories': prefs.getString('categories'),
                               'mission_data': prefs.getString('mission_data'),
@@ -569,11 +633,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
                             if (response.statusCode == 200 && mounted) {
                               _showNoticeDialog(
-                                '데이터가 클라우드에 저장되었습니다! ☁️\n아이디: ${userId.trim()}',
+                                '데이터가 클라우드에 저장되었습니다! ☁️\n아이디: %s'.trArgs([
+                                  userId.trim(),
+                                ]),
                               );
                             } else if (mounted) {
                               _showNoticeDialog(
-                                '저장에 실패했습니다.\n상태 코드: ${response.statusCode}',
+                                '저장에 실패했습니다.\n상태 코드: %s'.trArgs([
+                                  response.statusCode.toString(),
+                                ]),
                               );
                             }
                           } catch (e) {
@@ -582,13 +650,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             }
                             if (mounted) {
                               _showNoticeDialog(
-                                '저장 중 오류가 발생했습니다.\n인터넷 연결을 확인해 주세요. 🥲',
+                                '저장 중 오류가 발생했습니다.\n인터넷 연결을 확인해 주세요. 🥲'.tr,
                               );
                             }
                           }
                         },
-                        child: const Text(
-                          '저장',
+                        child: Text(
+                          '저장'.tr,
                           style: TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -624,15 +692,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '클라우드 불러오기',
+                Text(
+                  '클라우드 불러오기'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   onChanged: (val) => userId = val,
                   decoration: InputDecoration(
-                    hintText: '저장했던 아이디 입력',
+                    hintText: '저장했던 아이디 입력'.tr,
                     border: OutlineInputBorder(
                       borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(4),
@@ -646,8 +714,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       child: RetroGradientButton(
                         color: Colors.grey[300]!,
                         onPressed: () => Navigator.pop(dialogContext),
-                        child: const Text(
-                          '취소',
+                        child: Text(
+                          '취소'.tr,
                           style: TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -720,6 +788,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                   allData['supplementCount'] as int,
                                 );
                               }
+                              if (allData['isSupplementActive'] != null) {
+                                await prefs.setBool(
+                                  'isSupplementActive',
+                                  allData['isSupplementActive'] as bool,
+                                );
+                              }
                               if (allData['todos'] != null) {
                                 await prefs.setString(
                                   'todos',
@@ -741,13 +815,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
                               if (mounted) {
                                 _showNoticeDialog(
-                                  '클라우드 복구 성공! 🎉\n완벽한 적용을 위해 앱을 완전히 껐다 켜주세요.',
+                                  '클라우드 복구 성공! 🎉\n완벽한 적용을 위해 앱을 완전히 껐다 켜주세요.'
+                                      .tr,
                                 );
                               }
                             } else {
                               if (mounted) {
                                 _showNoticeDialog(
-                                  '해당 아이디의 데이터를 찾을 수 없습니다. 🥲\n(입력한 아이디: ${userId.trim()})',
+                                  '해당 아이디의 데이터를 찾을 수 없습니다. 🥲\n(입력한 아이디: %s)'
+                                      .trArgs([userId.trim()]),
                                 );
                               }
                             }
@@ -757,13 +833,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             }
                             if (mounted) {
                               _showNoticeDialog(
-                                '불러오기 중 오류가 발생했습니다.\n인터넷 연결을 확인해 주세요. 🥲',
+                                '불러오기 중 오류가 발생했습니다.\n인터넷 연결을 확인해 주세요. 🥲'.tr,
                               );
                             }
                           }
                         },
-                        child: const Text(
-                          '복구',
+                        child: Text(
+                          '복구'.tr,
                           style: TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -808,12 +884,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             PixelEmoji('box', size: 24),
                             SizedBox(width: 8),
                             Text(
-                              '내 보관함',
+                              '내 보관함'.tr,
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -830,14 +906,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // --- 물고기 보관함 영역 ---
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.symmetric(vertical: 8.0),
                               child: Row(
                                 children: [
                                   PixelEmoji('fish', size: 16),
                                   SizedBox(width: 8),
                                   Text(
-                                    '내 물고기',
+                                    '내 물고기'.tr,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -847,7 +923,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               ),
                             ),
                             _ownedFishes.isEmpty
-                                ? const Text('아직 뽑은 물고기가 없어요!')
+                                ? Text('아직 뽑은 물고기가 없어요!'.tr)
                                 : GridView.builder(
                                     shrinkWrap: true,
                                     physics:
@@ -888,7 +964,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       );
                                                     } else {
                                                       _showNoticeDialog(
-                                                        '최소 1마리의 물고기는 수조에 있어야 합니다!',
+                                                        '최소 1마리의 물고기는 수조에 있어야 합니다!'
+                                                            .tr,
                                                       );
                                                     }
                                                   } else {
@@ -896,7 +973,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                             .length >=
                                                         5) {
                                                       _showNoticeDialog(
-                                                        '수조에는 최대 5마리까지만 넣을 수 있습니다!',
+                                                        '수조에는 최대 5마리까지만 넣을 수 있습니다!'
+                                                            .tr,
                                                       );
                                                     } else {
                                                       _swimmingFishIds.add(
@@ -934,9 +1012,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       ),
                                                       const SizedBox(height: 6),
                                                       Text(
-                                                        fish['name']
-                                                                ?.toString() ??
-                                                            '',
+                                                        (fish['type']
+                                                                    ?.toString() ??
+                                                                '')
+                                                            .tr, // 💡 이름을 번역하여 표시
                                                         style: const TextStyle(
                                                           fontSize: 11,
                                                           fontWeight:
@@ -991,14 +1070,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             const SizedBox(height: 24),
 
                             // --- 수초 보관함 영역 ---
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.symmetric(vertical: 8.0),
                               child: Row(
                                 children: [
                                   PixelEmoji('seaweed', size: 16),
                                   SizedBox(width: 8),
                                   Text(
-                                    '내 수초',
+                                    '내 수초'.tr,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -1008,10 +1087,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               ),
                             ),
                             _ownedSeaweeds.isEmpty
-                                ? const Padding(
+                                ? Padding(
                                     padding: EdgeInsets.only(bottom: 20),
                                     child: Text(
-                                      '아직 뽑은 수초가 없어요!\n가챠 샵에서 수초를 뽑아보세요.',
+                                      '아직 뽑은 수초가 없어요!\n가챠 샵에서 수초를 뽑아보세요.'.tr,
                                     ),
                                   )
                                 : GridView.builder(
@@ -1090,9 +1169,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       ),
                                                       const SizedBox(height: 6),
                                                       Text(
-                                                        seaweed['name']
-                                                                ?.toString() ??
-                                                            '',
+                                                        (seaweed['type']
+                                                                    ?.toString() ??
+                                                                '')
+                                                            .tr, // 💡 이름을 번역하여 표시
                                                         style: const TextStyle(
                                                           fontSize: 11,
                                                           fontWeight:
@@ -1165,7 +1245,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 4),
               Text(
-                label,
+                label.tr, // 💡 라벨 번역
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: isSelected ? 13 : 11,
@@ -1184,19 +1264,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 48, // 상단바 두께 축소 (기본값 56)
-        leading:
-            _selectedIndex ==
-                1 // 💡 할 일 탭에서만 톱니바퀴 표시
-            ? IconButton(
-                icon: const Icon(Icons.settings, color: Colors.black),
-                onPressed: _showSettingsDialog, // 💡 설정 및 데이터 백업 버튼
-                tooltip: '설정',
-              )
-            : null,
         title: Text(
           'Gacha TODO!',
           style: GoogleFonts.pressStart2p(fontSize: 16),
         ),
+        centerTitle: false, // 💡 어느 기기/화면이든 제목을 좌측 정렬 강제
         // 💡 탭에 따라 우측 상단바 UI를 다르게 표시
         actions: [
           if (_selectedIndex == 0) // 내 수조 탭: 남은 먹이 개수 표시
@@ -1320,6 +1392,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
+          if (_selectedIndex == 1) // 💡 할 일 탭에서만 톱니바퀴 표시를 우측 끝으로 이동
+            IconButton(
+              icon: const Icon(Icons.settings, color: Colors.black),
+              onPressed: _showSettingsDialog, // 💡 설정 및 데이터 백업 버튼
+              tooltip: '설정',
+            ),
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
@@ -1336,6 +1414,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             plantedSeaweeds: _plantedSeaweeds,
             feedCount: _feedCount,
             supplementCount: _supplementCount,
+            isSupplementActive: _isSupplementActive,
             onFeed: (fishId) {
               setState(() {
                 _feedCount--;
@@ -1343,12 +1422,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               });
               _saveMainData(); // 먹이 소모 및 경험치 저장
             },
-            onSupplement: (fishId) {
+            onSupplement: () {
               setState(() {
                 _supplementCount--;
-                _gainExp(50, fishId);
+                _isSupplementActive = true;
               });
-              _saveMainData(); // 먹이 소모 시 저장
+              _saveMainData();
             },
             onUpdateSeaweeds: (newList) {
               setState(() => _plantedSeaweeds = newList);

@@ -6,6 +6,7 @@ import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
 import '../pixel_emoji.dart';
 import '../pixel_supplement.dart';
+import '../translations.dart';
 
 class ShopScreen extends StatefulWidget {
   final int coins;
@@ -111,8 +112,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '알림',
+                Text(
+                  '알림'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
@@ -131,8 +132,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '닫기',
+                    child: Text(
+                      '닫기'.tr,
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -187,6 +188,20 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     final bool isSingle = results.length == 1;
     final bool hasAnyNew = results.any((r) => r['isNew'] == true);
 
+    String titleKey = isSingle
+        ? (hasAnyNew
+              ? (isFish ? '야생의 물고기가 나타났다!' : '야생의 수초가 나타났다!')
+              : (isFish ? '이미 있는 물고기예요!' : '이미 있는 수초예요!'))
+        : (hasAnyNew ? '새로운 친구들을 획득했다!' : '모두 이미 있는 친구들이네요..');
+
+    String msgKey = isSingle
+        ? (hasAnyNew
+              ? '[%s] 가 당첨되었습니다!\n보관함에서 확인해보세요.'
+              : '[%s] 은(는) 이미 보관함에 있습니다!\n아쉽지만 다음 기회를 노려보세요.')
+        : (hasAnyNew
+              ? '새로운 %s를 획득했습니다!\n보관함에서 확인해보세요.'
+              : '전부 이미 보유 중인 %s입니다.\n아쉽지만 다음 기회를 노려보세요.');
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -218,13 +233,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       TextSpan(
-                        text: isSingle
-                            ? (hasAnyNew
-                                  ? '야생의 ${isFish ? '물고기' : '수초'}가 나타났다!'
-                                  : '이미 있는 ${isFish ? '물고기' : '수초'}예요!')
-                            : (hasAnyNew
-                                  ? '새로운 친구들을 획득했다!'
-                                  : '모두 이미 있는 친구들이네요..'),
+                        text: titleKey.tr, // 💡 제목 번역
                       ),
                     ],
                   ),
@@ -293,7 +302,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                       ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  isNew ? 'NEW' : '중복',
+                                  isNew ? 'NEW' : '중복'.tr, // 💡 중복 텍스트 번역
                                   style: TextStyle(
                                     fontWeight: FontWeight.w900,
                                     fontSize: 10,
@@ -311,13 +320,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   ),
                 const SizedBox(height: 24),
                 Text(
-                  isSingle
-                      ? (hasAnyNew
-                            ? '[${results[0]['item']['name']}] 가 당첨되었습니다!\n보관함에서 확인해보세요.'
-                            : '[${results[0]['item']['name']}] 은(는) 이미 보관함에 있습니다!\n아쉽지만 다음 기회를 노려보세요.')
-                      : (hasAnyNew
-                            ? '새로운 ${isFish ? '물고기' : '수초'}를 획득했습니다!\n보관함에서 확인해보세요.'
-                            : '전부 이미 보유 중인 ${isFish ? '물고기' : '수초'}입니다.\n아쉽지만 다음 기회를 노려보세요.'),
+                  msgKey.trArgs([
+                    isSingle
+                        ? (results[0]['item']['type']?.toString() ?? '')
+                              .tr // 💡 번역된 이름 주입
+                        : (isFish ? '물고기'.tr : '수초'.tr),
+                  ]),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -334,8 +342,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           child: RetroGradientButton(
                             color: Colors.grey[300]!,
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text(
-                              '닫기',
+                            child: Text(
+                              '닫기'.tr,
                               style: TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 16,
@@ -362,8 +370,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                 widget
                                     .onNavigateToAquarium(); // 메인 화면에 수조 탭으로 이동 요청
                               },
-                              child: const Text(
-                                '보관함 가기',
+                              child: Text(
+                                '보관함 가기'.tr,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontSize: 16,
@@ -390,8 +398,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            '먹이 및 영양제 상점',
+          Text(
+            '먹이 및 영양제 상점'.tr,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
@@ -409,7 +417,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 40),
           _buildBuyItemButton(
-            '일반 먹이 10개',
+            '일반 먹이 10개'.tr,
             'feed',
             1,
             10,
@@ -418,7 +426,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 16),
           _buildBuyItemButton(
-            '영양제 5개',
+            '영양제 5개'.tr,
             'supplement',
             2,
             5,
@@ -486,13 +494,16 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '구매 확인',
+                Text(
+                  '구매 확인'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '$title\n정말 $cost코인으로 구매하시겠습니까?',
+                  '%s\n정말 %s코인으로 구매하시겠습니까?'.trArgs([
+                    title,
+                    cost.toString(),
+                  ]), // 💡 구매 확인 메시지 번역
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16),
                 ),
@@ -503,8 +514,8 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       child: RetroGradientButton(
                         color: Colors.grey[300]!,
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          '취소',
+                        child: Text(
+                          '취소'.tr,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -517,13 +528,13 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           Navigator.pop(context);
                           if (widget.coins >= cost) {
                             widget.onBuyItem(type, cost, amount);
-                            _showNoticeDialog('구매가 완료되었습니다! 🎉');
+                            _showNoticeDialog('구매가 완료되었습니다! 🎉'.tr);
                           } else {
-                            _showNoticeDialog('코인이 부족합니다! 🪙');
+                            _showNoticeDialog('코인이 부족합니다! 🪙'.tr);
                           }
                         },
-                        child: const Text(
-                          '구매',
+                        child: Text(
+                          '구매'.tr,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),

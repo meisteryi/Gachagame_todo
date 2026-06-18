@@ -156,6 +156,28 @@ class _PixelEmojiPainter extends CustomPainter {
         'wwwwwwww',
         '........',
       ],
+      'plus': [
+        // ➕ 플러스(할 일 추가)
+        '........',
+        '...kk...',
+        '...kk...',
+        '.kkkkkk.',
+        '.kkkkkk.',
+        '...kk...',
+        '...kk...',
+        '........',
+      ],
+      'shapes': [
+        // 🔺 카테고리 도형 (네모, 동그라미, 세모)
+        '.rr...b.',
+        '.rr..bbb',
+        '.....bbb',
+        '......b.',
+        '...g....',
+        '..ggg...',
+        '.ggggg..',
+        '........',
+      ],
       'mood_good': [
         // 😄 기분 좋음
         '..yyyy..',

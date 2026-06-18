@@ -4,6 +4,7 @@ import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
 import 'pixel_emoji.dart';
+import 'translations.dart';
 
 class SlotMachine extends StatefulWidget {
   final String gachaType; // 'fish' 또는 'seaweed'
@@ -213,8 +214,8 @@ class _SlotMachineState extends State<SlotMachine> {
               ],
             ),
             const SizedBox(height: 10),
-            const Text(
-              '할 일을 완료하고 코인을 모아보세요!',
+            Text(
+              '할 일을 완료하고 코인을 모아보세요!'.tr,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 40),
@@ -392,8 +393,8 @@ class _SlotMachineState extends State<SlotMachine> {
                     onPressed: () => _spin(count: 1),
                     child: Column(
                       children: [
-                        const Text(
-                          '1회 뽑기',
+                        Text(
+                          '1회 뽑기'.tr,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -435,8 +436,8 @@ class _SlotMachineState extends State<SlotMachine> {
                     onPressed: () => _spin(count: 10),
                     child: Column(
                       children: [
-                        const Text(
-                          '10연속 뽑기',
+                        Text(
+                          '10연속 뽑기'.tr,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

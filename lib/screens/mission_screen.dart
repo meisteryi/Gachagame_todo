@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
+import '../translations.dart';
 
 class MissionScreen extends StatefulWidget {
   final bool isActive;
@@ -165,8 +166,8 @@ class _MissionScreenState extends State<MissionScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '알림',
+                Text(
+                  '알림'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
@@ -185,8 +186,8 @@ class _MissionScreenState extends State<MissionScreen>
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '닫기',
+                    child: Text(
+                      '닫기'.tr,
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -211,7 +212,7 @@ class _MissionScreenState extends State<MissionScreen>
     if (!mounted) {
       return;
     }
-    _showNoticeDialog('보상 $reward코인을 획득했습니다! 🪙');
+    _showNoticeDialog('보상 %s코인을 획득했습니다! 🪙'.trArgs([reward.toString()]));
   }
 
   Widget _buildMissionCard({
@@ -275,8 +276,10 @@ class _MissionScreenState extends State<MissionScreen>
                 onPressed: (isCompleted && !isClaimed) ? onClaim : null,
                 child: Text(
                   isClaimed
-                      ? '완료됨'
-                      : (isCompleted ? '보상 받기\n($reward)' : '진행 중'),
+                      ? '완료됨'.tr
+                      : (isCompleted
+                            ? '보상 받기\n(%s)'.trArgs([reward.toString()])
+                            : '진행 중'.tr),
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontWeight: FontWeight.w900),
                 ),
@@ -313,14 +316,14 @@ class _MissionScreenState extends State<MissionScreen>
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            const Text(
-              '🔥 일일 미션',
+            Text(
+              '🔥 일일 미션'.tr,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),
             _buildMissionCard(
-              title: '오늘도 출석체크!',
-              desc: '앱에 접속하기',
+              title: '오늘도 출석체크!'.tr,
+              desc: '앱에 접속하기'.tr,
               reward: 1,
               isCompleted: true,
               isClaimed: _missionData['daily_attendance_claimed'] == true,
@@ -328,26 +331,26 @@ class _MissionScreenState extends State<MissionScreen>
               onClaim: () => _claimReward('daily_attendance_claimed', 1),
             ),
             _buildMissionCard(
-              title: '오늘의 할 일 끝!',
-              desc: '오늘의 모든 할 일 완료',
+              title: '오늘의 할 일 끝!'.tr,
+              desc: '오늘의 모든 할 일 완료'.tr,
               reward: 2,
               isCompleted: dailyClearCompleted,
               isClaimed: _missionData['daily_all_clear_claimed'] == true,
               progressText: _todayTodoTotal > 0
                   ? '$_todayTodoDone/$_todayTodoTotal'
-                  : '할 일 없음',
+                  : '할 일 없음'.tr,
               onClaim: () => _claimReward('daily_all_clear_claimed', 2),
             ),
 
             const SizedBox(height: 24),
-            const Text(
-              '🏅 주간 미션',
+            Text(
+              '🏅 주간 미션'.tr,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),
             _buildMissionCard(
-              title: '성실한 개근상',
-              desc: '일주일 내내 출석',
+              title: '성실한 개근상'.tr,
+              desc: '일주일 내내 출석'.tr,
               reward: 10,
               isCompleted: weeklyAttProgress >= 7,
               isClaimed: _missionData['weekly_attendance_claimed'] == true,
@@ -355,8 +358,8 @@ class _MissionScreenState extends State<MissionScreen>
               onClaim: () => _claimReward('weekly_attendance_claimed', 10),
             ),
             _buildMissionCard(
-              title: '완벽한 일주일',
-              desc: '일주일 내내 할 일 모두 완료',
+              title: '완벽한 일주일'.tr,
+              desc: '일주일 내내 할 일 모두 완료'.tr,
               reward: 20,
               isCompleted: weeklyClearProgress >= 7,
               isClaimed: _missionData['weekly_all_clear_claimed'] == true,

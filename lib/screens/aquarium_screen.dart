@@ -6,14 +6,16 @@ import '../pixel_seaweed.dart';
 import '../pixel_emoji.dart';
 import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
 import '../pixel_supplement.dart';
+import '../translations.dart';
 
 class AquariumScreen extends StatefulWidget {
   final List<Map<String, dynamic>> swimmingFishes; // 💡 여러 마리 물고기 배열
   final List<Map<String, dynamic>> plantedSeaweeds;
   final int feedCount;
   final int supplementCount;
+  final bool isSupplementActive;
   final ValueChanged<String> onFeed;
-  final ValueChanged<String> onSupplement;
+  final VoidCallback onSupplement;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final VoidCallback onShowStorage;
 
@@ -23,6 +25,7 @@ class AquariumScreen extends StatefulWidget {
     required this.plantedSeaweeds,
     required this.feedCount,
     required this.supplementCount,
+    required this.isSupplementActive,
     required this.onFeed,
     required this.onSupplement,
     required this.onUpdateSeaweeds,
@@ -272,8 +275,8 @@ class _AquariumScreenState extends State<AquariumScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '알림',
+                Text(
+                  '알림'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
@@ -292,8 +295,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '닫기',
+                    child: Text(
+                      '닫기'.tr,
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -314,11 +317,17 @@ class _AquariumScreenState extends State<AquariumScreen>
     if (_isFeeding) return; // 이미 먹이를 먹는 중이면 중복 실행 방지
 
     if (type == 'feed' && widget.feedCount <= 0) {
-      _showNoticeDialog('남은 먹이가 없습니다! 🍗\n가챠 상점에서 구매하세요.');
+      _showNoticeDialog('남은 먹이가 없습니다! 🍗\n가챠 상점에서 구매하세요.'.tr);
       return;
     }
     if (type == 'supplement' && widget.supplementCount <= 0) {
-      _showNoticeDialog('남은 영양제가 없습니다! 💊\n가챠 상점에서 구매하세요.');
+      _showNoticeDialog('남은 영양제가 없습니다! 💊\n가챠 상점에서 구매하세요.'.tr);
+      return;
+    }
+
+    // 💡 영양제는 물고기를 고르지 않고 수조 전체에 퍼짐!
+    if (type == 'supplement') {
+      _executeSupplement();
       return;
     }
 
@@ -341,7 +350,7 @@ class _AquariumScreenState extends State<AquariumScreen>
             child: Column(
               children: [
                 Text(
-                  type == 'feed' ? '누구에게 먹이를 줄까요?' : '누구에게 영양제를 줄까요?',
+                  '누구에게 먹이를 줄까요?'.tr,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -395,7 +404,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
-                                        fish['name'] ?? '',
+                                        (fish['type']?.toString() ?? '')
+                                            .tr, // 💡 번역된 물고기 이름 표시
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -407,7 +417,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                                     Row(
                                       children: [
                                         Text(
-                                          '$mood ',
+                                          '${mood.tr} ', // 💡 기분 번역
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
@@ -488,8 +498,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '취소',
+                    child: Text(
+                      '취소'.tr,
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -511,11 +521,7 @@ class _AquariumScreenState extends State<AquariumScreen>
 
   // 💡 선택한 물고기에게 먹이를 주는 실제 애니메이션 및 경험치 부여 실행 함수
   void _executeFeeding(String type, String targetId) {
-    if (type == 'feed') {
-      widget.onFeed(targetId);
-    } else {
-      widget.onSupplement(targetId);
-    }
+    widget.onFeed(targetId);
 
     setState(() {
       _isFeeding = true;
@@ -552,6 +558,26 @@ class _AquariumScreenState extends State<AquariumScreen>
     });
   }
 
+  // 💡 영양제 투여 애니메이션 실행 함수
+  void _executeSupplement() {
+    widget.onSupplement();
+
+    setState(() {
+      _isFeeding = true;
+      _feedType = 'supplement';
+      _targetFishId = null;
+    });
+
+    _feedStartPositions.clear();
+    _feedController?.forward(from: 0.0).then((_) {
+      if (mounted) {
+        setState(() {
+          _isFeeding = false;
+        });
+      }
+    });
+  }
+
   // 💡 수조 하단에 표시되는 물고기 상태 패널
   Widget _buildFishStatusPanel() {
     final fish = widget.swimmingFishes.firstWhere(
@@ -583,14 +609,14 @@ class _AquariumScreenState extends State<AquariumScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${fish['name']} (Lv.$level)',
+                '${(fish['type']?.toString() ?? '').tr} (Lv.$level)', // 💡 번역된 물고기 이름
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
                 ),
               ),
               Text(
-                '기분: $mood',
+                '기분: ${mood.tr}', // 💡 기분 텍스트 번역
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -928,19 +954,57 @@ class _AquariumScreenState extends State<AquariumScreen>
 
                             // 높이(시간) 차이를 두고 3조각 생성
                             if (_feedType == 'supplement') {
-                              // 영양제 알약 모형으로 생성
-                              effectWidgets.add(
-                                buildFood(
-                                  0.0,
-                                  0.20,
-                                  0.50,
-                                  -3,
-                                  Colors.pinkAccent,
-                                ),
-                              );
-                              effectWidgets.add(
-                                buildFood(0.05, 0.25, 0.55, 3, Colors.white),
-                              );
+                              // 💊 영양제가 수조 아래로 스르륵 내려오다 녹아내림
+                              double suppY = -150.0;
+                              double suppOpacity = 1.0;
+                              if (feedV < 0.3) {
+                                suppY =
+                                    -150.0 +
+                                    (h * 0.6 - (-150.0)) * (feedV / 0.3);
+                              } else if (feedV < 0.5) {
+                                suppY =
+                                    h * 0.6 +
+                                    sin((feedV - 0.3) * pi * 8) * 4; // 녹으면서 흔들림
+                                suppOpacity =
+                                    1.0 - ((feedV - 0.3) / 0.2); // 투명해짐
+                              } else {
+                                suppOpacity = 0.0;
+                              }
+
+                              if (suppOpacity > 0) {
+                                effectWidgets.add(
+                                  Positioned(
+                                    left: w / 2 + 15,
+                                    top: suppY,
+                                    child: Opacity(
+                                      opacity: suppOpacity,
+                                      child: const PixelSupplement(size: 24),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              // ✨ 수초가 반짝반짝이는 효과
+                              if (feedV > 0.4 && feedV < 0.9) {
+                                double sparkleProgress = (feedV - 0.4) / 0.5;
+                                for (var seaweed in widget.plantedSeaweeds) {
+                                  double sx =
+                                      (seaweed['x'] as num?)?.toDouble() ??
+                                      140.0;
+                                  effectWidgets.add(
+                                    Positioned(
+                                      left: sx - 10,
+                                      bottom: 25,
+                                      child: CustomPaint(
+                                        size: const Size(60, 60),
+                                        painter: PixelSparklePainter(
+                                          sparkleProgress,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
                             } else {
                               effectWidgets.add(
                                 buildFood(
@@ -969,12 +1033,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                                   Colors.brown[900]!,
                                 ),
                               );
-                            }
 
-                            // 밥을 먹는 타이밍에 맞춰 하트 3개 뿅뿅 발사
-                            effectWidgets.add(buildHeart(0.40, 0.4, -15));
-                            effectWidgets.add(buildHeart(0.48, 0.4, 5));
-                            effectWidgets.add(buildHeart(0.55, 0.4, -5));
+                              // 밥을 먹는 타이밍에 맞춰 하트 3개 뿅뿅 발사
+                              effectWidgets.add(buildHeart(0.40, 0.4, -15));
+                              effectWidgets.add(buildHeart(0.48, 0.4, 5));
+                              effectWidgets.add(buildHeart(0.55, 0.4, -5));
+                            }
                           }
 
                           // 💡 다중 물고기들을 순회하며 각자의 위치와 위상 적용
@@ -1106,12 +1170,12 @@ class _AquariumScreenState extends State<AquariumScreen>
               color: Colors.white,
               textColor: Colors.black,
               onPressed: widget.onShowStorage,
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  PixelEmoji('box', size: 18),
-                  SizedBox(width: 6),
-                  Text('보관함'),
+                  const PixelEmoji('box', size: 18),
+                  const SizedBox(width: 6),
+                  Text('보관함'.tr),
                 ],
               ),
             ),
@@ -1127,12 +1191,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                   textColor: Colors.white,
                   onPressed: () =>
                       _startFeeding('feed'), // 💡 올바른 함수 호출 방식으로 변경
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      PixelEmoji('meat', size: 16),
-                      SizedBox(width: 4),
-                      Text('먹이'),
+                      const PixelEmoji('meat', size: 16),
+                      const SizedBox(width: 4),
+                      Text('먹이'.tr),
                     ],
                   ),
                 ),
@@ -1142,12 +1206,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                   textColor: Colors.white,
                   onPressed: () =>
                       _startFeeding('supplement'), // 💡 영양제 주기 버튼 추가
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      PixelSupplement(size: 16),
-                      SizedBox(width: 4),
-                      Text('영양제'),
+                      const PixelSupplement(size: 16),
+                      const SizedBox(width: 4),
+                      Text('영양제'.tr), // 💡 번역 누락된 부분도 함께 수정
                     ],
                   ),
                 ),
@@ -1193,7 +1257,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                 children: [
                   Icon(_isEditMode ? Icons.check : Icons.edit, size: 18),
                   const SizedBox(width: 6),
-                  Text(_isEditMode ? '편집 완료' : '수초 편집'),
+                  Text(_isEditMode ? '편집 완료'.tr : '수초 편집'.tr),
                 ],
               ),
             ),
@@ -1214,8 +1278,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                     color: Colors.black87,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
-                    '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.',
+                  child: Text(
+                    '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -1226,6 +1290,42 @@ class _AquariumScreenState extends State<AquariumScreen>
                 ),
               ),
             ),
+          // 💡 영양제 활성화 상태일 때 안내 메시지 (편집 모드가 아닐 때만 표시)
+          Positioned(
+            top: 80,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              ignoring: !(widget.isSupplementActive && !_isEditMode),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: (widget.isSupplementActive && !_isEditMode)
+                    ? 1.0
+                    : 0.0,
+                curve: Curves.easeInOut,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.pinkAccent.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '💊 다음 먹이 주기 경험치 2배 (20)'.tr,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
           // 💡 수조 하단 물고기 상태창
           Positioned(
             bottom: 85,
@@ -1397,6 +1497,34 @@ class PixelHeartPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant PixelHeartPainter oldDelegate) =>
       oldDelegate.opacity != opacity;
+}
+
+// --- ✨ 수초 주변 반짝거리는 픽셀 애니메이션 ---
+class PixelSparklePainter extends CustomPainter {
+  final double progress;
+  PixelSparklePainter(this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final opacity = sin(progress * pi).clamp(0.0, 1.0);
+    final paint = Paint()
+      ..color = Colors.yellowAccent.withValues(alpha: opacity);
+    final paintWhite = Paint()..color = Colors.white.withValues(alpha: opacity);
+    const double p = 3.0; // 픽셀 크기
+
+    void drawSparkle(double cx, double cy, Paint pnt) {
+      canvas.drawRect(Rect.fromLTWH(cx - p, cy, p * 3, p), pnt);
+      canvas.drawRect(Rect.fromLTWH(cx, cy - p, p, p * 3), pnt);
+    }
+
+    drawSparkle(size.width * 0.2, size.height * 0.3, paint);
+    drawSparkle(size.width * 0.8, size.height * 0.5, paintWhite);
+    drawSparkle(size.width * 0.5, size.height * 0.8, paint);
+    drawSparkle(size.width * 0.3, size.height * 0.9, paintWhite);
+  }
+
+  @override
+  bool shouldRepaint(covariant PixelSparklePainter oldDelegate) => true;
 }
 
 // --- 🧊 도트 느낌의 수조 테두리 및 모래 바닥 ---
