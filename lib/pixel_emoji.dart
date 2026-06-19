@@ -246,16 +246,18 @@ class _PixelEmojiPainter extends CustomPainter {
       Offset(0, ph),
     ];
 
-    // 1. 얇은 테두리(외곽선) 그리기
-    for (int y = 0; y < 8; y++) {
-      for (int x = 0; x < 8; x++) {
-        final char = data[y][x];
-        if (char != '.') {
-          for (var offset in outlineOffsets) {
-            canvas.drawRect(
-              Rect.fromLTWH(x * pw + offset.dx, y * ph + offset.dy, pw, ph),
-              outlinePaint,
-            );
+    // 1. 얇은 테두리(외곽선) 그리기 (플러스 아이콘은 외곽선 제외하여 얇고 선명하게 유지)
+    if (name != 'plus') {
+      for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+          final char = data[y][x];
+          if (char != '.') {
+            for (var offset in outlineOffsets) {
+              canvas.drawRect(
+                Rect.fromLTWH(x * pw + offset.dx, y * ph + offset.dy, pw, ph),
+                outlinePaint,
+              );
+            }
           }
         }
       }
