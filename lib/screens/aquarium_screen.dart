@@ -865,7 +865,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                         _buildRuleItem(
                           'fish',
                           '레벨 시스템',
-                          '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n최대 레벨은 5입니다.',
+                          '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n5레벨이 되면 엄청난 일이 일어날지도....',
                           const Color(0xFFFFF9C4),
                           const Color(0xFFE6A800),
                         ),
@@ -879,21 +879,14 @@ class _AquariumScreenState extends State<AquariumScreen>
                         _buildRuleItem(
                           'seaweed',
                           '영양제 시스템',
-                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 EXP가 2배(+20 EXP)가 되고\n수초들이 반짝이며 빛납니다.',
+                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 경험치가 2배가 됩니다.',
                           const Color(0xFFA8E6CF),
                           const Color(0xFF1E7A4A),
                         ),
                         _buildRuleItem(
-                          'coin',
-                          '레벨 5 진화',
-                          '레벨 5에 도달하면 물고기가 진화합니다!\n크기가 최대가 되고, 각 물고기 종류에 맞는\n특별한 색상으로 화려하게 변신합니다!',
-                          const Color(0xFFB4D8E7),
-                          const Color(0xFF1A6E99),
-                        ),
-                        _buildRuleItem(
                           'mood_great',
                           '기분 시스템',
-                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n자주 먹이를 주면 기분이 좋아집니다!',
+                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n 각 기분에 따라서 경험치의 증가량이 달라집니다!',
                           const Color(0xFFFFB7B2),
                           const Color(0xFFA8003A),
                         ),
