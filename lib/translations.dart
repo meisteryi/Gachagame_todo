@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AppLang { ko, en, ja, es }
+enum AppLang { ko, en, jp, es }
 
 class Tr {
   static AppLang lang = AppLang.ko;
@@ -9,7 +9,11 @@ class Tr {
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('app_lang') ?? 'ko';
+    var saved = prefs.getString('app_lang') ?? 'ko';
+    if (saved == 'ja') {
+      saved = 'jp';
+      await prefs.setString('app_lang', 'jp');
+    }
     lang = AppLang.values.firstWhere(
       (e) => e.name == saved,
       orElse: () => AppLang.ko,
@@ -197,8 +201,10 @@ class Tr {
       '수정': 'Edited',
       '설정': 'Set',
       ' (알림 ': ' (Alarm ',
+      '보관함': 'Storage',
+      '< 뒤로': '< Back',
     },
-    AppLang.ja: {
+    AppLang.jp: {
       '게임 설정': 'ゲーム設定',
       '언어 / Language': '言語 / Language',
       '내 수조': '水槽',
@@ -358,6 +364,8 @@ class Tr {
       '수정': '修正',
       '설정': '設定',
       ' (알림 ': ' (アラーム ',
+      '보관함': '保管庫',
+      '< 뒤로': '< 戻る',
     },
     AppLang.es: {
       '게임 설정': 'Ajustes',
@@ -531,6 +539,8 @@ class Tr {
       '수정': 'editada',
       '설정': 'activada',
       ' (알림 ': ' (Alarma ',
+      '보관함': 'Almacén',
+      '< 뒤로': '< Atrás',
     },
   };
 

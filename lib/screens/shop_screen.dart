@@ -666,7 +666,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: _buildShopItem(
-                                '물고기 뽑기',
+                                '물고기 뽑기'.tr,
                                 const PixelEmoji('fish', size: 36),
                                 const Color(0xFFFFDAB9),
                                 () => setState(() => _gachaMode = 'fish'),
@@ -675,7 +675,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             const SizedBox(width: 16),
                             Expanded(
                               child: _buildShopItem(
-                                '수초 뽑기',
+                                '수초 뽑기'.tr,
                                 const PixelEmoji('seaweed', size: 36),
                                 const Color(0xFFA8E6CF),
                                 () => setState(() => _gachaMode = 'seaweed'),
@@ -690,7 +690,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: _buildShopItem(
-                                '먹이 및\n영양제 상점',
+                                '먹이 및\n영양제 상점'.tr,
                                 const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -789,9 +789,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                     gradient: getRetroGradient(Colors.white),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
-                                    '< 뒤로',
-                                    style: TextStyle(
+                                  child: Text(
+                                    '< 뒤로'.tr,
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
                                       color: Colors.black,

@@ -590,6 +590,13 @@ class _AquariumScreenState extends State<AquariumScreen>
     final int maxExp = level * 100;
     final String mood = fish['mood'] ?? '보통';
 
+    String moodEmoji = 'mood_normal';
+    if (mood == '좋음' || mood == '최고야!') {
+      moodEmoji = 'mood_good';
+    } else if (mood == '나쁨') {
+      moodEmoji = 'mood_bad';
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -614,12 +621,18 @@ class _AquariumScreenState extends State<AquariumScreen>
                   fontSize: 16,
                 ),
               ),
-              Text(
-                '기분: ${mood.tr}', // 💡 기분 텍스트 번역
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '기분: ${mood.tr} ', // 💡 기분 텍스트 번역
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  PixelEmoji(moodEmoji, size: 16),
+                ],
               ),
             ],
           ),
