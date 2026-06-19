@@ -150,15 +150,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final PageController _pageController = PageController(
     initialPage: 1,
   ); // 💡 초기 화면을 '할 일'로 변경
+  Timer? _moodTimer;
 
   @override
   void initState() {
     super.initState();
     _loadMainData(); // 앱 시작 시 보관함 데이터 불러오기
+    _startMoodTimer();
   }
 
   @override
   void dispose() {
+    _moodTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -267,6 +270,24 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     await prefs.setBool('isSupplementActive', _isSupplementActive); // 버프 상태 저장
   }
 
+  void _startMoodTimer() {
+    _moodTimer?.cancel();
+    _moodTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      _randomizeFishMoods();
+    });
+  }
+
+  void _randomizeFishMoods() {
+    final random = Random();
+    final moods = ['보통', '좋음', '최고야!', '나쁨'];
+    setState(() {
+      for (var fish in _ownedFishes) {
+        fish['mood'] = moods[random.nextInt(moods.length)];
+      }
+    });
+    _saveMainData();
+  }
+
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
   void _onItemTapped(int index) {
     setState(() {
@@ -363,14 +384,30 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     for (var fish in _ownedFishes) {
       if (fish['id'] == targetId) {
-        fish['exp'] = (fish['exp'] ?? 0) + finalAmount;
-        int level = fish['level'] ?? 1;
-        int maxExp = level * 100;
-        if (fish['exp'] >= maxExp) {
-          fish['level'] = level + 1;
-          fish['exp'] -= maxExp;
-          fish['mood'] = '최고야!';
-          leveledUp = true;
+        // --- 💡 기분에 따른 경험치 추가 효과 ---
+        double moodMultiplier = 1.0;
+        final String mood = fish['mood'] ?? '보통';
+        if (mood == '최고야!') {
+          moodMultiplier = 1.5;
+        } else if (mood == '좋음') {
+          moodMultiplier = 1.2;
+        } else if (mood == '나쁨') {
+          moodMultiplier = 0.7;
+        }
+        int expGain = (finalAmount * moodMultiplier).round();
+
+        fish['exp'] = (fish['exp'] ?? 0) + expGain;
+        while (true) {
+          int level = fish['level'] ?? 1;
+          int maxExp = 30 * (1 << (level - 1).clamp(0, 10));
+          if (fish['exp'] >= maxExp) {
+            fish['level'] = level + 1;
+            fish['exp'] -= maxExp;
+            fish['mood'] = '최고야!';
+            leveledUp = true;
+          } else {
+            break;
+          }
         }
       }
     }
@@ -1008,6 +1045,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                                   ?.toString() ??
                                                               'puffer',
                                                           isAnimated: false,
+                                                          level:
+                                                              fish['level'] ??
+                                                              1,
                                                         ),
                                                       ),
                                                       const SizedBox(height: 6),

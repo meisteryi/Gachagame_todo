@@ -5,8 +5,14 @@ import 'package:flutter/material.dart';
 class PixelFish extends StatefulWidget {
   final String type;
   final bool isAnimated;
+  final int level;
 
-  const PixelFish({super.key, this.type = 'puffer', this.isAnimated = true});
+  const PixelFish({
+    super.key,
+    this.type = 'puffer',
+    this.isAnimated = true,
+    this.level = 1,
+  });
 
   @override
   State<PixelFish> createState() => _PixelFishState();
@@ -36,12 +42,19 @@ class _PixelFishState extends State<PixelFish>
 
   @override
   Widget build(BuildContext context) {
+    final int lv = widget.level.clamp(1, 5);
+    final double scaleMultiplier = 1.0 + (lv - 1) * 0.125;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return CustomPaint(
-          size: const Size(60, 40), // 전체 물고기의 크기
-          painter: PixelFishPainter(widget.type, _controller.value),
+        return Transform.scale(
+          scale: scaleMultiplier,
+          alignment: Alignment.center,
+          child: CustomPaint(
+            size: const Size(60, 40), // 전체 물고기의 크기
+            painter: PixelFishPainter(widget.type, _controller.value),
+          ),
         );
       },
     );

@@ -203,6 +203,8 @@ class Tr {
       ' (알림 ': ' (Alarm ',
       '보관함': 'Storage',
       '< 뒤로': '< Back',
+      '수조 안 물고기 정보': 'Fishes in the Tank',
+      '수조에 물고기가 없습니다!': 'No fishes in the tank!',
     },
     AppLang.jp: {
       '게임 설정': 'ゲーム設定',
@@ -366,6 +368,8 @@ class Tr {
       ' (알림 ': ' (アラーム ',
       '보관함': '保管庫',
       '< 뒤로': '< 戻る',
+      '수조 안 물고기 정보': '水槽内の魚の情報',
+      '수조에 물고기가 없습니다!': '水槽に魚がいません！',
     },
     AppLang.es: {
       '게임 설정': 'Ajustes',
@@ -541,6 +545,8 @@ class Tr {
       ' (알림 ': ' (Alarma ',
       '보관함': 'Almacén',
       '< 뒤로': '< Atrás',
+      '수조 안 물고기 정보': 'Información de los Peces en el Tanque',
+      '수조에 물고기가 없습니다!': '¡No hay peces en el tanque!',
     },
   };
 

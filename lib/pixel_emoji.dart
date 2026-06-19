@@ -178,6 +178,17 @@ class _PixelEmojiPainter extends CustomPainter {
         '.ggggg..',
         '........',
       ],
+      'mood_great': [
+        // 🥰 기분 최고 (머리 옆에 하트가 떠 있는 웃는 표정)
+        'r.r.yyy.',
+        'rrryyyyy',
+        '.r.ykyky',
+        '...yyyyy',
+        '...ykyky',
+        '...yykky',
+        '....yyy.',
+        '........',
+      ],
       'mood_good': [
         // 😄 기분 좋음
         '..yyyy..',

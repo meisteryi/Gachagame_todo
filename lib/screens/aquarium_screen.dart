@@ -1,5 +1,6 @@
 // 내 수조 화면 분리 완료
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
@@ -49,6 +50,7 @@ class _AquariumScreenState extends State<AquariumScreen>
   bool _showStatus = false; // 🌟 물고기 상태창 표시 여부
   String? _selectedFishId; // 🌟 상태창을 띄울 물고기 ID
   String? _targetFishId; // 🌟 먹이를 줄 목표 물고기 ID
+  final Map<String, Timer> _activeStatusTimers = {}; // 💡 터치 시 임시 상태창 표시에 쓸 타이머 저장소
 
   @override
   void initState() {
@@ -66,6 +68,10 @@ class _AquariumScreenState extends State<AquariumScreen>
 
   @override
   void dispose() {
+    for (var timer in _activeStatusTimers.values) {
+      timer.cancel();
+    }
+    _activeStatusTimers.clear();
     _fishController?.dispose();
     _feedController?.dispose();
     super.dispose();
@@ -365,11 +371,13 @@ class _AquariumScreenState extends State<AquariumScreen>
                       children: widget.swimmingFishes.map((fish) {
                         final int level = fish['level'] ?? 1;
                         final int exp = fish['exp'] ?? 0;
-                        final int maxExp = level * 100;
+                        final int maxExp = 30 * (1 << (level - 1).clamp(0, 10));
                         final String mood = fish['mood'] ?? '보통';
 
                         String moodEmoji = 'mood_normal';
-                        if (mood == '좋음' || mood == '최고야!') {
+                        if (mood == '최고야!') {
+                          moodEmoji = 'mood_great';
+                        } else if (mood == '좋음') {
                           moodEmoji = 'mood_good';
                         } else if (mood == '나쁨') {
                           moodEmoji = 'mood_bad';
@@ -399,6 +407,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                                       child: PixelFish(
                                         type: fish['type'] ?? 'puffer',
                                         isAnimated: false,
+                                        level: fish['level'] ?? 1,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
@@ -587,11 +596,13 @@ class _AquariumScreenState extends State<AquariumScreen>
 
     final int level = fish['level'] ?? 1;
     final int exp = fish['exp'] ?? 0;
-    final int maxExp = level * 100;
+    final int maxExp = 30 * (1 << (level - 1).clamp(0, 10));
     final String mood = fish['mood'] ?? '보통';
 
     String moodEmoji = 'mood_normal';
-    if (mood == '좋음' || mood == '최고야!') {
+    if (mood == '최고야!') {
+      moodEmoji = 'mood_great';
+    } else if (mood == '좋음') {
       moodEmoji = 'mood_good';
     } else if (mood == '나쁨') {
       moodEmoji = 'mood_bad';
@@ -684,6 +695,201 @@ class _AquariumScreenState extends State<AquariumScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSmallStatusBubble(Map<String, dynamic> fish) {
+    final String mood = fish['mood'] ?? '보통';
+
+    String moodEmoji = 'mood_normal';
+    if (mood == '최고야!') {
+      moodEmoji = 'mood_great';
+    } else if (mood == '좋음') {
+      moodEmoji = 'mood_good';
+    } else if (mood == '나쁨') {
+      moodEmoji = 'mood_bad';
+    }
+
+    return PixelEmoji(moodEmoji, size: 20);
+  }
+
+  void _showSwimmingFishesStats() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            height: 420,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE1F5FE),
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: const [
+                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+              ],
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '수조 안 물고기 정보'.tr,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: widget.swimmingFishes.isEmpty
+                      ? Center(
+                          child: Text(
+                            '수조에 물고기가 없습니다!'.tr,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: widget.swimmingFishes.map((fish) {
+                              final int level = fish['level'] ?? 1;
+                              final int exp = fish['exp'] ?? 0;
+                              final int maxExp = 30 * (1 << (level - 1).clamp(0, 10));
+                              final String mood = fish['mood'] ?? '보통';
+
+                              String moodEmoji = 'mood_normal';
+                              if (mood == '최고야!') {
+                                moodEmoji = 'mood_great';
+                              } else if (mood == '좋음') {
+                                moodEmoji = 'mood_good';
+                              } else if (mood == '나쁨') {
+                                moodEmoji = 'mood_bad';
+                              }
+
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: getRetroGradient(Colors.white),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: const Color(0xFF333333),
+                                    width: 3,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Transform.scale(
+                                          scale: 0.8,
+                                          child: PixelFish(
+                                            type: fish['type'] ?? 'puffer',
+                                            isAnimated: false,
+                                            level: fish['level'] ?? 1,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            (fish['name']?.toString() ?? '').tr,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${mood.tr} ',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            PixelEmoji(moodEmoji, size: 16),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Lv.$level',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 12,
+                                            color: Colors.blueAccent,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Container(
+                                            height: 12,
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[300],
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                                return Stack(
+                                                  children: [
+                                                    ClipRRect(
+                                                      borderRadius: BorderRadius.circular(4),
+                                                      child: Container(
+                                                        width: constraints.maxWidth *
+                                                            (exp / maxExp).clamp(0.0, 1.0),
+                                                        color: Colors.greenAccent,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '$exp / $maxExp',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      '닫기'.tr,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1113,34 +1319,62 @@ class _AquariumScreenState extends State<AquariumScreen>
                               Positioned(
                                 left: x,
                                 top: y,
-                                child: Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.diagonal3Values(
-                                    flipX ? -1.0 : 1.0, // 좌우 반전 적용
-                                    1.0,
-                                    1.0,
-                                  )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () {
-                                      setState(() {
-                                        // 💡 터치한 물고기의 ID를 선택하여 상태창을 켬
-                                        if (_selectedFishId == fish['id']) {
-                                          _showStatus = false;
-                                          _selectedFishId = null;
-                                        } else {
-                                          _selectedFishId = fish['id'];
-                                          _showStatus = true;
-                                        }
-                                      });
-                                    },
-                                    child: Transform.scale(
-                                      scale: 0.5, // 💡 물고기 크기 절반으로 축소
-                                      child: PixelFish(
-                                        type: fish['type'] ?? 'puffer',
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.diagonal3Values(
+                                        flipX ? -1.0 : 1.0, // 좌우 반전 적용
+                                        1.0,
+                                        1.0,
+                                      )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
+                                      child: GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onTap: () {
+                                          setState(() {
+                                            // 💡 터치한 물고기의 ID를 선택하여 상태창을 켬
+                                            if (_selectedFishId == fish['id']) {
+                                              _showStatus = false;
+                                              _selectedFishId = null;
+                                            } else {
+                                              _selectedFishId = fish['id'];
+                                              _showStatus = true;
+                                            }
+
+                                            // 💡 물고기 터치 시 3초 동안 왼쪽 위에 현재 상태 표시
+                                            final String? fishId = fish['id'];
+                                            if (fishId != null) {
+                                              _activeStatusTimers[fishId]?.cancel();
+                                              _activeStatusTimers[fishId] = Timer(
+                                                const Duration(seconds: 3),
+                                                () {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _activeStatusTimers.remove(fishId);
+                                                    });
+                                                  }
+                                                },
+                                              );
+                                            }
+                                          });
+                                        },
+                                        child: Transform.scale(
+                                          scale: 0.5, // 💡 물고기 크기 절반으로 축소
+                                          child: PixelFish(
+                                            type: fish['type'] ?? 'puffer',
+                                            level: fish['level'] ?? 1,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                    if (_activeStatusTimers.containsKey(fish['id']))
+                                      Positioned(
+                                        left: 0,
+                                        top: -5,
+                                        child: _buildSmallStatusBubble(fish),
+                                      ),
+                                  ],
                                 ),
                               ),
                             );
@@ -1234,12 +1468,10 @@ class _AquariumScreenState extends State<AquariumScreen>
           Positioned(
             top: 16,
             left: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: getRetroGradient(Colors.white),
-                borderRadius: BorderRadius.circular(4),
-              ),
+            child: PixelButton(
+              color: Colors.white,
+              textColor: Colors.black,
+              onPressed: _showSwimmingFishesStats,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
