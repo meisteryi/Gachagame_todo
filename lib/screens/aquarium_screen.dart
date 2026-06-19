@@ -54,7 +54,8 @@ class _AquariumScreenState extends State<AquariumScreen>
   bool _showStatus = false; // 🌟 물고기 상태창 표시 여부
   String? _selectedFishId; // 🌟 상태창을 띄울 물고기 ID
   String? _targetFishId; // 🌟 먹이를 줄 목표 물고기 ID
-  final Map<String, Timer> _activeStatusTimers = {}; // 💡 터치 시 임시 상태창 표시에 쓸 타이머 저장소
+  final Map<String, Timer> _activeStatusTimers =
+      {}; // 💡 터치 시 임시 상태창 표시에 쓸 타이머 저장소
 
   @override
   void initState() {
@@ -98,9 +99,12 @@ class _AquariumScreenState extends State<AquariumScreen>
     final int seed = _mixHash(id.hashCode);
 
     // 💡 각 물고기마다 고유한 난수 시드를 기반으로 수평/수직 이동 편향(Shift) 및 진폭 배율(Amplitude Scale)을 적용하여 완전히 다른 궤적을 그리게 합니다.
-    final double dxShift = (((seed ~/ 100) % 11) - 5) * 8.0; // -40 ~ +40 픽셀 수평 이동
-    final double dyShift = (((seed ~/ 1000) % 11) - 5) * 6.0; // -30 ~ +30 픽셀 수직 이동
-    final double ampScale = 0.7 + ((seed % 7) / 10.0); // 0.7 ~ 1.3배의 상하 출렁임 크기 변화
+    final double dxShift =
+        (((seed ~/ 100) % 11) - 5) * 8.0; // -40 ~ +40 픽셀 수평 이동
+    final double dyShift =
+        (((seed ~/ 1000) % 11) - 5) * 6.0; // -30 ~ +30 픽셀 수직 이동
+    final double ampScale =
+        0.7 + ((seed % 7) / 10.0); // 0.7 ~ 1.3배의 상하 출렁임 크기 변화
 
     double x = 0;
     double y = 0;
@@ -112,67 +116,81 @@ class _AquariumScreenState extends State<AquariumScreen>
       x = w / 2 + drift * (w / 2.5) + dxShift;
       // % 대신 연속적인 사인 곡선을 사용하여 위치가 뚝 끊기지 않게 보정
       double pulse = (sin(v * pi * 20) + 1.0) / 2.0; // 펄스(맥박) 주기를 3배 느리게 완화
-      y = h * 0.4 + sin(v * pi * 2) * (h * 0.2) * ampScale - (pulse * 20.0) + dyShift;
+      y =
+          h * 0.4 +
+          sin(v * pi * 2) * (h * 0.2) * ampScale -
+          (pulse * 20.0) +
+          dyShift;
       flipX = drift < 0;
     } else if (type == 'seahorse') {
-      // 🐉 해마: 꼿꼿하게 서서 위아래로 통통 튀며 아주 느리게 전진
-      double t = v * 2; // 30초 동안 좌우 왕복 1회
-      x = (w / 2) + sin(t * pi * 2) * (w * 0.4) + dxShift;
-      y = h * 0.6 + sin(v * pi * 30) * 12 * ampScale + dyShift; // 빠르게 통통 튀기 (조금 더 부드럽게 완화)
+      // 🐉 해마: 꼿꼿하게 서서 위아래로 부드럽게 둥실둥실 떠오르며 아주 천천히 좌우로 왔다갔다함
+      double t = v; // 30초 동안 좌우 왕복 1회 (더 차분하고 느린 속도)
+      x = (w / 2) + sin(t * pi * 2) * (w * 0.35) + dxShift;
+      // 30초 동안 부드럽게 2번 오르내리는 둥실둥실 모션 (루프 경계에서 자연스럽게 연결)
+      double floatWave = sin(v * pi * 4) * 14 * ampScale;
+      y = h * 0.55 + floatWave + dyShift;
       flipX = cos(t * pi * 2) < 0;
     } else if (type == 'shrimp') {
-      // 🦐 새우: 바닥을 기어가다가 연속성을 유지하며 뒤로 펄쩍 뜀 (벽에 충돌하여 멈추는 불연속 수정)
-      double cycleV = (v * 4) % 1.0; // 30초 동안 4사이클
-      int cycle = (v * 4).floor();
-      bool isMovingRight = cycle % 2 == 0; // 지그재그 방향
+      // 🦐 새우: 수조 전역(중하층 위주)을 꼬물꼬물 헤엄쳐 돌아다니며, 가끔 뒤로 펄쩍 튀는 반동 헤엄 모션 적용
+      double cycleV = (v * 3.0) % 1.0; // 30초 동안 3사이클
+      int cycle = (v * 3.0).floor();
+      bool isMovingRight = cycle % 2 == 0; // 지그재그 헤엄 방향
 
       double xProgress;
+      double swimWave = sin(cycleV * pi * 12) * 5; // 꼬물꼬물 헤엄치는 미세 진동
+
+      // 높낮이를 넓게 둥실둥실 이동 (수직 범위를 h * 0.35 ~ h * 0.85 로 확장)
+      double verticalCenter = h * 0.6 + sin(v * pi * 2) * (h * 0.2) + dyShift;
+
       if (cycleV < 0.8) {
-        // 0.0 ~ 0.8 동안 목표 지점보다 살짝 더 전진 (1.05배)
-        xProgress = (cycleV / 0.8) * 1.05;
-        double subT = cycleV / 0.8;
-        y = h * 0.93 - (sin(subT * pi * 16).abs() * 4 * ampScale) + dyShift * 0.4; // 바닥을 꼬물꼬물
+        // 0.0 ~ 0.8 동안 앞으로 꼬물꼬물 헤엄침
+        xProgress = (cycleV / 0.8) * 1.0;
+        y = verticalCenter + swimWave * ampScale;
       } else {
-        // 0.8 ~ 1.0 동안 초과했던 0.05만큼 뒤로 후퇴하며 펄쩍 뜀!
+        // 0.8 ~ 1.0 동안 꼬리를 강하게 튕겨 뒤로 후퇴하며 솟구침
         double subT = (cycleV - 0.8) / 0.2;
-        xProgress = 1.05 - (subT * 0.05);
-        y = h * 0.93 - (sin(subT * pi) * 35 * ampScale) + dyShift * 0.4; // 부드러운 포물선 점프
+        xProgress = 1.0 - (subT * 0.15); // 뒤로 살짝 반동
+        y = verticalCenter - (sin(subT * pi) * 50 * ampScale); // 솟구치는 반동
       }
 
-      // 좌우 벽면 근처에서 프리징이 생기지 않도록 가로 폭 범위를 소폭 압축하고 오프셋을 조율
+      // 좌우 벽면 근처에서 프리징이 생기지 않도록 가로 폭 범위를 널찍하게 확장하고 오프셋 조율
       x = isMovingRight
-          ? (w * 0.22) + (w * 0.56 * xProgress) + dxShift * 0.5
-          : (w * 0.78) - (w * 0.56 * xProgress) + dxShift * 0.5;
+          ? (w * 0.1) + (w * 0.7 * xProgress) + dxShift * 0.5
+          : (w * 0.9) - (w * 0.7 * xProgress) + dxShift * 0.5;
 
       flipX = !isMovingRight; // 점프 시에도 시선 유지
     } else if (type == 'crab') {
-      // 🦀 꽃게: 바닥층에서 완만한 파도를 타듯 위아래로 기어가며 아주 느리게 옆걸음질 (속도 소폭 하향 및 상하 흔들림 적용)
-      double t = (v * 0.7) % 1.0; // 30초 동안 0.7회 왕복 (속도 감소)
+      // 🦀 꽃게: 바닥층에서 완만한 파도를 타듯 위아래로 기어가며 옆걸음질 (정수 주기로 루프 경계 튐 해결)
+      double t = v; // 30초 동안 1회 왕복
       bool isMovingRight = t < 0.5;
       double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
-      
+
       // 수평 이동 범위 설정 및 테두리 프리징 방지
-      x = (w * 0.2) + (w * 0.6 * progress) + dxShift * 0.5;
-      
+      x = (w * 0.25) + (w * 0.5 * progress) + dxShift * 0.5;
+
       // 바닥 근처에서 완만한 파동(walkWave)을 그리며 상하로 움직임 (발걸음 뜀박질 속도를 더 차분하게 조율)
-      double walkWave = sin(t * pi * 4) * (h * 0.07); 
-      y = h * 0.88 + walkWave - (sin(v * pi * 12).abs() * 1.2) + dyShift * 0.5; 
+      double walkWave = sin(t * pi * 4) * (h * 0.07);
+      y =
+          h * 0.88 +
+          walkWave -
+          (sin(v * pi * 12).abs() * 1.2 * sin(v * pi)) +
+          dyShift * 0.5;
       flipX = !isMovingRight;
     } else if (type == 'whale_shark') {
       // 🐋 고래상어: 거대 필터 피더로서 중상층에서 대단히 느리고 묵직하게 큰 원을 그리듯 직선 스위핑
       double t = (v * 0.8) % 1.0; // 30초 동안 0.8사이클 (대단히 느린 속도)
       bool isMovingRight = t < 0.5;
       double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
-      
+
       x = (w * 0.1) + (w * 0.8 * progress) + dxShift;
       y = h * 0.35 + sin(t * pi * 4) * (h * 0.08) * ampScale + dyShift;
       flipX = !isMovingRight;
     } else if (type == 'electric_eel') {
-      // ⚡ 전기뱀장어: 중하층에서 느리게 구불거리며 전진
-      double t = (v * 1.5) % 1.0; // 30초 동안 1.5사이클 (약간 느린 속도)
+      // ⚡ 전기뱀장어: 중하층에서 느리게 구불거리며 전진 (정수 주기로 순간이동 해결)
+      double t = v; // 30초 동안 1회 왕복
       bool isMovingRight = t < 0.5;
       double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
-      
+
       x = (w * 0.15) + (w * 0.7 * progress) + dxShift;
       y = h * 0.65 + sin(t * pi * 8) * 15 * ampScale + dyShift;
       flipX = !isMovingRight;
@@ -181,7 +199,7 @@ class _AquariumScreenState extends State<AquariumScreen>
       double t = (v * 3.0) % 1.0; // 30초 동안 3사이클 (매우 빠른 속도)
       bool isMovingRight = t < 0.5;
       double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
-      
+
       x = (w * 0.1) + (w * 0.8 * progress) + dxShift;
       y = h * 0.5 + sin(t * pi * 6) * (h * 0.22) * ampScale + dyShift;
       flipX = !isMovingRight;
@@ -190,7 +208,7 @@ class _AquariumScreenState extends State<AquariumScreen>
       double t = (v * 1.2) % 1.0; // 30초 동안 1.2사이클 (차분한 속도)
       bool isMovingRight = t < 0.5;
       double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
-      
+
       x = (w * 0.15) + (w * 0.7 * progress) + dxShift;
       y = h * 0.7 + sin(t * pi * 4) * (h * 0.12) * ampScale + dyShift;
       flipX = !isMovingRight;
@@ -793,6 +811,152 @@ class _AquariumScreenState extends State<AquariumScreen>
     return FadeFloatingEmoji(moodEmoji: moodEmoji);
   }
 
+  void _showRuleGuideDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: 340,
+            height: 520,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8E1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFF333333), width: 3),
+              boxShadow: const [
+                BoxShadow(color: Color(0xFF333333), offset: Offset(4, 4)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 🎮 타이틀
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A237E),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '🎮 시스템 안내',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildRuleItem(
+                          '⭐ 레벨 시스템',
+                          '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n최대 레벨은 5입니다.',
+                          const Color(0xFFFFF9C4),
+                          const Color(0xFFF9A825),
+                        ),
+                        _buildRuleItem(
+                          '🍗 먹이 시스템',
+                          '할 일 완료 → 코인 획득 → 상점에서 먹이 구매!\n먹이 1개 = +10 EXP\n물고기를 선택해 개별적으로 먹이를 줄 수 있어요.',
+                          const Color(0xFFFFE0B2),
+                          const Color(0xFFE65100),
+                        ),
+                        _buildRuleItem(
+                          '💊 영양제 시스템',
+                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 EXP가 2배(+20 EXP)가 되고\n수초들이 반짝이며 빛납니다. ✨',
+                          const Color(0xFFE8F5E9),
+                          const Color(0xFF2E7D32),
+                        ),
+                        _buildRuleItem(
+                          '✨ 레벨 5 진화',
+                          '레벨 5에 도달하면 물고기가 진화합니다!\n크기가 최대가 되고, 각 물고기 종류에 맞는\n특별한 색상으로 화려하게 변신합니다! 🌈',
+                          const Color(0xFFEDE7F6),
+                          const Color(0xFF4A148C),
+                        ),
+                        _buildRuleItem(
+                          '💖 기분 시스템',
+                          '물고기에게는 4가지 기분이 있어요:\n나쁨 😞 / 보통 😐 / 좋음 😊 / 최고야! 🤩\n자주 먹이를 주면 기분이 좋아집니다!',
+                          const Color(0xFFFFE4E8),
+                          const Color(0xFFC62828),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: RetroGradientButton(
+                    color: const Color(0xFF1A237E),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text(
+                      '확인!',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRuleItem(
+    String title,
+    String description,
+    Color bgColor,
+    Color accentColor,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: accentColor.withValues(alpha: 0.5), width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+              color: accentColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            description,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Colors.black87,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showSwimmingFishesStats() {
     showDialog(
       context: context,
@@ -833,7 +997,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                             children: widget.swimmingFishes.map((fish) {
                               final int level = fish['level'] ?? 1;
                               final int exp = fish['exp'] ?? 0;
-                              final int maxExp = 30 * (1 << (level - 1).clamp(0, 10));
+                              final int maxExp =
+                                  30 * (1 << (level - 1).clamp(0, 10));
                               final String mood = fish['mood'] ?? '보통';
 
                               String moodEmoji = 'mood_normal';
@@ -912,18 +1077,29 @@ class _AquariumScreenState extends State<AquariumScreen>
                                             height: 12,
                                             decoration: BoxDecoration(
                                               color: Colors.grey[300],
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: LayoutBuilder(
                                               builder: (context, constraints) {
                                                 return Stack(
                                                   children: [
                                                     ClipRRect(
-                                                      borderRadius: BorderRadius.circular(4),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            4,
+                                                          ),
                                                       child: Container(
-                                                        width: constraints.maxWidth *
-                                                            (exp / maxExp).clamp(0.0, 1.0),
-                                                        color: Colors.greenAccent,
+                                                        width:
+                                                            constraints
+                                                                .maxWidth *
+                                                            (exp / maxExp)
+                                                                .clamp(
+                                                                  0.0,
+                                                                  1.0,
+                                                                ),
+                                                        color:
+                                                            Colors.greenAccent,
                                                       ),
                                                     ),
                                                   ],
@@ -1426,17 +1602,20 @@ class _AquariumScreenState extends State<AquariumScreen>
                                             // 💡 물고기 터치 시 3초 동안 왼쪽 위에 현재 상태 표시
                                             final String? fishId = fish['id'];
                                             if (fishId != null) {
-                                              _activeStatusTimers[fishId]?.cancel();
-                                              _activeStatusTimers[fishId] = Timer(
-                                                const Duration(seconds: 3),
-                                                () {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      _activeStatusTimers.remove(fishId);
-                                                    });
-                                                  }
-                                                },
-                                              );
+                                              _activeStatusTimers[fishId]
+                                                  ?.cancel();
+                                              _activeStatusTimers[fishId] =
+                                                  Timer(
+                                                    const Duration(seconds: 3),
+                                                    () {
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          _activeStatusTimers
+                                                              .remove(fishId);
+                                                        });
+                                                      }
+                                                    },
+                                                  );
                                             }
                                           });
                                         },
@@ -1449,7 +1628,9 @@ class _AquariumScreenState extends State<AquariumScreen>
                                         ),
                                       ),
                                     ),
-                                    if (_activeStatusTimers.containsKey(fish['id']))
+                                    if (_activeStatusTimers.containsKey(
+                                      fish['id'],
+                                    ))
                                       Positioned(
                                         left: 0,
                                         top: -5,
@@ -1545,27 +1726,85 @@ class _AquariumScreenState extends State<AquariumScreen>
               ],
             ),
           ),
-          // 🐟 현재 물고기 수 표시 (좌측 상단)
+          // 🐟 현재 물고기 수 표시 (좌측 상단) - BouncingWrapper 적용
           Positioned(
             top: 16,
             left: 16,
-            child: PixelButton(
-              color: Colors.white,
-              textColor: Colors.black,
-              onPressed: _showSwimmingFishesStats,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const PixelEmoji('fish', size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${widget.swimmingFishes.length} / 5',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14,
+            child: BouncingWrapper(
+              child: GestureDetector(
+                onTap: _showSwimmingFishesStats,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: getRetroGradient(Colors.white),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: const Color(0xFF333333),
+                      width: 3,
                     ),
                   ),
-                ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const PixelEmoji('fish', size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${widget.swimmingFishes.length} / 5',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 📖 수조 생태 규칙 안내 버튼 (물고기 수 표시 바로 아래)
+          Positioned(
+            top: 72,
+            left: 16,
+            child: BouncingWrapper(
+              child: GestureDetector(
+                onTap: _showRuleGuideDialog,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: getRetroGradient(Colors.white),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: const Color(0xFF333333),
+                      width: 3,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.help_outline,
+                        size: 16,
+                        color: Colors.black,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '시스템 안내'.tr,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -1599,13 +1838,22 @@ class _AquariumScreenState extends State<AquariumScreen>
                   GestureDetector(
                     onTap: widget.onCheatAllLevel5,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.redAccent,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: const Color(0xFF333333), width: 2),
+                        border: Border.all(
+                          color: const Color(0xFF333333),
+                          width: 2,
+                        ),
                         boxShadow: const [
-                          BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                          BoxShadow(
+                            color: Color(0xFF333333),
+                            offset: Offset(2, 2),
+                          ),
                         ],
                       ),
                       child: const Text(
@@ -1622,13 +1870,22 @@ class _AquariumScreenState extends State<AquariumScreen>
                   GestureDetector(
                     onTap: widget.onCheatResetLevel,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blueAccent,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: const Color(0xFF333333), width: 2),
+                        border: Border.all(
+                          color: const Color(0xFF333333),
+                          width: 2,
+                        ),
                         boxShadow: const [
-                          BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                          BoxShadow(
+                            color: Color(0xFF333333),
+                            offset: Offset(2, 2),
+                          ),
                         ],
                       ),
                       child: const Text(
@@ -2018,10 +2275,7 @@ class _PixelButtonState extends State<PixelButton> {
 class FadeFloatingEmoji extends StatefulWidget {
   final String moodEmoji;
 
-  const FadeFloatingEmoji({
-    super.key,
-    required this.moodEmoji,
-  });
+  const FadeFloatingEmoji({super.key, required this.moodEmoji});
 
   @override
   State<FadeFloatingEmoji> createState() => _FadeFloatingEmojiState();
@@ -2045,8 +2299,10 @@ class _FadeFloatingEmojiState extends State<FadeFloatingEmoji>
     // 0.9 ~ 1.0 (0.3초) 동안 서서히 사라짐
     _opacityAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 10.0, // 전체의 10% (0.3초)
       ),
       TweenSequenceItem(
@@ -2054,8 +2310,10 @@ class _FadeFloatingEmojiState extends State<FadeFloatingEmoji>
         weight: 80.0, // 전체의 80% (2.4초 유지)
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 10.0, // 전체의 10% (0.3초)
       ),
     ]).animate(_controller);
@@ -2063,14 +2321,13 @@ class _FadeFloatingEmojiState extends State<FadeFloatingEmoji>
     // 뿅 하고 나타나는 스케일 애니메이션 추가 (마이크로 인터랙션)
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.5, end: 1.0)
-            .chain(CurveTween(curve: Curves.elasticOut)),
+        tween: Tween<double>(
+          begin: 0.5,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.elasticOut)),
         weight: 15.0, // 전체의 15% 동안 튕기며 안착
       ),
-      TweenSequenceItem(
-        tween: ConstantTween<double>(1.0),
-        weight: 85.0,
-      ),
+      TweenSequenceItem(tween: ConstantTween<double>(1.0), weight: 85.0),
     ]).animate(_controller);
 
     _controller.forward();

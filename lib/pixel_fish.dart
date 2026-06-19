@@ -111,16 +111,16 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'shark') {
-      color1 = Colors.blueGrey[700]!;
-      color2 = Colors.grey[300]!;
+      color1 = Colors.blueGrey[800]!;
+      color2 = Colors.white;
       pixels = [
-        [e, e, e, e, e, e, e, e, c1, c1, e, e, e, e],
-        [e, e, e, e, e, e, e, c1, c1, c1, e, e, e, e],
-        [e, e, e, e, c1, c1, c1, c1, c1, c1, c1, e, e, e],
-        [c1, c1, e, c1, c1, c1, c1, c1, c1, w, b, c1, e, e],
-        [c1, c1, c1, c1, c1, c1, c1, c1, c1, w, w, c1, c1, e],
-        [c1, c1, e, c1, c1, e, e, e, e, c1, c1, c1, e, e],
-        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
+        [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
+        [c1, e, e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
+        [c1, c1, c1, c1, c1, c1, c1, c1, w, b, c1, c1, c1, e],
+        [e, c1, c1, c1, c1, c1, c2, c2, c2, w, b, w, e, e],
+        [c1, c1, e, c1, c1, e, c2, c2, c2, c2, c2, e, e, e],
+        [e, e, e, e, e, e, e, c2, c2, e, e, e, e, e],
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'whale') {
@@ -354,8 +354,8 @@ class PixelFishPainter extends CustomPainter {
         color1 = Colors.cyanAccent;
         color2 = Colors.purpleAccent;
       } else if (type == 'shark') {
-        color1 = Colors.grey[900]!;
-        color2 = Colors.redAccent;
+        color1 = const Color(0xFF0B132B); // 심해 어둠의 흑청색
+        color2 = const Color(0xFFE0E1DD); // 차가운 메탈릭 실버 화이트
       } else if (type == 'whale') {
         color1 = Colors.purple[800]!;
         color2 = Colors.pinkAccent;
@@ -390,20 +390,20 @@ class PixelFishPainter extends CustomPainter {
         color1 = Colors.indigoAccent;
         color2 = Colors.cyanAccent;
       } else if (type == 'carp') {
-        color1 = Colors.yellowAccent;
-        color2 = Colors.pinkAccent;
+        color1 = const Color(0xFFFFD700); // 찬란한 황금색 (Golden Koi)
+        color2 = const Color(0xFFD32F2F); // 강렬한 심홍색 무늬 (Crimson)
       } else if (type == 'crab') {
-        color1 = Colors.cyanAccent;
-        color2 = Colors.lightGreenAccent;
+        color1 = const Color(0xFFE63946); // 깊은 크림슨 레드 등딱지 (Imperial Red)
+        color2 = const Color(0xFFE5A93C); // 금빛 집게발 및 마디 (Gold)
       } else if (type == 'whale_shark') {
-        color1 = Colors.deepPurpleAccent;
-        color2 = Colors.cyanAccent;
+        color1 = const Color(0xFF0F172A); // 심우주 블랙/네이비 (Cosmic Space)
+        color2 = const Color(0xFF38BDF8); // 빛나는 네온 청록 별빛 (Starry Cyan)
       } else if (type == 'electric_eel') {
-        color1 = Colors.purpleAccent;
-        color2 = Colors.cyanAccent;
+        color1 = const Color(0xFF1E293B); // 어두운 화산석 블랙 (Obsidian Slate)
+        color2 = Colors.cyanAccent;       // 고전압 네온 블루 전류 (High-Voltage Cyan)
       } else if (type == 'salmon') {
-        color1 = Colors.tealAccent;
-        color2 = Colors.orangeAccent;
+        color1 = const Color(0xFFE07A5F); // 우아한 로즈골드 브론즈 (Rose Gold)
+        color2 = const Color(0xFFF1F5F9); // 은빛 플래티넘 실버 줄무늬 (Platinum Silver)
       } else {
         // puffer (default)
         color1 = Colors.yellowAccent;
