@@ -322,7 +322,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                 Text(
                   msgKey.trArgs([
                     isSingle
-                        ? (results[0]['item']['type']?.toString() ?? '')
+                        ? (results[0]['item']['name']?.toString() ?? '')
                               .tr // 💡 번역된 이름 주입
                         : (isFish ? '물고기'.tr : '수초'.tr),
                   ]),

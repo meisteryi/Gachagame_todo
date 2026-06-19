@@ -404,8 +404,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
-                                        (fish['type']?.toString() ?? '')
-                                            .tr, // 💡 번역된 물고기 이름 표시
+                                        (fish['name']?.toString() ?? '').tr,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -609,7 +608,7 @@ class _AquariumScreenState extends State<AquariumScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${(fish['type']?.toString() ?? '').tr} (Lv.$level)', // 💡 번역된 물고기 이름
+                '${(fish['name']?.toString() ?? '').tr} (Lv.$level)',
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 16,

@@ -1012,10 +1012,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       ),
                                                       const SizedBox(height: 6),
                                                       Text(
-                                                        (fish['type']
+                                                        (fish['name']
                                                                     ?.toString() ??
                                                                 '')
-                                                            .tr, // 💡 이름을 번역하여 표시
+                                                            .tr,
                                                         style: const TextStyle(
                                                           fontSize: 11,
                                                           fontWeight:
@@ -1169,10 +1169,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       ),
                                                       const SizedBox(height: 6),
                                                       Text(
-                                                        (seaweed['type']
+                                                        (seaweed['name']
                                                                     ?.toString() ??
                                                                 '')
-                                                            .tr, // 💡 이름을 번역하여 표시
+                                                            .tr,
                                                         style: const TextStyle(
                                                           fontSize: 11,
                                                           fontWeight:
