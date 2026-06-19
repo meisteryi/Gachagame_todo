@@ -822,8 +822,8 @@ class _AquariumScreenState extends State<AquariumScreen>
             height: 520,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF8E1),
-              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFFFFF0F5), // 앱 전체 배경 테마와 동일한 연한 핑크 계열
+              borderRadius: BorderRadius.circular(4),
               border: Border.all(color: const Color(0xFF333333), width: 3),
               boxShadow: const [
                 BoxShadow(color: Color(0xFF333333), offset: Offset(4, 4)),
@@ -832,22 +832,26 @@ class _AquariumScreenState extends State<AquariumScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🎮 타이틀
+                // 타이틀
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A237E),
-                    borderRadius: BorderRadius.circular(6),
+                    gradient: getRetroGradient(const Color(0xFFFFB7B2)),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: const Color(0xFF333333),
+                      width: 2,
+                    ),
                   ),
                   child: const Center(
                     child: Text(
-                      '🎮 시스템 안내',
+                      '시스템 안내',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 17,
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
+                        color: Color(0xFF333333),
+                        letterSpacing: 1.0,
                       ),
                     ),
                   ),
@@ -859,34 +863,39 @@ class _AquariumScreenState extends State<AquariumScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildRuleItem(
-                          '⭐ 레벨 시스템',
+                          'fish',
+                          '레벨 시스템',
                           '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n최대 레벨은 5입니다.',
                           const Color(0xFFFFF9C4),
-                          const Color(0xFFF9A825),
+                          const Color(0xFFE6A800),
                         ),
                         _buildRuleItem(
-                          '🍗 먹이 시스템',
+                          'meat',
+                          '먹이 시스템',
                           '할 일 완료 → 코인 획득 → 상점에서 먹이 구매!\n먹이 1개 = +10 EXP\n물고기를 선택해 개별적으로 먹이를 줄 수 있어요.',
-                          const Color(0xFFFFE0B2),
-                          const Color(0xFFE65100),
+                          const Color(0xFFFFDAB9),
+                          const Color(0xFFD4560A),
                         ),
                         _buildRuleItem(
-                          '💊 영양제 시스템',
-                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 EXP가 2배(+20 EXP)가 되고\n수초들이 반짝이며 빛납니다. ✨',
-                          const Color(0xFFE8F5E9),
-                          const Color(0xFF2E7D32),
+                          'seaweed',
+                          '영양제 시스템',
+                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 EXP가 2배(+20 EXP)가 되고\n수초들이 반짝이며 빛납니다.',
+                          const Color(0xFFA8E6CF),
+                          const Color(0xFF1E7A4A),
                         ),
                         _buildRuleItem(
-                          '✨ 레벨 5 진화',
-                          '레벨 5에 도달하면 물고기가 진화합니다!\n크기가 최대가 되고, 각 물고기 종류에 맞는\n특별한 색상으로 화려하게 변신합니다! 🌈',
-                          const Color(0xFFEDE7F6),
-                          const Color(0xFF4A148C),
+                          'coin',
+                          '레벨 5 진화',
+                          '레벨 5에 도달하면 물고기가 진화합니다!\n크기가 최대가 되고, 각 물고기 종류에 맞는\n특별한 색상으로 화려하게 변신합니다!',
+                          const Color(0xFFB4D8E7),
+                          const Color(0xFF1A6E99),
                         ),
                         _buildRuleItem(
-                          '💖 기분 시스템',
-                          '물고기에게는 4가지 기분이 있어요:\n나쁨 😞 / 보통 😐 / 좋음 😊 / 최고야! 🤩\n자주 먹이를 주면 기분이 좋아집니다!',
-                          const Color(0xFFFFE4E8),
-                          const Color(0xFFC62828),
+                          'mood_great',
+                          '기분 시스템',
+                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n자주 먹이를 주면 기분이 좋아집니다!',
+                          const Color(0xFFFFB7B2),
+                          const Color(0xFFA8003A),
                         ),
                       ],
                     ),
@@ -897,14 +906,14 @@ class _AquariumScreenState extends State<AquariumScreen>
                   width: double.infinity,
                   height: 48,
                   child: RetroGradientButton(
-                    color: const Color(0xFF1A237E),
+                    color: const Color(0xFFFFB7B2),
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '확인!',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
-                        color: Colors.white,
+                        color: Color(0xFF333333),
                       ),
                     ),
                   ),
@@ -918,6 +927,7 @@ class _AquariumScreenState extends State<AquariumScreen>
   }
 
   Widget _buildRuleItem(
+    String emojiKey,
     String title,
     String description,
     Color bgColor,
@@ -925,22 +935,31 @@ class _AquariumScreenState extends State<AquariumScreen>
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: accentColor.withValues(alpha: 0.5), width: 2),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF333333), width: 2),
+        boxShadow: const [
+          BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              color: accentColor,
-            ),
+          Row(
+            children: [
+              PixelEmoji(emojiKey, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                  color: accentColor,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Text(
@@ -1741,10 +1760,6 @@ class _AquariumScreenState extends State<AquariumScreen>
                   decoration: BoxDecoration(
                     gradient: getRetroGradient(Colors.white),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: const Color(0xFF333333),
-                      width: 3,
-                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1780,19 +1795,11 @@ class _AquariumScreenState extends State<AquariumScreen>
                   decoration: BoxDecoration(
                     gradient: getRetroGradient(Colors.white),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: const Color(0xFF333333),
-                      width: 3,
-                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.help_outline,
-                        size: 16,
-                        color: Colors.black,
-                      ),
+                      const PixelEmoji('box', size: 16),
                       const SizedBox(width: 6),
                       Text(
                         '시스템 안내'.tr,
