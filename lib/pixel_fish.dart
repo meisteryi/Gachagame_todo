@@ -53,7 +53,11 @@ class _PixelFishState extends State<PixelFish>
           alignment: Alignment.center,
           child: CustomPaint(
             size: const Size(60, 40), // 전체 물고기의 크기
-            painter: PixelFishPainter(widget.type, _controller.value),
+            painter: PixelFishPainter(
+              widget.type,
+              _controller.value,
+              widget.level,
+            ),
           ),
         );
       },
@@ -64,7 +68,8 @@ class _PixelFishState extends State<PixelFish>
 class PixelFishPainter extends CustomPainter {
   final String type;
   final double time;
-  PixelFishPainter(this.type, this.time);
+  final int level;
+  PixelFishPainter(this.type, this.time, this.level);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -261,6 +266,71 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
       ];
+    } else if (type == 'carp') {
+      color1 = Colors.white;
+      color2 = Colors.redAccent;
+      pixels = [
+        [e, e, e, e, e, c2, c2, e, e, e, e, e, e, e],
+        [e, e, e, e, c1, c1, c2, c2, c1, e, e, e, e, e],
+        [e, e, e, c1, c1, c2, c1, c1, c1, c1, e, e, e, e],
+        [c2, e, c1, c1, c2, c2, c1, c1, c1, c1, c1, e, e, e],
+        [c2, c1, c1, c1, c1, c1, c1, c1, w, w, c1, c1, e, e],
+        [c2, e, c1, c1, c1, c1, c1, c1, w, b, c1, c1, e, e],
+        [e, e, e, c1, c1, c1, c1, c1, c1, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'crab') {
+      color1 = Colors.orangeAccent;
+      color2 = Colors.redAccent;
+      pixels = [
+        [e, c2, c2, e, e, e, e, e, e, e, e, c2, c2, e],
+        [c2, c2, c2, c2, e, b, e, e, b, e, c2, c2, c2, c2],
+        [c2, e, e, c2, e, w, c1, c1, w, e, c2, e, e, c2],
+        [e, c2, c2, c2, c1, c1, c1, c1, c1, c1, c2, c2, c2, e],
+        [e, e, e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
+        [e, e, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e, e],
+        [e, c2, e, c2, e, c2, e, e, c2, e, c2, e, c2, e],
+        [c2, e, c2, e, c2, e, e, e, e, c2, e, c2, e, c2],
+      ];
+    } else if (type == 'whale_shark') {
+      color1 = const Color(0xFF1E3A8A); // 진한 남색
+      color2 = Colors.white;
+      pixels = [
+        [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
+        [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
+        [e, e, e, c1, c1, c2, c1, c2, c1, c2, c1, c1, c1, e],
+        [c1, e, c1, c1, c2, c1, c2, c1, c2, c1, w, b, c1, c1],
+        [c1, c1, c1, c1, c1, c2, c1, c2, c1, c2, w, w, e, e],
+        [e, c1, c1, c1, c2, c1, c2, c1, c2, c1, c1, c1, c1, c1],
+        [e, e, e, c1, c1, e, e, e, c1, c1, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'electric_eel') {
+      color1 = const Color(0xFF2C3E50); // 어두운 블루그레이
+      color2 = Colors.yellowAccent;
+      pixels = [
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e, e],
+        [c1, c1, c1, c2, c1, c2, c1, c2, c1, w, b, c1, e, e],
+        [c2, c1, c1, c1, c2, c1, c2, c1, c2, c1, c1, c1, e, e],
+        [e, c2, c2, c2, c2, c2, c2, c2, c2, c2, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'salmon') {
+      color1 = const Color(0xFFFA8072); // 살몬 핑크색
+      color2 = const Color(0xFFE2E8F0); // 은색 실선
+      pixels = [
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, c2, c2, c2, e, e, e, e, e, e],
+        [e, e, c2, c2, c1, c1, c1, c1, c1, c1, c2, e, e, e],
+        [c2, c1, c1, c2, c1, c2, c1, c2, c1, w, b, c1, e, e],
+        [c2, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, e, e],
+        [e, c2, c2, e, e, c1, c1, c1, c1, c1, c2, e, e, e],
+        [e, e, e, e, e, e, e, c2, c2, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
     } else {
       // puffer (default)
       color1 = Colors.orangeAccent;
@@ -276,6 +346,71 @@ class PixelFishPainter extends CustomPainter {
       ];
     }
 
+    if (level >= 5) {
+      if (type == 'goldfish') {
+        color1 = Colors.amberAccent[400]!;
+        color2 = Colors.deepOrangeAccent;
+      } else if (type == 'mackerel') {
+        color1 = Colors.cyanAccent;
+        color2 = Colors.purpleAccent;
+      } else if (type == 'shark') {
+        color1 = Colors.grey[900]!;
+        color2 = Colors.redAccent;
+      } else if (type == 'whale') {
+        color1 = Colors.purple[800]!;
+        color2 = Colors.pinkAccent;
+      } else if (type == 'betta') {
+        color1 = Colors.amberAccent;
+        color2 = Colors.deepPurpleAccent;
+      } else if (type == 'nemo') {
+        color1 = Colors.limeAccent;
+        color2 = Colors.black;
+      } else if (type == 'guppy') {
+        color1 = Colors.redAccent;
+        color2 = Colors.yellowAccent;
+      } else if (type == 'axolotl') {
+        color1 = Colors.yellow[300]!;
+        color2 = Colors.redAccent;
+      } else if (type == 'tuna') {
+        color1 = Colors.grey[200]!;
+        color2 = Colors.cyanAccent;
+      } else if (type == 'shrimp') {
+        color1 = Colors.cyan[200]!;
+        color2 = Colors.blueAccent;
+      } else if (type == 'seahorse') {
+        color1 = Colors.lightGreenAccent;
+        color2 = Colors.indigoAccent;
+      } else if (type == 'turtle') {
+        color1 = Colors.tealAccent;
+        color2 = Colors.amber[800]!;
+      } else if (type == 'jellyfish') {
+        color1 = Colors.yellowAccent;
+        color2 = Colors.cyanAccent;
+      } else if (type == 'stingray') {
+        color1 = Colors.indigoAccent;
+        color2 = Colors.cyanAccent;
+      } else if (type == 'carp') {
+        color1 = Colors.yellowAccent;
+        color2 = Colors.pinkAccent;
+      } else if (type == 'crab') {
+        color1 = Colors.cyanAccent;
+        color2 = Colors.lightGreenAccent;
+      } else if (type == 'whale_shark') {
+        color1 = Colors.deepPurpleAccent;
+        color2 = Colors.cyanAccent;
+      } else if (type == 'electric_eel') {
+        color1 = Colors.purpleAccent;
+        color2 = Colors.cyanAccent;
+      } else if (type == 'salmon') {
+        color1 = Colors.tealAccent;
+        color2 = Colors.orangeAccent;
+      } else {
+        // puffer (default)
+        color1 = Colors.yellowAccent;
+        color2 = Colors.deepOrangeAccent;
+      }
+    }
+
     final pixelWidth = size.width / pixels[0].length;
     final pixelHeight = size.height / pixels.length;
 
@@ -288,7 +423,13 @@ class PixelFishPainter extends CustomPainter {
         if (pixels[y][x] == c1) {
           paint.color = color1;
         } else if (pixels[y][x] == c2) {
-          paint.color = color2;
+          if (type == 'electric_eel') {
+            // 전기뱀장어 전류 흐르는 반짝임 효과
+            final pulse = (sin(time * pi * 8) + 1.0) / 2.0;
+            paint.color = Color.lerp(color2, Colors.white, pulse)!;
+          } else {
+            paint.color = color2;
+          }
         } else if (pixels[y][x] == w) {
           paint.color = Colors.white;
         } else if (pixels[y][x] == b) {
@@ -301,12 +442,63 @@ class PixelFishPainter extends CustomPainter {
         double dy = 0.0;
 
         if (type == 'jellyfish') {
-          // 🪼 해파리: 촉수 부분(y >= 5)이 아래로 갈수록 좌우로 하늘하늘 흔들리도록 적용
+          // 🪼 해파리: 촉수 부분(y >= 5)이 아래로 갈수록 좌우로 하늘하늘 흔들리며, 상단 우산(y < 5)은 위아래로 수축/이완
           if (y >= 5) {
             dx = sin(time * pi * 4 - y * 0.8) * (y - 4) * 0.2;
+          } else {
+            dy = -sin(time * pi * 2) * 0.15;
+          }
+        } else if (type == 'crab') {
+          // 🦀 꽃게: 집게(x <= 3 또는 x >= 8, y <= 2)가 번갈아 움직이고 다리(y == 6)가 바쁘게 움직임
+          if (y <= 2 && x <= 3) {
+            dy = sin(time * pi * 4) * 0.4;
+          } else if (y <= 2 && x >= 8) {
+            dy = -sin(time * pi * 4) * 0.4;
+          } else if (y == 6) {
+            dx = sin(time * pi * 6 + x) * 0.4;
+          }
+        } else if (type == 'stingray') {
+          // 🪽 가오리: 날개 플랩 모션 (양 끝 y <= 2 또는 y >= 5 부분이 우아하게 위아래로 펄럭임)
+          if (y <= 2) {
+            dy = sin(time * pi * 2.5 - x * 0.3) * (3 - y) * 0.3;
+          } else if (y >= 5) {
+            dy = -sin(time * pi * 2.5 - x * 0.3) * (y - 4) * 0.3;
+          }
+        } else if (type == 'electric_eel') {
+          // ⚡ 전기뱀장어: S자로 몸 전체가 부드럽게 흔들림
+          dy = sin(time * pi * 3 - x * 0.5) * 0.7;
+        } else if (type == 'seahorse') {
+          // 🐴 해마: 수직 기립 상태에서 뒷 지느러미(x <= 6, y >= 3 && y <= 5)를 매우 빠르게 흔들고 몸은 둥실둥실
+          if (x <= 6 && y >= 3 && y <= 5) {
+            dx = sin(time * pi * 12) * 0.8;
+          } else {
+            dy = sin(time * pi * 2) * 0.2;
+          }
+        } else if (type == 'turtle') {
+          // 🐢 거북이: 다리(x <= 4 또는 x >= 9, y >= 5)를 패들링(둥글게 젓기)
+          if ((x <= 4 || x >= 9) && y >= 5) {
+            dx = sin(time * pi * 2.5) * 0.6;
+            dy = cos(time * pi * 2.5) * 0.3;
+          }
+        } else if (type == 'puffer') {
+          // 🐡 복어: 꼬리(x < 3)를 제외한 몸통 부분(x >= 3)만 수축 팽창 모션 적용 (중심 7.5, 3.5 기준)
+          if (x >= 3) {
+            const double cx = 7.5;
+            const double cy = 3.5;
+            final double pulse = sin(time * pi * 1.5) * 0.08;
+            dx = (x - cx) * pulse;
+            dy = (y - cy) * pulse;
+          } else {
+            // 꼬리 부분은 자연스러운 꼬리 치기 모션 적용
+            dy = sin(time * pi * 2 - x * 0.4) * (3 - x) * 0.1;
+          }
+        } else if (type == 'whale' || type == 'whale_shark') {
+          // 🐋 대형 어류: 대형 크기에 어울리게 꼬리를 느리고 묵직하게 흔들림
+          if (x < 6) {
+            dy = sin(time * pi - x * 0.3) * (6 - x) * 0.12;
           }
         } else {
-          // 🐟 일반 물고기: 왼쪽 꼬리 부분(x < 6)일수록 위아래로 더 크게 움직임
+          // 🐟 일반 물고기 (금붕어, 고등어, 상어, 베타, 니모, 구피, 아홀로틀, 참치, 새우, 비단잉어, 연어 등)
           if (x < 6) {
             dy = sin(time * pi * 2 - x * 0.4) * (6 - x) * 0.15;
           }
@@ -328,5 +520,7 @@ class PixelFishPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant PixelFishPainter oldDelegate) =>
-      oldDelegate.type != type || oldDelegate.time != time;
+      oldDelegate.type != type ||
+      oldDelegate.time != time ||
+      oldDelegate.level != level;
 }

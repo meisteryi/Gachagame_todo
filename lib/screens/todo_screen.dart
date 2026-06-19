@@ -542,7 +542,8 @@ class _TodoScreenState extends State<TodoScreen>
                                 foregroundColor: Colors.white,
                                 onPressed: () {
                                   // 💡 개발자 치트키 로직
-                                  if (newTask.trim() == 'showmethemoney') {
+                                  final trimmedTask = newTask.trim().toLowerCase();
+                                  if (trimmedTask == 'showmethemoney') {
                                     widget.onSecretCommand?.call();
                                     _showNoticeDialog(
                                       '쇼미더머니! 코인 1,000개가 지급되었습니다. 🪙'.tr,
@@ -552,7 +553,7 @@ class _TodoScreenState extends State<TodoScreen>
                                   }
 
                                   // 💡 개발자 치트키 2: 모든 물고기/수초 해금
-                                  if (newTask.trim() == 'unlockall') {
+                                  if (trimmedTask == 'unlockall') {
                                     widget.onUnlockAllCommand?.call();
                                     _showNoticeDialog(
                                       '도감 100% 달성! 모든 물고기와 수초가 보관함에 추가되었습니다. 🐟🌿'

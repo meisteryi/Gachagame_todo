@@ -19,6 +19,8 @@ class AquariumScreen extends StatefulWidget {
   final VoidCallback onSupplement;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final VoidCallback onShowStorage;
+  final VoidCallback onCheatAllLevel5;
+  final VoidCallback onCheatResetLevel;
 
   const AquariumScreen({
     super.key,
@@ -31,6 +33,8 @@ class AquariumScreen extends StatefulWidget {
     required this.onSupplement,
     required this.onUpdateSeaweeds,
     required this.onShowStorage,
+    required this.onCheatAllLevel5,
+    required this.onCheatResetLevel,
   });
 
   @override
@@ -77,13 +81,27 @@ class _AquariumScreenState extends State<AquariumScreen>
     super.dispose();
   }
 
+  int _mixHash(int h) {
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    h = ((h >> 16) ^ h) * 0x45d9f3b;
+    return ((h >> 16) ^ h).abs();
+  }
+
   // 평상시 물고기의 유영 궤도를 계산하는 헬퍼 함수 (재사용성 및 애니메이션 보간을 위해 분리)
   (Offset, bool) _getNormalFishPosAndFlip(
     String type,
+    String id,
     double v,
     double w,
     double h,
   ) {
+    final int seed = _mixHash(id.hashCode);
+
+    // 💡 각 물고기마다 고유한 난수 시드를 기반으로 수평/수직 이동 편향(Shift) 및 진폭 배율(Amplitude Scale)을 적용하여 완전히 다른 궤적을 그리게 합니다.
+    final double dxShift = (((seed ~/ 100) % 11) - 5) * 8.0; // -40 ~ +40 픽셀 수평 이동
+    final double dyShift = (((seed ~/ 1000) % 11) - 5) * 6.0; // -30 ~ +30 픽셀 수직 이동
+    final double ampScale = 0.7 + ((seed % 7) / 10.0); // 0.7 ~ 1.3배의 상하 출렁임 크기 변화
+
     double x = 0;
     double y = 0;
     bool flipX = false;
@@ -91,41 +109,91 @@ class _AquariumScreenState extends State<AquariumScreen>
     if (type == 'jellyfish') {
       // 🪼 해파리: 위아래로 강하게 펄스 치며 수직 이동 강조, 느린 수평 이동
       double drift = sin(v * pi * 2); // 30초 동안 1번 좌우 왕복 (거북이처럼 느리게)
-      x = w / 2 + drift * (w / 2.5);
+      x = w / 2 + drift * (w / 2.5) + dxShift;
       // % 대신 연속적인 사인 곡선을 사용하여 위치가 뚝 끊기지 않게 보정
       double pulse = (sin(v * pi * 20) + 1.0) / 2.0; // 펄스(맥박) 주기를 3배 느리게 완화
-      y = h * 0.4 + sin(v * pi * 2) * (h * 0.2) - (pulse * 20.0);
+      y = h * 0.4 + sin(v * pi * 2) * (h * 0.2) * ampScale - (pulse * 20.0) + dyShift;
       flipX = drift < 0;
     } else if (type == 'seahorse') {
       // 🐉 해마: 꼿꼿하게 서서 위아래로 통통 튀며 아주 느리게 전진
       double t = v * 2; // 30초 동안 좌우 왕복 1회
-      x = (w / 2) + sin(t * pi * 2) * (w * 0.4);
-      y = h * 0.6 + sin(v * pi * 30) * 12; // 빠르게 통통 튀기 (조금 더 부드럽게 완화)
+      x = (w / 2) + sin(t * pi * 2) * (w * 0.4) + dxShift;
+      y = h * 0.6 + sin(v * pi * 30) * 12 * ampScale + dyShift; // 빠르게 통통 튀기 (조금 더 부드럽게 완화)
       flipX = cos(t * pi * 2) < 0;
     } else if (type == 'shrimp') {
-      // 🦐 새우: 바닥을 기어가다가 연속성을 유지하며 뒤로 펄쩍 뜀
+      // 🦐 새우: 바닥을 기어가다가 연속성을 유지하며 뒤로 펄쩍 뜀 (벽에 충돌하여 멈추는 불연속 수정)
       double cycleV = (v * 4) % 1.0; // 30초 동안 4사이클
       int cycle = (v * 4).floor();
       bool isMovingRight = cycle % 2 == 0; // 지그재그 방향
 
       double xProgress;
       if (cycleV < 0.8) {
-        // 0.0 ~ 0.8 동안 목표 지점보다 살짝 더 전진 (1.1배)
-        xProgress = (cycleV / 0.8) * 1.1;
+        // 0.0 ~ 0.8 동안 목표 지점보다 살짝 더 전진 (1.05배)
+        xProgress = (cycleV / 0.8) * 1.05;
         double subT = cycleV / 0.8;
-        y = h * 0.95 - (sin(subT * pi * 16).abs() * 4); // 바닥을 꼬물꼬물
+        y = h * 0.93 - (sin(subT * pi * 16).abs() * 4 * ampScale) + dyShift * 0.4; // 바닥을 꼬물꼬물
       } else {
-        // 0.8 ~ 1.0 동안 초과했던 0.1만큼 뒤로 후퇴하며 펄쩍 뜀!
+        // 0.8 ~ 1.0 동안 초과했던 0.05만큼 뒤로 후퇴하며 펄쩍 뜀!
         double subT = (cycleV - 0.8) / 0.2;
-        xProgress = 1.1 - (subT * 0.1);
-        y = h * 0.95 - (sin(subT * pi) * 35); // 부드러운 포물선 점프
+        xProgress = 1.05 - (subT * 0.05);
+        y = h * 0.93 - (sin(subT * pi) * 35 * ampScale) + dyShift * 0.4; // 부드러운 포물선 점프
       }
 
+      // 좌우 벽면 근처에서 프리징이 생기지 않도록 가로 폭 범위를 소폭 압축하고 오프셋을 조율
       x = isMovingRight
-          ? (w * 0.1) + (w * 0.8 * xProgress)
-          : (w * 0.9) - (w * 0.8 * xProgress);
+          ? (w * 0.22) + (w * 0.56 * xProgress) + dxShift * 0.5
+          : (w * 0.78) - (w * 0.56 * xProgress) + dxShift * 0.5;
 
       flipX = !isMovingRight; // 점프 시에도 시선 유지
+    } else if (type == 'crab') {
+      // 🦀 꽃게: 바닥층에서 완만한 파도를 타듯 위아래로 기어가며 아주 느리게 옆걸음질 (속도 소폭 하향 및 상하 흔들림 적용)
+      double t = (v * 0.7) % 1.0; // 30초 동안 0.7회 왕복 (속도 감소)
+      bool isMovingRight = t < 0.5;
+      double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
+      
+      // 수평 이동 범위 설정 및 테두리 프리징 방지
+      x = (w * 0.2) + (w * 0.6 * progress) + dxShift * 0.5;
+      
+      // 바닥 근처에서 완만한 파동(walkWave)을 그리며 상하로 움직임 (발걸음 뜀박질 속도를 더 차분하게 조율)
+      double walkWave = sin(t * pi * 4) * (h * 0.07); 
+      y = h * 0.88 + walkWave - (sin(v * pi * 12).abs() * 1.2) + dyShift * 0.5; 
+      flipX = !isMovingRight;
+    } else if (type == 'whale_shark') {
+      // 🐋 고래상어: 거대 필터 피더로서 중상층에서 대단히 느리고 묵직하게 큰 원을 그리듯 직선 스위핑
+      double t = (v * 0.8) % 1.0; // 30초 동안 0.8사이클 (대단히 느린 속도)
+      bool isMovingRight = t < 0.5;
+      double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
+      
+      x = (w * 0.1) + (w * 0.8 * progress) + dxShift;
+      y = h * 0.35 + sin(t * pi * 4) * (h * 0.08) * ampScale + dyShift;
+      flipX = !isMovingRight;
+    } else if (type == 'electric_eel') {
+      // ⚡ 전기뱀장어: 중하층에서 느리게 구불거리며 전진
+      double t = (v * 1.5) % 1.0; // 30초 동안 1.5사이클 (약간 느린 속도)
+      bool isMovingRight = t < 0.5;
+      double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
+      
+      x = (w * 0.15) + (w * 0.7 * progress) + dxShift;
+      y = h * 0.65 + sin(t * pi * 8) * 15 * ampScale + dyShift;
+      flipX = !isMovingRight;
+    } else if (type == 'salmon') {
+      // 🐟 연어: 빠르고 힘차게 상하 폭이 큰 모션으로 전진 (매우 빠른 속도)
+      double t = (v * 3.0) % 1.0; // 30초 동안 3사이클 (매우 빠른 속도)
+      bool isMovingRight = t < 0.5;
+      double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
+      
+      x = (w * 0.1) + (w * 0.8 * progress) + dxShift;
+      y = h * 0.5 + sin(t * pi * 6) * (h * 0.22) * ampScale + dyShift;
+      flipX = !isMovingRight;
+    } else if (type == 'carp') {
+      // 🎏 비단잉어: 평온하게 중하층을 여유롭게 헤엄침 (차분한 속도)
+      double t = (v * 1.2) % 1.0; // 30초 동안 1.2사이클 (차분한 속도)
+      bool isMovingRight = t < 0.5;
+      double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
+      
+      x = (w * 0.15) + (w * 0.7 * progress) + dxShift;
+      y = h * 0.7 + sin(t * pi * 4) * (h * 0.12) * ampScale + dyShift;
+      flipX = !isMovingRight;
     } else {
       // 🐟 일반 물고기 그룹 (10단계 다채로운 모션)
       double timeV = v;
@@ -143,12 +211,12 @@ class _AquariumScreenState extends State<AquariumScreen>
       if (timeV < 0.1) {
         final t = timeV * 10;
         x = (w * 0.8) * t;
-        y = h / 2 + sin(t * pi * 2) * 20;
+        y = h / 2 + sin(t * pi * 2) * 20 * ampScale;
         flipX = false;
       } else if (timeV < 0.2) {
         final t = (timeV - 0.1) * 10;
         x = (w * 0.8) - (w * 0.4 * t);
-        y = h / 2 + (h * 0.2 * t) + sin(t * pi * 4) * 10;
+        y = h / 2 + (h * 0.2 * t) + sin(t * pi * 4) * 10 * ampScale;
         flipX = true;
       } else if (timeV < 0.3) {
         final t = (timeV - 0.2) * 10;
@@ -158,28 +226,28 @@ class _AquariumScreenState extends State<AquariumScreen>
       } else if (timeV < 0.4) {
         final t = (timeV - 0.3) * 10;
         x = w - (w * 0.8 * t);
-        y = h * 0.3 + sin(t * pi * 2) * 30;
+        y = h * 0.3 + sin(t * pi * 2) * 30 * ampScale;
         flipX = true;
       } else if (timeV < 0.5) {
         final t = (timeV - 0.4) * 10;
         x = (w * 0.2) + sin(t * pi * 2) * 40;
-        y = h * 0.3 + (h * 0.4 * t) - cos(t * pi * 2) * 40 + 40;
+        y = h * 0.3 + (h * 0.4 * t) - cos(t * pi * 2) * 40 * ampScale + 40;
         flipX = cos(t * pi * 2) < -0.5;
       } else if (timeV < 0.6) {
         final t = (timeV - 0.5) * 10;
         x = (w * 0.2) + (w * 0.7 * t);
         final frac = (t * 2) % 1.0;
-        y = h * 0.7 - (frac < 0.5 ? frac * 2 : (1 - frac) * 2) * 20;
+        y = h * 0.7 - (frac < 0.5 ? frac * 2 : (1 - frac) * 2) * 20 * ampScale;
         flipX = false;
       } else if (timeV < 0.7) {
         final t = (timeV - 0.6) * 10;
         x = (w * 0.9) - (w * 0.5 * t);
-        y = h * 0.7 + sin(t * pi) * 30;
+        y = h * 0.7 + sin(t * pi) * 30 * ampScale;
         flipX = true;
       } else if (timeV < 0.8) {
         final t = (timeV - 0.7) * 10;
         x = (w * 0.4) + (w * 0.4 * t);
-        y = h * 0.7 - (h * 0.5 * t) + sin(t * pi * 3) * 15;
+        y = h * 0.7 - (h * 0.5 * t) + sin(t * pi * 3) * 15 * ampScale;
         flipX = false;
       } else if (timeV < 0.9) {
         final t = (timeV - 0.8) * 10;
@@ -189,15 +257,24 @@ class _AquariumScreenState extends State<AquariumScreen>
       } else {
         final t = (timeV - 0.9) * 10;
         x = (w * 0.2) - (w * 0.2 * t);
-        y = h * 0.5 + sin(t * pi * 2) * 20;
+        y = h * 0.5 + sin(t * pi * 2) * 20 * ampScale;
         flipX = true;
       }
+
+      // 고유의 평행이동 좌표 더하기
+      x += dxShift;
+      y += dyShift;
 
       // 가오리나 거북이는 바닥에 깔려서 헤엄치도록 y 반경을 아래로 보정
       if (isBottom) {
         y = (y * 0.4) + (h * 0.55);
       }
     }
+
+    // 💡 수조 벽면 밖으로 튀어나가지 않도록 위치 제한(Clamping)
+    x = x.clamp(15.0, w - 15.0);
+    y = y.clamp(15.0, h - 15.0);
+
     return (Offset(x, y), flipX);
   }
 
@@ -240,6 +317,7 @@ class _AquariumScreenState extends State<AquariumScreen>
         final t = (feedV - 0.7) / 0.3;
         final (nextOffset, nextFlip) = _getNormalFishPosAndFlip(
           type,
+          id,
           fishV,
           w,
           h,
@@ -251,6 +329,7 @@ class _AquariumScreenState extends State<AquariumScreen>
     } else {
       final (normalOffset, normalFlip) = _getNormalFishPosAndFlip(
         type,
+        id,
         fishV,
         w,
         h,
@@ -546,10 +625,11 @@ class _AquariumScreenState extends State<AquariumScreen>
     final targetFish = widget.swimmingFishes.firstWhere(
       (f) => f['id'] == targetId,
     );
-    double phaseOffset = (targetFish['id'].hashCode % 1000) / 1000.0;
+    double phaseOffset = (_mixHash(targetFish['id'].hashCode) % 1000) / 1000.0;
     double fishV = (v + phaseOffset) % 1.0;
     final (startOffset, _) = _getNormalFishPosAndFlip(
       targetFish['type'] ?? 'puffer',
+      targetFish['id']?.toString() ?? '',
       fishV,
       w,
       h,
@@ -710,7 +790,7 @@ class _AquariumScreenState extends State<AquariumScreen>
       moodEmoji = 'mood_bad';
     }
 
-    return PixelEmoji(moodEmoji, size: 20);
+    return FadeFloatingEmoji(moodEmoji: moodEmoji);
   }
 
   void _showSwimmingFishesStats() {
@@ -1262,7 +1342,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                           // 💡 다중 물고기들을 순회하며 각자의 위치와 위상 적용
                           for (var fish in widget.swimmingFishes) {
                             double phaseOffset =
-                                (fish['id'].hashCode % 1000) / 1000.0;
+                                (_mixHash(fish['id'].hashCode) % 1000) / 1000.0;
                             double localFishV = (fishV + phaseOffset) % 1.0;
 
                             final currentPose = _getFishPose(
@@ -1308,7 +1388,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                             }
 
                             if (fish['type'] == 'jellyfish' ||
-                                fish['type'] == 'seahorse') {
+                                fish['type'] == 'seahorse' ||
+                                fish['type'] == 'crab') {
                               tiltAngle = 0.0;
                             }
                             if (fish['type'] == 'shrimp') {
@@ -1502,6 +1583,64 @@ class _AquariumScreenState extends State<AquariumScreen>
                   Icon(_isEditMode ? Icons.check : Icons.edit, size: 18),
                   const SizedBox(width: 6),
                   Text(_isEditMode ? '편집 완료'.tr : '수초 편집'.tr),
+                ],
+              ),
+            ),
+          ),
+          // ⚡ 개발용 치트 버튼 (상단 중앙)
+          Positioned(
+            top: 16,
+            left: 100,
+            right: 100,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: widget.onCheatAllLevel5,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFF333333), width: 2),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                        ],
+                      ),
+                      child: const Text(
+                        'Lv.5 ⚡',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: widget.onCheatResetLevel,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFF333333), width: 2),
+                        boxShadow: const [
+                          BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                        ],
+                      ),
+                      child: const Text(
+                        'Reset 🔄',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1871,6 +2010,91 @@ class _PixelButtonState extends State<PixelButton> {
           child: widget.child,
         ),
       ),
+    );
+  }
+}
+
+// --- 💡 터치 시 뿅 하고 나타났다가 서서히 사라지는 이모티콘 애니메이션 위젯 ---
+class FadeFloatingEmoji extends StatefulWidget {
+  final String moodEmoji;
+
+  const FadeFloatingEmoji({
+    super.key,
+    required this.moodEmoji,
+  });
+
+  @override
+  State<FadeFloatingEmoji> createState() => _FadeFloatingEmojiState();
+}
+
+class _FadeFloatingEmojiState extends State<FadeFloatingEmoji>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3), // 총 3초 생명주기
+    );
+
+    // 0.0 ~ 0.1 (0.3초) 동안 서서히 나타남
+    // 0.9 ~ 1.0 (0.3초) 동안 서서히 사라짐
+    _opacityAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 10.0, // 전체의 10% (0.3초)
+      ),
+      TweenSequenceItem(
+        tween: ConstantTween<double>(1.0),
+        weight: 80.0, // 전체의 80% (2.4초 유지)
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 10.0, // 전체의 10% (0.3초)
+      ),
+    ]).animate(_controller);
+
+    // 뿅 하고 나타나는 스케일 애니메이션 추가 (마이크로 인터랙션)
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.5, end: 1.0)
+            .chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 15.0, // 전체의 15% 동안 튕기며 안착
+      ),
+      TweenSequenceItem(
+        tween: ConstantTween<double>(1.0),
+        weight: 85.0,
+      ),
+    ]).animate(_controller);
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _opacityAnimation.value,
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: PixelEmoji(widget.moodEmoji, size: 20),
+          ),
+        );
+      },
     );
   }
 }

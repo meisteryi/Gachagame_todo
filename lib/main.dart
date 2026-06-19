@@ -151,6 +151,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     initialPage: 1,
   ); // 💡 초기 화면을 '할 일'로 변경
   Timer? _moodTimer;
+  int _lastMoodUpdateTime =
+      DateTime.now().millisecondsSinceEpoch; // 💡 마지막 기분 변경 시간 기록
 
   @override
   void initState() {
@@ -235,11 +237,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
         // 💡 수조의 물고기 목록 불러오기 (마이그레이션 포함)
         final String? swimStr = prefs.getString('swimmingFishIds');
+        final ownedIds = _ownedFishes.map((f) => f['id'].toString()).toSet();
         if (swimStr != null) {
-          // 💡 리스트 내부에 null이 섞여 있을 경우를 완벽하게 차단
+          // 💡 리스트 내부에 null이 섞여 있거나 더 이상 소유하지 않은 물고기의 ID는 필터링하여 제거
           _swimmingFishIds = (jsonDecode(swimStr) as List)
               .where((e) => e != null)
               .map((e) => e.toString())
+              .where((id) => ownedIds.contains(id))
               .toList();
         } else {
           final String oldSwim = prefs.getString('swimmingFish') ?? 'puffer';
@@ -251,6 +255,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         }
         if (_swimmingFishIds.isEmpty && _ownedFishes.isNotEmpty) {
           _swimmingFishIds.add(_ownedFishes.first['id'].toString());
+        }
+        _lastMoodUpdateTime =
+            prefs.getInt('lastMoodUpdateTime') ??
+            DateTime.now().millisecondsSinceEpoch;
+        final int now = DateTime.now().millisecondsSinceEpoch;
+        if (now - _lastMoodUpdateTime >= 5 * 60 * 1000) {
+          _randomizeFishMoods();
         }
       });
     } catch (e) {
@@ -268,6 +279,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     await prefs.setInt('feedCount', _feedCount); // 먹이 저장
     await prefs.setInt('supplementCount', _supplementCount); // 영양제 저장
     await prefs.setBool('isSupplementActive', _isSupplementActive); // 버프 상태 저장
+    await prefs.setInt(
+      'lastMoodUpdateTime',
+      _lastMoodUpdateTime,
+    ); // 마지막 기분 변경 시간 저장
   }
 
   void _startMoodTimer() {
@@ -280,12 +295,35 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void _randomizeFishMoods() {
     final random = Random();
     final moods = ['보통', '좋음', '최고야!', '나쁨'];
+    _lastMoodUpdateTime = DateTime.now().millisecondsSinceEpoch;
     setState(() {
       for (var fish in _ownedFishes) {
         fish['mood'] = moods[random.nextInt(moods.length)];
       }
     });
     _saveMainData();
+  }
+
+  void _cheatAllFishesToLevel5() {
+    setState(() {
+      for (var fish in _ownedFishes) {
+        fish['level'] = 5;
+        fish['exp'] = 0;
+      }
+    });
+    _saveMainData();
+    _showNoticeDialog('치트: 모든 물고기가 5레벨이 되었습니다! ⚡');
+  }
+
+  void _resetAllFishesLevel() {
+    setState(() {
+      for (var fish in _ownedFishes) {
+        fish['level'] = 1;
+        fish['exp'] = 0;
+      }
+    });
+    _saveMainData();
+    _showNoticeDialog('치트: 모든 물고기 레벨이 초기화되었습니다! 🔄');
   }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
@@ -1474,6 +1512,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               _saveMainData(); // 편집 위치 실시간 저장
             },
             onShowStorage: _showStorage,
+            onCheatAllLevel5: _cheatAllFishesToLevel5,
+            onCheatResetLevel: _resetAllFishesLevel,
           ),
           // 2. 할 일 탭 (전체 화면)
           TodoScreen(
@@ -1492,6 +1532,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   'mood': '보통',
                   'id': 'fish_default_0',
                 }); // 기본 복어 유지
+
+                int index = 1;
+                final nowMs = DateTime.now().millisecondsSinceEpoch;
                 _ownedFishes.addAll(
                   SlotMachine.fishList.map(
                     (e) => <String, dynamic>{
@@ -1499,8 +1542,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       'level': 1,
                       'exp': 0,
                       'mood': '좋음',
-                      'id':
-                          'fish_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}',
+                      'id': 'fish_${nowMs}_${index++}',
                     },
                   ),
                 );
@@ -1510,6 +1552,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     (e) => Map<String, dynamic>.from(e),
                   ),
                 );
+                // 💡 해금 후 수조의 헤엄치는 목록을 초기화하고 기본 복어만 넣어줌으로써 ID 불일치 및 가득 참 현상 방지
+                _swimmingFishIds.clear();
+                _swimmingFishIds.add('fish_default_0');
               });
               _saveMainData();
             },
