@@ -13,6 +13,7 @@ import 'screens/mission_screen.dart';
 import 'translations.dart';
 import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
+import 'pixel_decoration.dart';
 import 'bouncing_wrapper.dart';
 import 'pixel_emoji.dart';
 import 'slot_machine.dart';
@@ -141,8 +142,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   final List<Map<String, dynamic>> _ownedFishes = [];
   final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
+  final List<Map<String, dynamic>> _ownedDecorations = []; // 💡 장식물 보관 리스트
   List<String> _swimmingFishIds = []; // 💡 수조에서 헤엄치는 여러 마리의 물고기 ID 목록
   List<Map<String, dynamic>> _plantedSeaweeds = []; // 💡 수조에 심어진 여러 수초들의 위치 정보
+  List<Map<String, dynamic>> _plantedDecorations = []; // 💡 수조에 배치된 장식물
   int _coins = 0; // 💡 코인 재화 추가
   int _feedCount = 10; // 💡 기본 먹이 개수 (테스트용 10개)
   int _supplementCount = 5; // 💡 영양제 개수 추가
@@ -214,11 +217,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           }
         });
       }
+      // 💡 장식물 보관함 로드
+      final String? decoStr = prefs.getString('ownedDecorations');
+      if (decoStr != null) {
+        final List<dynamic> decodedDecos = jsonDecode(decoStr);
+        setState(() {
+          _ownedDecorations.clear();
+          for (var item in decodedDecos) {
+            _ownedDecorations.add(Map<String, dynamic>.from(item));
+          }
+        });
+      }
       final String? plantedSeaweedsStr = prefs.getString('plantedSeaweeds');
       if (plantedSeaweedsStr != null) {
         final List<dynamic> decoded = jsonDecode(plantedSeaweedsStr);
         _plantedSeaweeds = decoded
-            .where((e) => e != null) // 💡 null 값 안전 제거
+            .where((e) => e != null)
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
       } else {
@@ -228,6 +242,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           _plantedSeaweeds.add({'type': oldSeaweed, 'x': 140.0});
           prefs.remove('plantedSeaweed');
         }
+      }
+      // 💡 배치된 장식물 로드
+      final String? plantedDecoStr = prefs.getString('plantedDecorations');
+      if (plantedDecoStr != null) {
+        final List<dynamic> decodedDeco = jsonDecode(plantedDecoStr);
+        _plantedDecorations = decodedDeco
+            .where((e) => e != null)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       }
       setState(() {
         _coins = prefs.getInt('coins') ?? 0; // 코인 로드
@@ -273,8 +296,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('ownedFishes', jsonEncode(_ownedFishes));
     await prefs.setString('ownedSeaweeds', jsonEncode(_ownedSeaweeds));
+    await prefs.setString('ownedDecorations', jsonEncode(_ownedDecorations));
     await prefs.setString('swimmingFishIds', jsonEncode(_swimmingFishIds));
     await prefs.setString('plantedSeaweeds', jsonEncode(_plantedSeaweeds));
+    await prefs.setString('plantedDecorations', jsonEncode(_plantedDecorations));
     await prefs.setInt('coins', _coins); // 코인 저장
     await prefs.setInt('feedCount', _feedCount); // 먹이 저장
     await prefs.setInt('supplementCount', _supplementCount); // 영양제 저장
@@ -461,6 +486,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     setState(() {
       _ownedSeaweeds.add(drawnSeaweed);
     });
+    _saveMainData();
+  }
+
+  void _onAddDeco(Map<String, dynamic> deco) {
+    setState(() => _ownedDecorations.add(deco));
     _saveMainData();
   }
 
@@ -1289,6 +1319,108 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                     },
                                   ),
                             const SizedBox(height: 20),
+
+                            // --- 장식물 보관함 영역 ---
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  const PixelDecoration(type: 'ammonite', isAnimated: false),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '\ub0b4 \uc7a5\uc2dd\ubb3c',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            _ownedDecorations.isEmpty
+                                ? const Padding(
+                                    padding: EdgeInsets.only(bottom: 20),
+                                    child: Text('\uc544\uc9c1 \uc0b0 \uc7a5\uc2dd\ubb3c\uc774 \uc5c6\uc5b4\uc694!\n\uc0c1\uc810\uc5d0\uc11c \uc7a5\uc2dd\ubb3c\uc744 \uad6c\ub9e4\ud574\ub3c4\uc138\uc694.'),
+                                  )
+                                : GridView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 6,
+                                      mainAxisSpacing: 12,
+                                      childAspectRatio: 1.0,
+                                    ),
+                                    itemCount: _ownedDecorations.length,
+                                    itemBuilder: (context, index) {
+                                      final deco = _ownedDecorations[index];
+                                      final bool isPlaced = _plantedDecorations
+                                          .any((d) => d['type'] == deco['type']);
+                                      return BouncingWrapper(
+                                        child: SizedBox.expand(
+                                          child: Card(
+                                            margin: EdgeInsets.zero,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide.none,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  _plantedDecorations.add({
+                                                    'type': deco['type']?.toString() ?? 'ammonite',
+                                                    'name': deco['name']?.toString() ?? '',
+                                                    'x': 80.0 + (Random().nextDouble() * 160 - 40),
+                                                  });
+                                                  _selectedIndex = 0;
+                                                });
+                                                _saveMainData();
+                                                _pageController.animateToPage(0,
+                                                  duration: const Duration(milliseconds: 300),
+                                                  curve: Curves.easeInOut,
+                                                );
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      PixelDecoration(
+                                                        type: deco['type']?.toString() ?? 'ammonite',
+                                                        isAnimated: false,
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      Text(
+                                                        deco['name']?.toString() ?? '',
+                                                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                                        textAlign: TextAlign.center,
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  if (isPlaced)
+                                                    Positioned(
+                                                      top: 6,
+                                                      left: 6,
+                                                      child: SizedBox(
+                                                        width: 16,
+                                                        height: 16,
+                                                        child: CustomPaint(
+                                                          painter: PixelCheckPainter(color: Colors.green),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ),
@@ -1490,6 +1622,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 .where((f) => _swimmingFishIds.contains(f['id']))
                 .toList(),
             plantedSeaweeds: _plantedSeaweeds,
+            plantedDecorations: _plantedDecorations,
             feedCount: _feedCount,
             supplementCount: _supplementCount,
             isSupplementActive: _isSupplementActive,
@@ -1498,7 +1631,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 _feedCount--;
                 _gainExp(10, fishId);
               });
-              _saveMainData(); // 먹이 소모 및 경험치 저장
+              _saveMainData();
             },
             onSupplement: () {
               setState(() {
@@ -1509,7 +1642,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             },
             onUpdateSeaweeds: (newList) {
               setState(() => _plantedSeaweeds = newList);
-              _saveMainData(); // 편집 위치 실시간 저장
+              _saveMainData();
+            },
+            onUpdateDecorations: (newList) {
+              setState(() => _plantedDecorations = newList);
+              _saveMainData();
             },
             onShowStorage: _showStorage,
             onCheatAllLevel5: _cheatAllFishesToLevel5,
@@ -1574,6 +1711,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ownedSeaweeds: _ownedSeaweeds,
             onAddFish: _onAddFish,
             onAddSeaweed: _onAddSeaweed,
+            onAddDeco: _onAddDeco,
             onBuyItem: (type, cost, amount) {
               setState(() {
                 _coins -= cost;

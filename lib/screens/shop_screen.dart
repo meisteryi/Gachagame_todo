@@ -4,6 +4,7 @@ import '../bouncing_wrapper.dart';
 import '../slot_machine.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
+import '../pixel_decoration.dart';
 import '../pixel_emoji.dart';
 import '../pixel_supplement.dart';
 import '../translations.dart';
@@ -14,6 +15,7 @@ class ShopScreen extends StatefulWidget {
   final List<Map<String, dynamic>> ownedSeaweeds;
   final void Function(Map<String, dynamic> fish) onAddFish;
   final void Function(Map<String, dynamic> seaweed) onAddSeaweed;
+  final void Function(Map<String, dynamic> deco) onAddDeco;
   final void Function(String type, int cost, int amount) onBuyItem;
   final void Function(int cost) onSpendCoin;
   final VoidCallback onNavigateToAquarium;
@@ -25,6 +27,7 @@ class ShopScreen extends StatefulWidget {
     required this.ownedSeaweeds,
     required this.onAddFish,
     required this.onAddSeaweed,
+    required this.onAddDeco,
     required this.onBuyItem,
     required this.onSpendCoin,
     required this.onNavigateToAquarium,
@@ -393,6 +396,137 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   }
 
   // --- 먹이 상점 화면 UI ---
+  // --- 장식물 상점 ---
+  Widget _buildDecoShop() {
+    final decos = [
+      {'type': 'ammonite',      'name': '\uc554\ubaa8\ub098\uc774\ud2b8 \ud654\uc11d',  'color': const Color(0xFFBF8C3A)},
+      {'type': 'basalt',        'name': '\ud070 \ud604\ubb34\uc554',      'color': const Color(0xFF606060)},
+      {'type': 'spongebob_house','name': '\uc2a4\ud3f0\uc9c0\ubc25 \uc9d1',   'color': const Color(0xFFD4841A)},
+      {'type': 'sunken_ship',   'name': '\uce68\ubab0\ud55c \ubc30 \uc783\ud574', 'color': const Color(0xFF8B6340)},
+    ];
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        child: Column(
+          children: [
+            const Text(
+              '\uc7a5\uc2dd\ubb3c \uc0c1\uc810',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              '\uc218\uc870\ub97c \ub354 \uc544\ub984\ub2f5\uac8c \uaf43\ubc14\uacc4\uc694!',
+              style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 32),
+            ...decos.map((deco) {
+              final Color col = deco['color'] as Color;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: BouncingWrapper(
+                  child: RetroGradientButton(
+                    color: col,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    borderRadius: BorderRadius.circular(6),
+                    borderWidth: 2,
+                    onPressed: () => _confirmBuyDeco(
+                      deco['name'] as String,
+                      deco['type'] as String,
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 56,
+                          child: Center(
+                            child: PixelDecoration(
+                              type: deco['type'] as String,
+                              isAnimated: false,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            deco['name'] as String,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const PixelEmoji('coin', size: 16),
+                        const SizedBox(width: 4),
+                        const Text(
+                          '5',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmBuyDeco(String name, String type) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(4),
+            boxShadow: const [BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3))],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('\uad6c\ub9e4 \ud655\uc778', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Text(
+                '$name\n\ucf54\uc778 5\uac1c\ub97c \uc0ac\uc6a9\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 15),
+              ),
+              const SizedBox(height: 24),
+              Row(children: [
+                Expanded(
+                  child: RetroGradientButton(
+                    color: Colors.grey[300]!,
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('\ucde8\uc18c', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: RetroGradientButton(
+                    color: const Color(0xFFD4C4A0),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      if (widget.coins >= 5) {
+                        widget.onSpendCoin(5);
+                        widget.onAddDeco({'type': type, 'name': name});
+                        _showNoticeDialog('\uad6c\ub9e4 \uc644\ub8cc! \ub0b4 \ubcf4\uad00\ud568\uc5d0 \ucd94\uac00\ub418\uc5c8\uc2b5\ub2c8\ub2e4 \ud83c\udf89');
+                      } else {
+                        _showNoticeDialog('\ucf54\uc778\uc774 \ubd80\uc871\ud569\ub2c8\ub2e4! \ud83e\ude99');
+                      }
+                    },
+                    child: const Text('\uad6c\ub9e4', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFeedShop() {
     return Center(
       child: Column(
@@ -417,19 +551,19 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 40),
           _buildBuyItemButton(
-            '일반 먹이 10개'.tr,
+            '일반 먹이 5개'.tr,
             'feed',
             1,
-            10,
+            5,
             const Color(0xFFFFDAB9),
             const PixelEmoji('meat', size: 16),
           ),
           const SizedBox(height: 16),
           _buildBuyItemButton(
-            '영양제 5개'.tr,
+            '영양제 1개'.tr,
             'supplement',
-            2,
-            5,
+            1,
+            1,
             const Color(0xFFA8E6CF),
             const PixelSupplement(size: 16),
           ),
@@ -704,7 +838,14 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                               ),
                             ),
                             const SizedBox(width: 16),
-                            Expanded(child: _buildEmptyShopItem()),
+                            Expanded(
+                              child: _buildShopItem(
+                                '장식물 상점',
+                                const PixelDecoration(type: 'ammonite', isAnimated: false),
+                                const Color(0xFFD4C4A0),
+                                () => setState(() => _gachaMode = 'deco'),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -772,6 +913,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             },
                           ),
                         if (_gachaMode == 'feed') _buildFeedShop(),
+                        if (_gachaMode == 'deco') _buildDecoShop(),
                         SafeArea(
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),

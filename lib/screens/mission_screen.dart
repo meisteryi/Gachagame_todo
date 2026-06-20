@@ -28,6 +28,7 @@ class _MissionScreenState extends State<MissionScreen>
   int _todayTodoTotal = 0;
   int _todayTodoDone = 0;
   bool _isLoading = true;
+  bool _hasTomorrowTodo = false; // 내일 할 일 추가 여부
 
   @override
   void initState() {
@@ -75,6 +76,7 @@ class _MissionScreenState extends State<MissionScreen>
       "week_start_date": "",
       "daily_attendance_claimed": false,
       "daily_all_clear_claimed": false,
+      "daily_tomorrow_prep_claimed": false, // 내일을 위한 준비 미션
       "weekly_attendance_progress": 0,
       "weekly_all_clear_progress": 0,
       "weekly_attendance_claimed": false,
@@ -90,6 +92,15 @@ class _MissionScreenState extends State<MissionScreen>
       decoded.forEach((key, value) {
         data[key] = value;
       });
+    }
+
+    // 내일 할 일 유무 확인 (tomorrow의 date를 가진 todo가 1개 이상 있으면 달성)
+    final tomorrow = now.add(const Duration(days: 1));
+    final tomorrowDateStr = _formatDate(tomorrow);
+    bool hasTomorrowTodo = false;
+    if (todosStr != null) {
+      final List<dynamic> allTodos = jsonDecode(todosStr);
+      hasTomorrowTodo = allTodos.any((item) => item['date'] == tomorrowDateStr);
     }
 
     final weekStartStr = _formatDate(
@@ -112,6 +123,7 @@ class _MissionScreenState extends State<MissionScreen>
       data['last_update_date'] = nowDateStr;
       data['daily_attendance_claimed'] = false;
       data['daily_all_clear_claimed'] = false;
+      data['daily_tomorrow_prep_claimed'] = false; // 한 날이 지나면 리셋
       data['weekly_attendance_progress'] =
           ((data['weekly_attendance_progress'] ?? 0) as int) + 1;
       if (data['weekly_attendance_progress'] > 7) {
@@ -142,6 +154,7 @@ class _MissionScreenState extends State<MissionScreen>
         _missionData = data;
         _todayTodoTotal = total;
         _todayTodoDone = done;
+        _hasTomorrowTodo = hasTomorrowTodo;
         _isLoading = false;
       });
     }
@@ -340,6 +353,15 @@ class _MissionScreenState extends State<MissionScreen>
                   ? '$_todayTodoDone/$_todayTodoTotal'
                   : '할 일 없음'.tr,
               onClaim: () => _claimReward('daily_all_clear_claimed', 2),
+            ),
+            _buildMissionCard(
+              title: '내일을 위한 준비',
+              desc: '밤 12시 전에 내일 할 일 추가하기',
+              reward: 1,
+              isCompleted: _hasTomorrowTodo,
+              isClaimed: _missionData['daily_tomorrow_prep_claimed'] == true,
+              progressText: _hasTomorrowTodo ? '1/1' : '0/1',
+              onClaim: () => _claimReward('daily_tomorrow_prep_claimed', 1),
             ),
 
             const SizedBox(height: 24),

@@ -4,20 +4,23 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../pixel_fish.dart';
 import '../pixel_seaweed.dart';
+import '../pixel_decoration.dart';
 import '../pixel_emoji.dart';
 import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
 import '../pixel_supplement.dart';
 import '../translations.dart';
 
 class AquariumScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> swimmingFishes; // 💡 여러 마리 물고기 배열
+  final List<Map<String, dynamic>> swimmingFishes;
   final List<Map<String, dynamic>> plantedSeaweeds;
+  final List<Map<String, dynamic>> plantedDecorations;
   final int feedCount;
   final int supplementCount;
   final bool isSupplementActive;
   final ValueChanged<String> onFeed;
   final VoidCallback onSupplement;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
+  final ValueChanged<List<Map<String, dynamic>>> onUpdateDecorations;
   final VoidCallback onShowStorage;
   final VoidCallback onCheatAllLevel5;
   final VoidCallback onCheatResetLevel;
@@ -26,12 +29,14 @@ class AquariumScreen extends StatefulWidget {
     super.key,
     required this.swimmingFishes,
     required this.plantedSeaweeds,
+    required this.plantedDecorations,
     required this.feedCount,
     required this.supplementCount,
     required this.isSupplementActive,
     required this.onFeed,
     required this.onSupplement,
     required this.onUpdateSeaweeds,
+    required this.onUpdateDecorations,
     required this.onShowStorage,
     required this.onCheatAllLevel5,
     required this.onCheatResetLevel,
@@ -1318,6 +1323,110 @@ class _AquariumScreenState extends State<AquariumScreen>
                                       ),
                                     ),
                                   // 💡 오른쪽 도트 화살표
+                                  if (_isEditMode)
+                                    Positioned(
+                                      right: -12,
+                                      child: CustomPaint(
+                                        size: const Size(6, 10),
+                                        painter: PixelArrowPainter(
+                                          isLeft: false,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    // 🪁 배치된 장식물 (수초와 동일한 드래그 방식)
+                    if (_fishController != null)
+                      ...widget.plantedDecorations.asMap().entries.map((entry) {
+                        final int idx = entry.key;
+                        final Map<String, dynamic> deco = entry.value;
+                        final double x =
+                            (deco['x'] as num?)?.toDouble() ?? 160.0;
+                        return Positioned(
+                          key: ObjectKey(deco),
+                          bottom: 25,
+                          left: x,
+                          child: Listener(
+                            onPointerDown: _isEditMode
+                                ? (_) {
+                                    if (idx !=
+                                        widget.plantedDecorations.length - 1) {
+                                      setState(() {
+                                        widget.plantedDecorations.remove(deco);
+                                        widget.plantedDecorations.add(deco);
+                                      });
+                                      widget.onUpdateDecorations(
+                                        widget.plantedDecorations,
+                                      );
+                                    }
+                                  }
+                                : null,
+                            child: GestureDetector(
+                              onPanUpdate: _isEditMode
+                                  ? (details) {
+                                      setState(() {
+                                        deco['x'] = (x + details.delta.dx)
+                                            .clamp(5.0, 270.0);
+                                      });
+                                    }
+                                  : null,
+                              onPanEnd: _isEditMode
+                                  ? (_) => widget.onUpdateDecorations(
+                                      widget.plantedDecorations,
+                                    )
+                                  : null,
+                              onDoubleTap: _isEditMode
+                                  ? () {
+                                      setState(
+                                        () => widget.plantedDecorations.remove(
+                                          deco,
+                                        ),
+                                      );
+                                      widget.onUpdateDecorations(
+                                        widget.plantedDecorations,
+                                      );
+                                    }
+                                  : null,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    color: Colors.transparent,
+                                    child: Container(
+                                      decoration: _isEditMode
+                                          ? BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.blueAccent,
+                                                width: 2,
+                                              ),
+                                              color: Colors.blueAccent
+                                                  .withValues(alpha: 0.15),
+                                            )
+                                          : null,
+                                      child: Transform.scale(
+                                        alignment: Alignment.bottomCenter,
+                                        scale: 0.85,
+                                        child: PixelDecoration(
+                                          type: deco['type'] ?? 'ammonite',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_isEditMode)
+                                    Positioned(
+                                      left: -12,
+                                      child: CustomPaint(
+                                        size: const Size(6, 10),
+                                        painter: PixelArrowPainter(
+                                          isLeft: true,
+                                        ),
+                                      ),
+                                    ),
                                   if (_isEditMode)
                                     Positioned(
                                       right: -12,
