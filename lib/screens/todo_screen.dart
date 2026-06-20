@@ -542,7 +542,9 @@ class _TodoScreenState extends State<TodoScreen>
                                 foregroundColor: Colors.white,
                                 onPressed: () {
                                   // 💡 개발자 치트키 로직
-                                  final trimmedTask = newTask.trim().toLowerCase();
+                                  final trimmedTask = newTask
+                                      .trim()
+                                      .toLowerCase();
                                   if (trimmedTask == 'showmethemoney') {
                                     widget.onSecretCommand?.call();
                                     _showNoticeDialog(

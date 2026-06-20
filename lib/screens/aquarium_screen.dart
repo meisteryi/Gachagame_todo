@@ -61,6 +61,7 @@ class _AquariumScreenState extends State<AquariumScreen>
   String? _targetFishId; // 🌟 먹이를 줄 목표 물고기 ID
   final Map<String, Timer> _activeStatusTimers =
       {}; // 💡 터치 시 임시 상태창 표시에 쓸 타이머 저장소
+  final List<dynamic> _mergedPlantedItems = []; // 💡 수초와 장식물의 통합 렌더 순서 관리 리스트
 
   @override
   void initState() {
@@ -1226,223 +1227,240 @@ class _AquariumScreenState extends State<AquariumScreen>
                     Positioned.fill(
                       child: CustomPaint(painter: PixelTankPainter()),
                     ),
-                    // 🌱 여러 개의 수초를 바닥에 배치 및 편집 가능하게 구성
+                    // 🌱/🪁 여러 개의 수초와 장식물을 통합 렌더링하여 레이어 순서(z-index) 관리
                     if (_fishController != null)
-                      ...widget.plantedSeaweeds.asMap().entries.map((entry) {
-                        final int idx = entry.key;
-                        final Map<String, dynamic> seaweed = entry.value;
-                        final double x =
-                            (seaweed['x'] as num?)?.toDouble() ?? 140.0;
+                      ...() {
+                        // 1. 위젯 속 리스트와 상태 리스트 동기화
+                        final allCurrent = [
+                          ...widget.plantedSeaweeds,
+                          ...widget.plantedDecorations,
+                        ];
 
-                        return Positioned(
-                          key: ObjectKey(
-                            seaweed,
-                          ), // 💡 순서가 바뀌어도 드래그가 끊기지 않도록 고유 키 부여
-                          bottom: 25,
-                          left: x,
-                          child: Listener(
-                            onPointerDown: _isEditMode
-                                ? (_) {
-                                    // 💡 터치 시 해당 수초를 배열 맨 끝으로 보내서 화면 맨 앞(위)으로 렌더링
-                                    if (idx !=
-                                        widget.plantedSeaweeds.length - 1) {
-                                      setState(() {
-                                        widget.plantedSeaweeds.remove(seaweed);
-                                        widget.plantedSeaweeds.add(seaweed);
-                                      });
-                                      widget.onUpdateSeaweeds(
-                                        widget.plantedSeaweeds,
-                                      );
-                                    }
-                                  }
-                                : null,
-                            child: GestureDetector(
-                              onPanUpdate: _isEditMode
-                                  ? (details) {
-                                      setState(() {
-                                        seaweed['x'] = (x + details.delta.dx)
-                                            .clamp(10.0, 280.0); // 어항 범위 제한
-                                      });
-                                    }
-                                  : null,
-                              onPanEnd: _isEditMode
-                                  ? (_) => widget.onUpdateSeaweeds(
-                                      widget.plantedSeaweeds,
-                                    )
-                                  : null,
-                              onDoubleTap: _isEditMode
-                                  ? () {
-                                      setState(() {
-                                        widget.plantedSeaweeds.remove(
-                                          seaweed,
-                                        ); // 💡 바뀐 순서에 맞춰 안전하게 객체로 삭제
-                                      });
-                                      widget.onUpdateSeaweeds(
-                                        widget.plantedSeaweeds,
-                                      );
-                                    }
-                                  : null,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    color:
-                                        Colors.transparent, // 💡 드래그 터치 영역 확보
-                                    child: Container(
-                                      decoration: _isEditMode
-                                          ? BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.redAccent,
-                                                width: 2,
-                                              ),
-                                              color: Colors.redAccent
-                                                  .withValues(alpha: 0.2),
-                                            )
-                                          : null,
-                                      child: Transform.scale(
-                                        alignment: Alignment.bottomCenter,
-                                        scale:
-                                            0.75, // 💡 수초 크기도 물고기처럼 아담한 사이즈로 0.75배 축소
-                                        child: PixelSeaweed(
-                                          type:
-                                              seaweed['type'] ?? 'green_algae',
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // 💡 왼쪽 도트 화살표
-                                  if (_isEditMode)
-                                    Positioned(
-                                      left: -12,
-                                      child: CustomPaint(
-                                        size: const Size(6, 10),
-                                        painter: PixelArrowPainter(
-                                          isLeft: true,
-                                        ),
-                                      ),
-                                    ),
-                                  // 💡 오른쪽 도트 화살표
-                                  if (_isEditMode)
-                                    Positioned(
-                                      right: -12,
-                                      child: CustomPaint(
-                                        size: const Size(6, 10),
-                                        painter: PixelArrowPainter(
-                                          isLeft: false,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        // 기존 상태에 없던 새 아이템 추가
+                        for (var item in allCurrent) {
+                          if (!_mergedPlantedItems.contains(item)) {
+                            _mergedPlantedItems.add(item);
+                          }
+                        }
+                        // 소유하지 않게 된 아이템 제거
+                        _mergedPlantedItems.removeWhere(
+                          (item) => !allCurrent.contains(item),
                         );
-                      }),
-                    // 🪁 배치된 장식물 (수초와 동일한 드래그 방식)
-                    if (_fishController != null)
-                      ...widget.plantedDecorations.asMap().entries.map((entry) {
-                        final int idx = entry.key;
-                        final Map<String, dynamic> deco = entry.value;
-                        final double x =
-                            (deco['x'] as num?)?.toDouble() ?? 160.0;
-                        return Positioned(
-                          key: ObjectKey(deco),
-                          bottom: 25,
-                          left: x,
-                          child: Listener(
-                            onPointerDown: _isEditMode
-                                ? (_) {
-                                    if (idx !=
-                                        widget.plantedDecorations.length - 1) {
-                                      setState(() {
-                                        widget.plantedDecorations.remove(deco);
-                                        widget.plantedDecorations.add(deco);
-                                      });
-                                      widget.onUpdateDecorations(
-                                        widget.plantedDecorations,
-                                      );
-                                    }
-                                  }
-                                : null,
-                            child: GestureDetector(
-                              onPanUpdate: _isEditMode
-                                  ? (details) {
-                                      setState(() {
-                                        deco['x'] = (x + details.delta.dx)
-                                            .clamp(5.0, 270.0);
-                                      });
-                                    }
-                                  : null,
-                              onPanEnd: _isEditMode
-                                  ? (_) => widget.onUpdateDecorations(
-                                      widget.plantedDecorations,
-                                    )
-                                  : null,
-                              onDoubleTap: _isEditMode
-                                  ? () {
-                                      setState(
-                                        () => widget.plantedDecorations.remove(
-                                          deco,
-                                        ),
-                                      );
-                                      widget.onUpdateDecorations(
-                                        widget.plantedDecorations,
-                                      );
-                                    }
-                                  : null,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    color: Colors.transparent,
-                                    child: Container(
-                                      decoration: _isEditMode
-                                          ? BoxDecoration(
-                                              border: Border.all(
-                                                color: Colors.blueAccent,
-                                                width: 2,
-                                              ),
-                                              color: Colors.blueAccent
-                                                  .withValues(alpha: 0.15),
-                                            )
-                                          : null,
-                                      child: Transform.scale(
-                                        alignment: Alignment.bottomCenter,
-                                        scale: 0.85,
-                                        child: PixelDecoration(
-                                          type: deco['type'] ?? 'ammonite',
+
+                        return _mergedPlantedItems.asMap().entries.map((entry) {
+                          final Map<String, dynamic> item = entry.value;
+                          final bool isSeaweed = widget.plantedSeaweeds
+                              .contains(item);
+                          final double x =
+                              (item['x'] as num?)?.toDouble() ??
+                              (isSeaweed ? 140.0 : 160.0);
+
+                          if (isSeaweed) {
+                            // 수초 렌더링
+                            return Positioned(
+                              key: ObjectKey(item),
+                              bottom: 25,
+                              left: x,
+                              child: Listener(
+                                onPointerDown: _isEditMode
+                                    ? (_) {
+                                        setState(() {
+                                          // 1. 전체 머지 리스트의 맨 끝으로 보내 가장 앞으로 렌더링
+                                          _mergedPlantedItems.remove(item);
+                                          _mergedPlantedItems.add(item);
+
+                                          // 2. 원본 리스트의 순서도 업데이트하여 동기화
+                                          widget.plantedSeaweeds.remove(item);
+                                          widget.plantedSeaweeds.add(item);
+                                        });
+                                        widget.onUpdateSeaweeds(
+                                          widget.plantedSeaweeds,
+                                        );
+                                      }
+                                    : null,
+                                child: GestureDetector(
+                                  onPanUpdate: _isEditMode
+                                      ? (details) {
+                                          setState(() {
+                                            item['x'] = (x + details.delta.dx)
+                                                .clamp(10.0, 280.0);
+                                          });
+                                        }
+                                      : null,
+                                  onPanEnd: _isEditMode
+                                      ? (_) => widget.onUpdateSeaweeds(
+                                          widget.plantedSeaweeds,
+                                        )
+                                      : null,
+                                  onDoubleTap: _isEditMode
+                                      ? () {
+                                          setState(() {
+                                            _mergedPlantedItems.remove(item);
+                                            widget.plantedSeaweeds.remove(item);
+                                          });
+                                          widget.onUpdateSeaweeds(
+                                            widget.plantedSeaweeds,
+                                          );
+                                        }
+                                      : null,
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        color: Colors.transparent,
+                                        child: Container(
+                                          decoration: _isEditMode
+                                              ? BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.redAccent,
+                                                    width: 2,
+                                                  ),
+                                                  color: Colors.redAccent
+                                                      .withValues(alpha: 0.2),
+                                                )
+                                              : null,
+                                          child: Transform.scale(
+                                            alignment: Alignment.bottomCenter,
+                                            scale: 0.75,
+                                            child: PixelSeaweed(
+                                              type:
+                                                  item['type'] ?? 'green_algae',
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      if (_isEditMode)
+                                        Positioned(
+                                          left: -12,
+                                          child: CustomPaint(
+                                            size: const Size(6, 10),
+                                            painter: PixelArrowPainter(
+                                              isLeft: true,
+                                            ),
+                                          ),
+                                        ),
+                                      if (_isEditMode)
+                                        Positioned(
+                                          right: -12,
+                                          child: CustomPaint(
+                                            size: const Size(6, 10),
+                                            painter: PixelArrowPainter(
+                                              isLeft: false,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  if (_isEditMode)
-                                    Positioned(
-                                      left: -12,
-                                      child: CustomPaint(
-                                        size: const Size(6, 10),
-                                        painter: PixelArrowPainter(
-                                          isLeft: true,
-                                        ),
-                                      ),
-                                    ),
-                                  if (_isEditMode)
-                                    Positioned(
-                                      right: -12,
-                                      child: CustomPaint(
-                                        size: const Size(6, 10),
-                                        painter: PixelArrowPainter(
-                                          isLeft: false,
-                                        ),
-                                      ),
-                                    ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }),
+                            );
+                          } else {
+                            // 장식물 렌더링
+                            return Positioned(
+                              key: ObjectKey(item),
+                              bottom: 25,
+                              left: x,
+                              child: Listener(
+                                onPointerDown: _isEditMode
+                                    ? (_) {
+                                        setState(() {
+                                          // 1. 전체 머지 리스트의 맨 끝으로 보내 가장 앞으로 렌더링
+                                          _mergedPlantedItems.remove(item);
+                                          _mergedPlantedItems.add(item);
+
+                                          // 2. 원본 리스트의 순서도 업데이트하여 동기화
+                                          widget.plantedDecorations.remove(
+                                            item,
+                                          );
+                                          widget.plantedDecorations.add(item);
+                                        });
+                                        widget.onUpdateDecorations(
+                                          widget.plantedDecorations,
+                                        );
+                                      }
+                                    : null,
+                                child: GestureDetector(
+                                  onPanUpdate: _isEditMode
+                                      ? (details) {
+                                          setState(() {
+                                            item['x'] = (x + details.delta.dx)
+                                                .clamp(5.0, 270.0);
+                                          });
+                                        }
+                                      : null,
+                                  onPanEnd: _isEditMode
+                                      ? (_) => widget.onUpdateDecorations(
+                                          widget.plantedDecorations,
+                                        )
+                                      : null,
+                                  onDoubleTap: _isEditMode
+                                      ? () {
+                                          setState(() {
+                                            _mergedPlantedItems.remove(item);
+                                            widget.plantedDecorations.remove(
+                                              item,
+                                            );
+                                          });
+                                          widget.onUpdateDecorations(
+                                            widget.plantedDecorations,
+                                          );
+                                        }
+                                      : null,
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        color: Colors.transparent,
+                                        child: Container(
+                                          decoration: _isEditMode
+                                              ? BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.blueAccent,
+                                                    width: 2,
+                                                  ),
+                                                  color: Colors.blueAccent
+                                                      .withValues(alpha: 0.15),
+                                                )
+                                              : null,
+                                          child: Transform.scale(
+                                            alignment: Alignment.bottomCenter,
+                                            scale: 0.85,
+                                            child: PixelDecoration(
+                                              type: item['type'] ?? 'ammonite',
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (_isEditMode)
+                                        Positioned(
+                                          left: -12,
+                                          child: CustomPaint(
+                                            size: const Size(6, 10),
+                                            painter: PixelArrowPainter(
+                                              isLeft: true,
+                                            ),
+                                          ),
+                                        ),
+                                      if (_isEditMode)
+                                        Positioned(
+                                          right: -12,
+                                          child: CustomPaint(
+                                            size: const Size(6, 10),
+                                            painter: PixelArrowPainter(
+                                              isLeft: false,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        }).toList();
+                      }(),
                     // 헤엄치는 2D 도트 물고기 & 떨어지는 먹이 효과 결합
                     if (_fishController != null && _feedController != null)
                       AnimatedBuilder(
@@ -1928,9 +1946,9 @@ class _AquariumScreenState extends State<AquariumScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(_isEditMode ? Icons.check : Icons.edit, size: 18),
+                  PixelEmoji(_isEditMode ? 'check' : 'pencil', size: 16),
                   const SizedBox(width: 6),
-                  Text(_isEditMode ? '편집 완료'.tr : '수초 편집'.tr),
+                  Text(_isEditMode ? '편집 완료'.tr : '편집'.tr),
                 ],
               ),
             ),
@@ -2028,7 +2046,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    '수초를 좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.'.tr,
+                    '좌우로 드래그해서 옮기세요.\n더블탭하면 수조에서 삭제됩니다.'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
