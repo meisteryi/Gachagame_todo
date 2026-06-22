@@ -425,41 +425,56 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: BouncingWrapper(
-                  child: RetroGradientButton(
-                    color: col,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                    borderRadius: BorderRadius.circular(6),
-                    borderWidth: 2,
-                    onPressed: () => _confirmBuyDeco(
-                      deco['name'] as String,
-                      deco['type'] as String,
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 56,
-                          child: Center(
-                            child: PixelDecoration(
-                              type: deco['type'] as String,
-                              isAnimated: false,
+                  child: SizedBox(
+                    height: 80,
+                    width: double.infinity,
+                    child: RetroGradientButton(
+                      color: col,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      borderRadius: BorderRadius.circular(6),
+                      borderWidth: 2,
+                      onPressed: () => _confirmBuyDeco(
+                        deco['name'] as String,
+                        deco['type'] as String,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.all(4),
+                            child: Center(
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: PixelDecoration(
+                                  type: deco['type'] as String,
+                                  isAnimated: false,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            deco['name'] as String,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              deco['name'] as String,
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        const PixelEmoji('coin', size: 16),
-                        const SizedBox(width: 4),
-                        const Text(
-                          '5',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                          const PixelEmoji('coin', size: 16),
+                          const SizedBox(width: 4),
+                          const Text(
+                            '5',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

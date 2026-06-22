@@ -27,6 +27,7 @@ class _MissionScreenState extends State<MissionScreen>
   Map<String, dynamic> _missionData = {};
   int _todayTodoTotal = 0;
   int _todayTodoDone = 0;
+  int _weeklyCompletedCount = 0; // 💡 이번 주 완료한 총 할 일 개수
   bool _isLoading = true;
   bool _hasTomorrowTodo = false; // 내일 할 일 추가 여부
 
@@ -79,6 +80,7 @@ class _MissionScreenState extends State<MissionScreen>
       "daily_tomorrow_prep_claimed": false, // 내일을 위한 준비 미션
       "weekly_attendance_progress": 0,
       "weekly_all_clear_progress": 0,
+      "weekly_milestone_claimed": false,
       "weekly_attendance_claimed": false,
       "weekly_all_clear_claimed": false,
       "last_daily_all_clear_counted_date": "",
@@ -108,6 +110,27 @@ class _MissionScreenState extends State<MissionScreen>
     ); // 이번 주 월요일
     bool needsSave = false;
 
+    // 💡 이번 주 완료한 총 할 일 개수 계산
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekStartDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    int weeklyCompletedCount = 0;
+    if (todosStr != null) {
+      final List<dynamic> decoded = jsonDecode(todosStr);
+      for (var item in decoded) {
+        if (item['date'] != null) {
+          final parts = item['date'].toString().split('-');
+          if (parts.length == 3) {
+            final tDate = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+            if (tDate.compareTo(weekStartDate) >= 0 && tDate.compareTo(now) <= 0) {
+              if (item['isDone'] == true) {
+                weeklyCompletedCount++;
+              }
+            }
+          }
+        }
+      }
+    }
+
     // 💡 주간 초기화 (월요일 기준)
     if (data['week_start_date'] != weekStartStr) {
       data['week_start_date'] = weekStartStr;
@@ -115,6 +138,7 @@ class _MissionScreenState extends State<MissionScreen>
       data['weekly_all_clear_progress'] = 0;
       data['weekly_attendance_claimed'] = false;
       data['weekly_all_clear_claimed'] = false;
+      data['weekly_milestone_claimed'] = false;
       needsSave = true;
     }
 
@@ -154,6 +178,7 @@ class _MissionScreenState extends State<MissionScreen>
         _missionData = data;
         _todayTodoTotal = total;
         _todayTodoDone = done;
+        _weeklyCompletedCount = weeklyCompletedCount;
         _hasTomorrowTodo = hasTomorrowTodo;
         _isLoading = false;
       });
@@ -272,6 +297,19 @@ class _MissionScreenState extends State<MissionScreen>
                     color: isClaimed ? Colors.grey : Colors.black87,
                   ),
                 ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Text(
+                      '보상: 코인 %s개'.trArgs([reward.toString()]),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isClaimed ? Colors.grey : Colors.orange[800],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -346,13 +384,13 @@ class _MissionScreenState extends State<MissionScreen>
             _buildMissionCard(
               title: '오늘의 할 일 끝!'.tr,
               desc: '오늘의 모든 할 일 완료'.tr,
-              reward: 2,
+              reward: 3,
               isCompleted: dailyClearCompleted,
               isClaimed: _missionData['daily_all_clear_claimed'] == true,
               progressText: _todayTodoTotal > 0
                   ? '$_todayTodoDone/$_todayTodoTotal'
                   : '할 일 없음'.tr,
-              onClaim: () => _claimReward('daily_all_clear_claimed', 2),
+              onClaim: () => _claimReward('daily_all_clear_claimed', 3),
             ),
             _buildMissionCard(
               title: '내일을 위한 준비',
@@ -373,20 +411,29 @@ class _MissionScreenState extends State<MissionScreen>
             _buildMissionCard(
               title: '성실한 개근상'.tr,
               desc: '일주일 내내 출석'.tr,
-              reward: 10,
+              reward: 5,
               isCompleted: weeklyAttProgress >= 7,
               isClaimed: _missionData['weekly_attendance_claimed'] == true,
               progressText: '$weeklyAttProgress/7',
-              onClaim: () => _claimReward('weekly_attendance_claimed', 10),
+              onClaim: () => _claimReward('weekly_attendance_claimed', 5),
             ),
             _buildMissionCard(
               title: '완벽한 일주일'.tr,
               desc: '일주일 내내 할 일 모두 완료'.tr,
-              reward: 20,
+              reward: 10,
               isCompleted: weeklyClearProgress >= 7,
               isClaimed: _missionData['weekly_all_clear_claimed'] == true,
               progressText: '$weeklyClearProgress/7',
-              onClaim: () => _claimReward('weekly_all_clear_claimed', 20),
+              onClaim: () => _claimReward('weekly_all_clear_claimed', 10),
+            ),
+            _buildMissionCard(
+              title: '주간 마일스톤'.tr,
+              desc: '이번 주에 30개의 할 일 완료하기'.tr,
+              reward: 7,
+              isCompleted: _weeklyCompletedCount >= 30,
+              isClaimed: _missionData['weekly_milestone_claimed'] == true,
+              progressText: '$_weeklyCompletedCount/30',
+              onClaim: () => _claimReward('weekly_milestone_claimed', 7),
             ),
             const SizedBox(height: 40),
           ],

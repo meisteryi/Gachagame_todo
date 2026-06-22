@@ -78,6 +78,7 @@ class PixelDecorationPainter extends CustomPainter {
   static const int c2 = 2;
   static const int c3 = 3;
   static const int c4 = 4;
+  static const int c5 = 5;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -94,22 +95,23 @@ class PixelDecorationPainter extends CustomPainter {
       case 'ammonite':
         palette = [
           Colors.transparent,
-          const Color(0xFF7A5310), // 진한 갈색
-          const Color(0xFFBF8C3A), // 중간 황금
-          const Color(0xFFE8C87A), // 연한 크림
-          const Color(0xFF4A3008), // 외곽 어두운
+          const Color(0xFF5D3F1E), // 진한 외곽/나선선
+          const Color(0xFFC69752), // 중간 황금갈색
+          const Color(0xFFF3D299), // 연한 베이지 하이라이트
+          const Color(0xFF3E2713), // 제일 어두운 브라운 테두리
         ];
         pixels = [
-          [e, e, e, c4, c4, c4, c4, c4, e, e],
-          [e, e, c4, c1, c2, c2, c2, c1, c4, e],
-          [e, c4, c1, c2, c3, c3, c2, c2, c1, c4],
-          [c4, c1, c2, c3, c4, c4, c3, c2, c2, c1],
-          [c4, c1, c2, c3, c4, e, c3, c3, c2, c1],
-          [c4, c2, c2, c3, c3, c3, c1, c2, c2, c1],
-          [c4, c1, c2, c2, c1, c2, c2, c1, c1, c4],
-          [e, c4, c1, c1, c2, c2, c1, c1, c4, e],
-          [e, e, c4, c4, c1, c1, c4, c4, e, e],
-          [e, e, e, e, c4, c4, e, e, e, e],
+          [e, e, e, e, c4, c4, c4, c4, e, e, e, e],
+          [e, e, c4, c4, c2, c2, c2, c2, c4, c4, e, e],
+          [e, c4, c2, c2, c3, c3, c3, c3, c2, c2, c4, e],
+          [c4, c2, c3, c1, c1, c1, c1, c1, c3, c2, c2, c4],
+          [c4, c2, c1, c3, c3, c3, c3, c2, c1, c3, c2, c4],
+          [c4, c2, c1, c3, c2, c2, c1, c1, c1, c3, c2, c4],
+          [c4, c2, c1, c3, c2, c1, c3, c3, c1, c3, c2, c4],
+          [c4, c2, c2, c1, c2, c1, c1, c1, c2, c2, c2, c4],
+          [e, c4, c2, c2, c1, c2, c2, c2, c2, c2, c4, e],
+          [e, e, c4, c4, c2, c2, c2, c2, c2, c4, c4, e],
+          [e, e, e, e, c4, c4, c4, c4, c4, c4, e, e],
         ];
         break;
 
@@ -119,21 +121,21 @@ class PixelDecorationPainter extends CustomPainter {
       case 'basalt':
         palette = [
           Colors.transparent,
-          const Color(0xFF2A2A2A), // 아주 어두운 회
-          const Color(0xFF505050), // 중간 회
-          const Color(0xFF787878), // 밝은 회 (하이라이트)
-          const Color(0xFF141414), // 최외각 검정
+          const Color(0xFF2E2E3E), // 어두운 청회색
+          const Color(0xFF4E5066), // 중간 회적색
+          const Color(0xFF7A7D9A), // 밝은 청회색 (하이라이트)
+          const Color(0xFF1B1B26), // 주상절리 기둥 틈새/테두리 검정
         ];
         pixels = [
-          [e, e, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, e, e],
-          [e, c4, c1, c3, c2, c1, c2, c1, c2, c1, c2, c1, c4, e],
-          [c4, c1, c2, c1, c3, c2, c1, c2, c1, c3, c1, c2, c1, c4],
-          [c4, c2, c1, c2, c1, c1, c2, c1, c2, c1, c2, c1, c2, c4],
-          [c4, c1, c2, c1, c2, c3, c1, c3, c1, c2, c1, c2, c1, c4],
-          [c4, c2, c1, c2, c1, c2, c1, c2, c1, c1, c2, c1, c2, c4],
-          [e, c4, c1, c2, c1, c1, c2, c1, c2, c1, c2, c1, c4, e],
-          [e, e, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, e, e],
-          [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+          [e, e, e, e, c4, c4, c4, c4, e, e, e, e, e, e, e, e],
+          [e, e, e, c4, c3, c3, c2, c2, c4, e, e, e, e, e, e, e],
+          [e, e, c4, c2, c3, c2, c1, c1, c2, c4, e, e, e, e, e, e],
+          [e, c4, c2, c2, c2, c1, c1, c1, c1, c2, c4, c4, c4, e, e, e],
+          [c4, c3, c3, c2, c1, c4, c1, c4, c1, c1, c2, c3, c2, c4, e, e],
+          [c4, c2, c2, c1, c4, c1, c4, c1, c4, c1, c2, c2, c1, c2, c4, e],
+          [c4, c1, c1, c1, c4, c1, c4, c1, c4, c1, c1, c1, c1, c1, c2, c4],
+          [c4, c1, c1, c1, c4, c1, c4, c1, c4, c1, c1, c1, c1, c1, c1, c4],
+          [c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4, c4],
         ];
         break;
 
@@ -174,23 +176,25 @@ class PixelDecorationPainter extends CustomPainter {
       default:
         palette = [
           Colors.transparent,
-          const Color(0xFF5C3A1A), // 썩은 나무 갈색
-          const Color(0xFF8B6340), // 중간 갈색
-          const Color(0xFF3A3A50), // 회청색 금속
-          const Color(0xFFA08060), // 연 베이지 갈색
+          const Color(0xFF3E2713), // 아주 어두운 나무 갈색 (그늘)
+          const Color(0xFF6B4527), // 메인 선체 갈색
+          const Color(0xFF2A483A), // 선체에 낀 초록 이끼/수초
+          const Color(0xFF9E7047), // 밝은 나무 하이라이트
+          const Color(0xFF1E1108), // 선체 윤곽 검정
         ];
         pixels = [
-          [e, e, e, e, c3, c3, e, e, e, e, e, e, e, e, e],
-          [e, e, e, c3, c1, c3, c3, e, e, e, e, e, e, e, e],
-          [e, e, c3, c1, c2, c1, c3, e, e, e, e, e, e, e, e],
-          [e, c3, c1, c2, c3, c2, c1, c3, c3, c3, e, e, e, e, e],
-          [c3, c1, c1, c2, c3, c2, c1, c1, c2, c1, c3, e, e, e, e],
-          [c1, c2, c1, c1, c2, c1, c2, c4, c1, c2, c1, c3, e, e, e],
-          [c1, c1, c2, c3, c1, c3, c4, c1, c4, c1, c2, c1, c3, e, e],
-          [c3, c1, c1, c1, c2, c1, c1, c1, c1, c2, c1, c1, c1, c3, e],
-          [e, c3, c3, c1, c1, c1, c2, c1, c1, c1, c1, c3, c3, e, e],
-          [e, e, e, c3, c3, c3, c3, c3, c3, c3, c3, e, e, e, e],
-          [e, e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+          [e, e, e, e, e, e, c5, c5, e, e, e, e, e, e, e, e, e, e],
+          [e, e, e, e, e, c5, c2, c4, c5, e, e, e, e, e, e, e, e, e],
+          [e, e, e, e, e, c5, c2, c2, c5, e, e, e, e, e, e, e, e, e], // 돛대 잔해
+          [e, e, e, e, e, e, c5, c5, e, e, e, e, e, e, e, e, e, e],
+          [e, e, e, c5, c5, c5, c5, c5, c5, c5, c5, e, e, e, e, e, e, e],
+          [e, c5, c5, c2, c2, c4, c2, c2, c4, c2, c2, c5, c5, e, e, e, e, e], // 갑판선
+          [c5, c2, c2, c4, c2, c2, c2, c2, c2, c2, c2, c2, c2, c5, e, e, e, e],
+          [c5, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c2, c5, e, e, e], // 어두운 안쪽 선체
+          [c5, c2, c3, c2, c5, c2, c3, c2, c5, c2, c3, c2, c2, c2, c2, c5, e, e], // 이끼와 구멍
+          [e, c5, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c5, c5, e, e],
+          [e, e, c5, c2, c3, c2, c2, c2, c3, c2, c2, c2, c2, c5, e, e, e, e], // 선체 하부
+          [e, e, e, c5, c5, c5, c5, c5, c5, c5, c5, c5, c5, e, e, e, e, e],
         ];
         break;
     }

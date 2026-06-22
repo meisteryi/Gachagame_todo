@@ -891,8 +891,8 @@ class _TodoScreenState extends State<TodoScreen>
                         backgroundColor: entry.value,
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(
-                            color: Color(0xFF333333),
-                            width: 3,
+                            color: Colors.transparent,
+                            width: 0,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
