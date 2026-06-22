@@ -249,27 +249,27 @@ class _PixelEmojiPainter extends CustomPainter {
     // 💡 픽셀 색상 팔레트
     final Map<String, Color> colors = {
       '.': Colors.transparent,
-      'y': Colors.yellowAccent,
-      'w': Colors.white,
-      'o': Colors.orangeAccent,
-      'b': Colors.blueAccent,
-      'c': Colors.lightBlueAccent,
-      'd': Colors.brown[800]!,
-      'm': Colors.brown[400]!,
-      'r': Colors.redAccent,
-      'g': Colors.green,
-      'l': Colors.lightGreen,
-      'p': Colors.yellow[700]!,
-      'k': Colors.black,
-      't': Colors.orange[200]!,
-      's': Colors.grey,
+      'y': const Color(0xFFEDE19E),
+      'w': const Color(0xFFF2F0E5),
+      'o': const Color(0xFFD3A068),
+      'b': const Color(0xFF4B80CA),
+      'c': const Color(0xFF68C2D3),
+      'd': const Color(0xFF352B42),
+      'm': const Color(0xFFA77B5B),
+      'r': const Color(0xFFB45252),
+      'g': const Color(0xFF8AB060),
+      'l': const Color(0xFFC2D368),
+      'p': const Color(0xFFE5CEB4),
+      'k': const Color(0xFF212123),
+      't': const Color(0xFFB2B47E),
+      's': const Color(0xFFB8B5B9),
     };
 
     final List<String> data = emojiData[name] ?? emojiData['coin']!;
     final double pw = size.width / 8;
     final double ph = size.height / 8;
     final paint = Paint();
-    final outlinePaint = Paint()..color = const Color(0xFF333333);
+    final outlinePaint = Paint()..color = const Color(0xFF212123);
 
     // 💡 1px 실선이 아닌, 영양제와 완벽하게 일치하는 픽셀 단위의 두꺼운 레트로 외곽선을 그립니다.
     final outlineOffsets = [

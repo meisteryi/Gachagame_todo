@@ -198,7 +198,7 @@ class _SlotMachineState extends State<SlotMachine> {
                     foreground: Paint()
                       ..style = PaintingStyle.stroke
                       ..strokeWidth = 3
-                      ..color = const Color(0xFF333333),
+                      ..color = const Color(0xFF212123),
                   ),
                 ),
                 const Text(
@@ -210,7 +210,7 @@ class _SlotMachineState extends State<SlotMachine> {
                     color: Colors.pinkAccent,
                     shadows: [
                       Shadow(
-                        color: Color(0xFF333333),
+                        color: Color(0xFF212123),
                         offset: Offset(1.5, 1.5),
                       ),
                     ],
@@ -238,11 +238,11 @@ class _SlotMachineState extends State<SlotMachine> {
                     decoration: BoxDecoration(
                       color: widget.gachaType == 'seaweed'
                           ? const Color(0xFF85CAC5)
-                          : const Color(0xFFFFB7B2), // 부드러운 기계 색상
+                          : const Color(0xFFCF8ACB), // 부드러운 기계 색상
                       borderRadius: BorderRadius.circular(4),
                       boxShadow: const [
                         BoxShadow(
-                          color: Color(0xFF333333),
+                          color: Color(0xFF212123),
                           offset: Offset(3, 3),
                         ),
                       ],
@@ -263,7 +263,7 @@ class _SlotMachineState extends State<SlotMachine> {
                           child: const Text(
                             'LUCKY GACHA',
                             style: TextStyle(
-                              color: Color(0xFFFFF3B0),
+                              color: Color(0xFFEDE19E),
                               fontWeight: FontWeight.w900,
                               fontSize: 16,
                               letterSpacing: 2,
@@ -318,7 +318,7 @@ class _SlotMachineState extends State<SlotMachine> {
                               borderRadius: BorderRadius.circular(4),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color(0xFF333333),
+                                  color: Color(0xFF212123),
                                   offset: Offset(3, 3),
                                 ),
                               ],
@@ -345,11 +345,11 @@ class _SlotMachineState extends State<SlotMachine> {
                                     width: 36,
                                     height: 36,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFFB7B2),
+                                      color: const Color(0xFFCF8ACB),
                                       borderRadius: BorderRadius.circular(4),
                                       boxShadow: const [
                                         BoxShadow(
-                                          color: Color(0xFF333333),
+                                          color: Color(0xFF212123),
                                           offset: Offset(3, 3),
                                         ),
                                       ],
@@ -387,7 +387,7 @@ class _SlotMachineState extends State<SlotMachine> {
                         ? Colors.grey
                         : (widget.gachaType == 'seaweed'
                               ? const Color(0xFFA8D8B9)
-                              : const Color(0xFFFFC6D3)),
+                              : const Color(0xFFEDC8C4)),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,

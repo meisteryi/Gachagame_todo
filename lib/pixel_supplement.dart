@@ -48,13 +48,13 @@ class PixelSupplementPainter extends CustomPainter {
         }
 
         if (pixels[y][x] == b) {
-          paint.color = const Color(0xFF333333);
+          paint.color = const Color(0xFF212123);
         } else if (pixels[y][x] == r) {
-          paint.color = Colors.pinkAccent;
+          paint.color = const Color(0xFFCF8ACB);
         } else if (pixels[y][x] == w) {
-          paint.color = Colors.white;
+          paint.color = const Color(0xFFF2F0E5);
         } else if (pixels[y][x] == s) {
-          paint.color = Colors.white.withValues(alpha: 0.7);
+          paint.color = const Color(0xFFF2F0E5).withValues(alpha: 0.7);
         }
 
         canvas.drawRect(

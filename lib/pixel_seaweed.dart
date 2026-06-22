@@ -69,13 +69,13 @@ class PixelSeaweedPainter extends CustomPainter {
     const int c1 = 1; // 주색
     const int c2 = 2; // 보조색
 
-    Color color1 = Colors.green;
-    Color color2 = Colors.lightGreen;
+    Color color1 = const Color(0xFF8AB060);
+    Color color2 = const Color(0xFFC2D368);
     List<List<int>> pixels;
 
     if (type == 'red_algae') {
-      color1 = Colors.red;
-      color2 = Colors.redAccent;
+      color1 = const Color(0xFFB45252);
+      color2 = const Color(0xFFCF8ACB);
       pixels = [
         [e, e, c1, e, e, e, c2, e],
         [e, c1, c1, e, e, c2, c2, e],
@@ -87,8 +87,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [c1, e, e, e, c1, c1, e, e],
       ];
     } else if (type == 'kelp') {
-      color1 = Colors.green[800]!;
-      color2 = Colors.green[600]!;
+      color1 = const Color(0xFF646365);
+      color2 = const Color(0xFF8AB060);
       pixels = [
         [e, e, c1, c1, e, e],
         [e, c1, c1, c2, e, e],
@@ -100,8 +100,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, c1, c1, c1, e, e],
       ];
     } else if (type == 'coral') {
-      color1 = Colors.pinkAccent;
-      color2 = Colors.pink;
+      color1 = const Color(0xFFCF8ACB);
+      color2 = const Color(0xFF6A536E);
       pixels = [
         [e, c1, e, e, e, c2, e],
         [c1, c1, c1, e, c2, c2, c2],
@@ -113,8 +113,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, e, c1, c1, c1, e, e],
       ];
     } else if (type == 'anemone') {
-      color1 = Colors.purpleAccent;
-      color2 = Colors.deepPurpleAccent;
+      color1 = const Color(0xFF43436A);
+      color2 = const Color(0xFF646365);
       pixels = [
         [c1, e, c2, e, c1, e, c2],
         [c1, c1, c2, c2, c1, c1, c2],
@@ -126,8 +126,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, e, c2, c2, c2, e, e],
       ];
     } else if (type == 'purple_kelp') {
-      color1 = Colors.purple;
-      color2 = Colors.deepPurple;
+      color1 = const Color(0xFF646365);
+      color2 = const Color(0xFF212123);
       pixels = [
         [e, c1, c2, e, e, e],
         [e, c2, c1, e, e, e],
@@ -141,8 +141,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, c1, c1, c1, e, e],
       ];
     } else if (type == 'short_grass') {
-      color1 = Colors.lightGreenAccent;
-      color2 = Colors.green;
+      color1 = const Color(0xFFEDE19E);
+      color2 = const Color(0xFF8AB060);
       pixels = [
         [e, e, e, e, e, e, e, e],
         [e, e, e, e, e, e, e, e],
@@ -154,8 +154,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [c1, c1, c1, c2, c1, c1, c1, e],
       ];
     } else if (type == 'blue_coral') {
-      color1 = Colors.blueAccent;
-      color2 = Colors.lightBlue;
+      color1 = const Color(0xFF4B80CA);
+      color2 = const Color(0xFF68C2D3);
       pixels = [
         [e, e, c1, e, e, e, c2, e],
         [e, c1, c1, e, e, c2, c2, e],
@@ -167,8 +167,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [c2, c1, c1, c1, c1, c1, c2, e],
       ];
     } else if (type == 'tall_bamboo') {
-      color1 = Colors.greenAccent;
-      color2 = Colors.teal;
+      color1 = const Color(0xFFC2D368);
+      color2 = const Color(0xFF8AB060);
       pixels = [
         [e, e, c1, c2, e, e],
         [e, e, c1, c2, e, e],
@@ -184,8 +184,8 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, e, c1, c2, e, e],
       ];
     } else if (type == 'golden_leaf') {
-      color1 = Colors.amber;
-      color2 = Colors.orange;
+      color1 = const Color(0xFFD3A068);
+      color2 = const Color(0xFFA77B5B);
       pixels = [
         [e, e, c1, c2, e, e, e],
         [e, c1, c1, c2, c2, e, e],
@@ -199,8 +199,8 @@ class PixelSeaweedPainter extends CustomPainter {
       ];
     } else {
       // green_algae (default)
-      color1 = Colors.green;
-      color2 = Colors.lightGreen;
+      color1 = const Color(0xFF8AB060);
+      color2 = const Color(0xFFC2D368);
       pixels = [
         [e, e, c2, e, e],
         [e, c2, c1, e, e],

@@ -378,7 +378,7 @@ class _AquariumScreenState extends State<AquariumScreen>
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(1.5, 1.5)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(1.5, 1.5)),
               ],
             ),
             child: Column(
@@ -453,7 +453,7 @@ class _AquariumScreenState extends State<AquariumScreen>
               color: const Color(0xFFE1F5FE), // 💡 눈이 편안한 옅은 파스텔 블루
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -495,7 +495,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                               gradient: getRetroGradient(Colors.white),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: const Color(0xFF333333),
+                                color: const Color(0xFF212123),
                                 width: 3,
                               ),
                             ),
@@ -717,9 +717,9 @@ class _AquariumScreenState extends State<AquariumScreen>
       decoration: BoxDecoration(
         gradient: getRetroGradient(Colors.white),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF333333), width: 3),
+        border: Border.all(color: const Color(0xFF212123), width: 3),
         boxShadow: const [
-          BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+          BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
         ],
       ),
       child: Column(
@@ -828,11 +828,11 @@ class _AquariumScreenState extends State<AquariumScreen>
             height: 520,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF0F5), // 앱 전체 배경 테마와 동일한 연한 핑크 계열
+              color: const Color(0xFFF2F0E5),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: const Color(0xFF333333), width: 3),
+              border: Border.all(color: const Color(0xFF212123), width: 3),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(4, 4)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(4, 4)),
               ],
             ),
             child: Column(
@@ -843,10 +843,10 @@ class _AquariumScreenState extends State<AquariumScreen>
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    gradient: getRetroGradient(const Color(0xFFFFB7B2)),
+                    gradient: getRetroGradient(const Color(0xFFCF8ACB)),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: const Color(0xFF333333),
+                      color: const Color(0xFF212123),
                       width: 2,
                     ),
                   ),
@@ -856,7 +856,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w900,
-                        color: Color(0xFF333333),
+                        color: Color(0xFF212123),
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -872,29 +872,29 @@ class _AquariumScreenState extends State<AquariumScreen>
                           'fish',
                           '레벨 시스템',
                           '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n5레벨이 되면 엄청난 일이 일어날지도....',
-                          const Color(0xFFFFF9C4),
-                          const Color(0xFFE6A800),
+                          const Color(0xFFEDE19E),
+                          const Color(0xFFD3A068),
                         ),
                         _buildRuleItem(
                           'meat',
                           '먹이 시스템',
                           '할 일 완료 → 코인 획득 → 상점에서 먹이 구매!\n먹이 1개 = +10 EXP\n물고기를 선택해 개별적으로 먹이를 줄 수 있어요.',
-                          const Color(0xFFFFDAB9),
-                          const Color(0xFFD4560A),
+                          const Color(0xFFE5CEB4),
+                          const Color(0xFFA77B5B),
                         ),
                         _buildRuleItem(
                           'seaweed',
                           '영양제 시스템',
                           '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 경험치가 2배가 됩니다.',
-                          const Color(0xFFA8E6CF),
-                          const Color(0xFF1E7A4A),
+                          const Color(0xFFA2DCC7),
+                          const Color(0xFF8AB060),
                         ),
                         _buildRuleItem(
                           'mood_great',
                           '기분 시스템',
                           '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n기분에 따라서 경험치의 증가량이 달라집니다!',
-                          const Color(0xFFFFB7B2),
-                          const Color(0xFFA8003A),
+                          const Color(0xFFEDC8C4),
+                          const Color(0xFFB45252),
                         ),
                       ],
                     ),
@@ -905,14 +905,14 @@ class _AquariumScreenState extends State<AquariumScreen>
                   width: double.infinity,
                   height: 48,
                   child: RetroGradientButton(
-                    color: const Color(0xFFFFB7B2),
+                    color: const Color(0xFFCF8ACB),
                     onPressed: () => Navigator.pop(context),
                     child: const Text(
                       '확인!',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
-                        color: Color(0xFF333333),
+                        color: Color(0xFF212123),
                       ),
                     ),
                   ),
@@ -938,9 +938,9 @@ class _AquariumScreenState extends State<AquariumScreen>
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF333333), width: 2),
+        border: Border.all(color: const Color(0xFF212123), width: 2),
         boxShadow: const [
-          BoxShadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+          BoxShadow(color: Color(0xFF212123), offset: Offset(2, 2)),
         ],
       ),
       child: Column(
@@ -988,7 +988,7 @@ class _AquariumScreenState extends State<AquariumScreen>
               color: const Color(0xFFE1F5FE),
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -1035,7 +1035,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                                   gradient: getRetroGradient(Colors.white),
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
-                                    color: const Color(0xFF333333),
+                                    color: const Color(0xFF212123),
                                     width: 3,
                                   ),
                                 ),
@@ -1187,7 +1187,7 @@ class _AquariumScreenState extends State<AquariumScreen>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF81D4FA), Color(0xFF0288D1)],
+                colors: [Color(0xFFB1C1D3), Color(0xFF68C2D3)],
               ),
             ),
             child: Center(
@@ -1199,7 +1199,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF333333).withValues(alpha: 0.1),
+                      color: const Color(0xFF212123).withValues(alpha: 0.1),
                       blurRadius: 0,
                       spreadRadius: 0,
                     ),
@@ -1216,7 +1216,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                       bottom: 4,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.lightBlueAccent.withValues(alpha: 0.15),
+                          color: const Color(0xFF68C2D3).withValues(alpha: 0.35),
                           borderRadius: const BorderRadius.vertical(
                             bottom: Radius.circular(4),
                           ),
@@ -1834,8 +1834,8 @@ class _AquariumScreenState extends State<AquariumScreen>
             child: Row(
               children: [
                 PixelButton(
-                  color: Colors.orangeAccent,
-                  textColor: Colors.white,
+                  color: const Color(0xFFD3A068),
+                  textColor: const Color(0xFFF2F0E5),
                   onPressed: () =>
                       _startFeeding('feed'), // 💡 올바른 함수 호출 방식으로 변경
                   child: Row(
@@ -1849,8 +1849,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                 ),
                 const SizedBox(width: 8),
                 PixelButton(
-                  color: Colors.pinkAccent,
-                  textColor: Colors.white,
+                  color: const Color(0xFFCF8ACB),
+                  textColor: const Color(0xFFF2F0E5),
                   onPressed: () =>
                       _startFeeding('supplement'), // 💡 영양제 주기 버튼 추가
                   child: Row(
@@ -1973,12 +1973,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                         color: Colors.redAccent,
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
-                          color: const Color(0xFF333333),
+                          color: const Color(0xFF212123),
                           width: 2,
                         ),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0xFF333333),
+                            color: Color(0xFF212123),
                             offset: Offset(2, 2),
                           ),
                         ],
@@ -2005,12 +2005,12 @@ class _AquariumScreenState extends State<AquariumScreen>
                         color: Colors.blueAccent,
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
-                          color: const Color(0xFF333333),
+                          color: const Color(0xFF212123),
                           width: 2,
                         ),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0xFF333333),
+                            color: Color(0xFF212123),
                             offset: Offset(2, 2),
                           ),
                         ],
@@ -2122,7 +2122,7 @@ class PixelArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final outlinePaint = Paint()..color = const Color(0xFF333333);
+    final outlinePaint = Paint()..color = const Color(0xFF212123);
     final fillPaint = Paint()..color = Colors.white;
     const double p = 2.0; // 픽셀 크기
 
@@ -2381,7 +2381,7 @@ class _PixelButtonState extends State<PixelButton> {
           boxShadow: _isPressed
               ? []
               : const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                  BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
                 ], // 도트 그림자
         ),
         child: DefaultTextStyle(

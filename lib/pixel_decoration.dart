@@ -95,10 +95,10 @@ class PixelDecorationPainter extends CustomPainter {
       case 'ammonite':
         palette = [
           Colors.transparent,
-          const Color(0xFF5D3F1E), // 진한 외곽/나선선
-          const Color(0xFFC69752), // 중간 황금갈색
-          const Color(0xFFF3D299), // 연한 베이지 하이라이트
-          const Color(0xFF3E2713), // 제일 어두운 브라운 테두리
+          const Color(0xFFA77B5B), // 진한 외곽/나선선
+          const Color(0xFFD3A068), // 중간 황금갈색
+          const Color(0xFFF2F0E5), // 연한 베이지 하이라이트
+          const Color(0xFF212123), // 제일 어두운 브라운 테두리
         ];
         pixels = [
           [e, e, e, e, c4, c4, c4, c4, e, e, e, e],
@@ -121,10 +121,10 @@ class PixelDecorationPainter extends CustomPainter {
       case 'basalt':
         palette = [
           Colors.transparent,
-          const Color(0xFF2E2E3E), // 어두운 청회색
-          const Color(0xFF4E5066), // 중간 회적색
-          const Color(0xFF7A7D9A), // 밝은 청회색 (하이라이트)
-          const Color(0xFF1B1B26), // 주상절리 기둥 틈새/테두리 검정
+          const Color(0xFF45444F), // 어두운 청회색
+          const Color(0xFFB8B5B9), // 중간 회적색
+          const Color(0xFF868188), // 밝은 청회색 (하이라이트)
+          const Color(0xFF212123), // 주상절리 기둥 틈새/테두리 검정
         ];
         pixels = [
           [e, e, e, e, c4, c4, c4, c4, e, e, e, e, e, e, e, e],
@@ -145,10 +145,10 @@ class PixelDecorationPainter extends CustomPainter {
       case 'spongebob_house':
         palette = [
           Colors.transparent,
-          const Color(0xFFD4841A), // 주황 몸통
-          const Color(0xFF2D8B18), // 초록 잎
-          const Color(0xFF8B4A00), // 진한 주황 (창문/윤곽)
-          const Color(0xFFF5DC60), // 노란 하이라이트
+          const Color(0xFFD3A068), // 주황 몸통
+          const Color(0xFF8AB060), // 초록 잎
+          const Color(0xFF212123), // 진한 주황 (창문/윤곽)
+          const Color(0xFFEDE19E), // 노란 하이라이트
         ];
         pixels = [
           [e, e, e, c2, c2, c2, e, e, e, e],  // 잎 꼭대기
@@ -176,11 +176,11 @@ class PixelDecorationPainter extends CustomPainter {
       default:
         palette = [
           Colors.transparent,
-          const Color(0xFF3E2713), // 아주 어두운 나무 갈색 (그늘)
-          const Color(0xFF6B4527), // 메인 선체 갈색
-          const Color(0xFF2A483A), // 선체에 낀 초록 이끼/수초
-          const Color(0xFF9E7047), // 밝은 나무 하이라이트
-          const Color(0xFF1E1108), // 선체 윤곽 검정
+          const Color(0xFF45444F), // 아주 어두운 나무 갈색 (그늘)
+          const Color(0xFFA77B5B), // 메인 선체 갈색
+          const Color(0xFF8AB060), // 선체에 낀 초록 이끼/수초
+          const Color(0xFFD3A068), // 밝은 나무 하이라이트
+          const Color(0xFF212123), // 선체 윤곽 검정
         ];
         pixels = [
           [e, e, e, e, e, e, c5, c5, e, e, e, e, e, e, e, e, e, e],

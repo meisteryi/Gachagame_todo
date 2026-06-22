@@ -81,12 +81,12 @@ class PixelFishPainter extends CustomPainter {
     const int b = 4; // 검은색
     const int a = 5; // 물줄기
 
-    Color color1 = Colors.orangeAccent;
+    Color color1 = const Color(0xFFD3A068);
     Color color2 = Colors.transparent;
     List<List<int>> pixels;
 
     if (type == 'goldfish') {
-      color1 = Colors.redAccent;
+      color1 = const Color(0xFFCF8ACB);
       pixels = [
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, c1, c1, c1, e, e, e, e, e, e],
@@ -98,8 +98,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'mackerel') {
-      color1 = Colors.blue;
-      color2 = Colors.grey[300]!;
+      color1 = const Color(0xFF4B80CA);
+      color2 = const Color(0xFFB8B5B9);
       pixels = [
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
@@ -111,8 +111,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'shark') {
-      color1 = Colors.blueGrey[800]!;
-      color2 = Colors.white;
+      color1 = const Color(0xFF646365);
+      color2 = const Color(0xFFF2F0E5);
       pixels = [
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
@@ -124,8 +124,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'whale') {
-      color1 = Colors.indigo[600]!;
-      color2 = Colors.lightBlue[200]!;
+      color1 = const Color(0xFF43436A);
+      color2 = const Color(0xFF68C2D3);
       pixels = [
         [e, e, e, e, e, e, e, e, a, e, a, e, e, e],
         [e, e, e, e, e, e, e, e, e, a, e, e, e, e],
@@ -137,8 +137,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'betta') {
-      color1 = Colors.pinkAccent; // 화려한 몸통
-      color2 = Colors.cyanAccent; // 펄럭이는 지느러미
+      color1 = const Color(0xFFCF8ACB);
+      color2 = const Color(0xFF68C2D3);
       pixels = [
         [e, e, e, e, c2, c2, c2, c2, c2, c2, e, e, e, e],
         [e, e, c2, c2, c2, c1, c1, c1, c1, c2, e, e, e, e],
@@ -150,8 +150,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'nemo') {
-      color1 = Colors.deepOrange; // 주황색 몸통
-      color2 = Colors.white; // 흰 줄무늬
+      color1 = const Color(0xFFD3A068); // 주황색 몸통
+      color2 = const Color(0xFFF2F0E5); // 흰 줄무늬
       pixels = [
         [e, e, e, e, e, e, e, c1, c1, c1, e, e, e, e],
         [e, e, e, e, e, e, c1, c1, c1, c1, c1, e, e, e],
@@ -163,8 +163,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'guppy') {
-      color1 = Colors.cyanAccent; // 작고 푸른 몸통
-      color2 = Colors.purpleAccent; // 풍성한 보라색 꼬리
+      color1 = const Color(0xFF68C2D3); // 작고 푸른 몸통
+      color2 = const Color(0xFFCF8ACB); // 풍성한 보라색 꼬리
       pixels = [
         [e, c2, c2, c2, e, e, e, e, e, e, e, e, e, e],
         [c2, c2, c2, c2, c2, e, e, e, e, e, e, e, e, e],
@@ -176,8 +176,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'axolotl') {
-      color1 = Colors.pink[200]!; // 귀여운 분홍색 몸통
-      color2 = Colors.pinkAccent; // 아가미 및 꼬리
+      color1 = const Color(0xFFE5CEB4); // 귀여운 분홍색 몸통
+      color2 = const Color(0xFFCF8ACB); // 아가미 및 꼬리
       pixels = [
         [e, e, e, e, e, e, e, c2, e, e, e, e, e, e],
         [e, e, e, e, e, e, e, c2, c1, c1, e, e, e, e],
@@ -189,8 +189,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'tuna') {
-      color1 = Colors.blueGrey[300]!; // 은빛 몸통
-      color2 = Colors.indigo[800]!; // 진한 지느러미
+      color1 = const Color(0xFF868188); // 은빛 몸통
+      color2 = const Color(0xFF646365); // 진한 지느러미
       pixels = [
         [e, e, e, e, e, e, c2, c2, c2, e, e, e, e, e],
         [e, e, e, e, e, e, e, c2, c2, e, e, e, e, e],
@@ -202,8 +202,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, c2, c2, c2, e, e, e, e, e],
       ];
     } else if (type == 'shrimp') {
-      color1 = Colors.deepOrangeAccent; // 붉은 새우 등
-      color2 = Colors.orange[200]!; // 연한 새우 배
+      color1 = const Color(0xFFD3A068); // 붉은 새우 등
+      color2 = const Color(0xFFE5CEB4); // 연한 새우 배
       pixels = [
         [e, e, e, e, e, e, e, e, e, c1, c1, e, e, e],
         [e, e, e, e, c1, c1, c1, e, c1, w, b, e, e, e],
@@ -215,8 +215,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'seahorse') {
-      color1 = Colors.amber; // 노란 몸통
-      color2 = Colors.orange; // 주황색 갈기
+      color1 = const Color(0xFFD3A068); // 노란 몸통
+      color2 = const Color(0xFFA77B5B); // 주황색 갈기
       pixels = [
         [e, e, e, e, e, e, e, e, c2, c1, c1, c2, e, e],
         [e, e, e, e, e, e, e, c2, c1, w, b, c1, e, e],
@@ -228,8 +228,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, c1, c1, c1, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'turtle') {
-      color1 = Colors.green; // 초록 피부
-      color2 = Colors.brown[700]!; // 갈색 등딱지
+      color1 = const Color(0xFF8AB060); // 초록 피부
+      color2 = const Color(0xFF212123); // 갈색 등딱지
       pixels = [
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, c2, c2, c2, c2, c2, e, e, e, e, e],
@@ -241,8 +241,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'jellyfish') {
-      color1 = Colors.pinkAccent[100]!; // 분홍빛 우산
-      color2 = Colors.purpleAccent[100]!; // 보라빛 촉수
+      color1 = const Color(0xFFE5CEB4); // 분홍빛 우산
+      color2 = const Color(0xFF5F556A); // 보라빛 촉수
       pixels = [
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
         [e, e, e, e, c1, c1, c1, c1, c1, c1, e, e, e, e],
@@ -254,8 +254,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, c2, e, e, c2, c2, e, e, c2, e, e, e],
       ];
     } else if (type == 'stingray') {
-      color1 = Colors.blueGrey; // 푸른 회색 등
-      color2 = Colors.grey[400]!; // 배
+      color1 = const Color(0xFF868188); // 푸른 회색 등
+      color2 = const Color(0xFFB8B5B9); // 배
       pixels = [
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
@@ -267,8 +267,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
       ];
     } else if (type == 'carp') {
-      color1 = Colors.white;
-      color2 = Colors.redAccent;
+      color1 = const Color(0xFFF2F0E5);
+      color2 = const Color(0xFFCF8ACB);
       pixels = [
         [e, e, e, e, e, c2, c2, e, e, e, e, e, e, e],
         [e, e, e, e, c1, c1, c2, c2, c1, e, e, e, e, e],
@@ -280,8 +280,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'crab') {
-      color1 = Colors.orangeAccent;
-      color2 = Colors.redAccent;
+      color1 = const Color(0xFFE5CEB4);
+      color2 = const Color(0xFFCF8ACB);
       pixels = [
         [e, c2, c2, e, e, e, e, e, e, e, e, c2, c2, e],
         [c2, c2, c2, c2, e, b, e, e, b, e, c2, c2, c2, c2],
@@ -293,8 +293,8 @@ class PixelFishPainter extends CustomPainter {
         [c2, e, c2, e, c2, e, e, e, e, c2, e, c2, e, c2],
       ];
     } else if (type == 'whale_shark') {
-      color1 = const Color(0xFF1E3A8A); // 진한 남색
-      color2 = Colors.white;
+      color1 = const Color(0xFF646365); // 진한 남색
+      color2 = const Color(0xFFF2F0E5);
       pixels = [
         [e, e, e, e, e, e, c1, c1, e, e, e, e, e, e],
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
@@ -306,8 +306,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'electric_eel') {
-      color1 = const Color(0xFF2C3E50); // 어두운 블루그레이
-      color2 = Colors.yellowAccent;
+      color1 = const Color(0xFF646365); // 어두운 블루그레이
+      color2 = const Color(0xFFEDE19E);
       pixels = [
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
@@ -319,8 +319,8 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
     } else if (type == 'salmon') {
-      color1 = const Color(0xFFFA8072); // 살몬 핑크색
-      color2 = const Color(0xFFE2E8F0); // 은색 실선
+      color1 = const Color(0xFFE5CEB4); // 살몬 핑크색
+      color2 = const Color(0xFFB8B5B9); // 은색 실선
       pixels = [
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
         [e, e, e, e, e, c2, c2, c2, e, e, e, e, e, e],
@@ -333,7 +333,7 @@ class PixelFishPainter extends CustomPainter {
       ];
     } else {
       // puffer (default)
-      color1 = Colors.orangeAccent;
+      color1 = const Color(0xFFD3A068);
       pixels = [
         [e, e, e, e, e, c1, c1, c1, c1, e, e, e, e, e],
         [e, e, e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
@@ -348,66 +348,66 @@ class PixelFishPainter extends CustomPainter {
 
     if (level >= 5) {
       if (type == 'goldfish') {
-        color1 = Colors.amberAccent[400]!;
-        color2 = Colors.deepOrangeAccent;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFFD3A068);
       } else if (type == 'mackerel') {
-        color1 = Colors.cyanAccent;
-        color2 = Colors.purpleAccent;
+        color1 = const Color(0xFF68C2D3);
+        color2 = const Color(0xFFCF8ACB);
       } else if (type == 'shark') {
-        color1 = const Color(0xFF0B132B); // 심해 어둠의 흑청색
-        color2 = const Color(0xFFE0E1DD); // 차가운 메탈릭 실버 화이트
+        color1 = const Color(0xFF212123);
+        color2 = const Color(0xFFF2F0E5);
       } else if (type == 'whale') {
-        color1 = Colors.purple[800]!;
-        color2 = Colors.pinkAccent;
+        color1 = const Color(0xFF212123);
+        color2 = const Color(0xFFCF8ACB);
       } else if (type == 'betta') {
-        color1 = Colors.amberAccent;
-        color2 = Colors.deepPurpleAccent;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFFCF8ACB);
       } else if (type == 'nemo') {
-        color1 = Colors.limeAccent;
-        color2 = Colors.black;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFF212123);
       } else if (type == 'guppy') {
-        color1 = Colors.redAccent;
-        color2 = Colors.yellowAccent;
+        color1 = const Color(0xFFCF8ACB);
+        color2 = const Color(0xFFEDE19E);
       } else if (type == 'axolotl') {
-        color1 = Colors.yellow[300]!;
-        color2 = Colors.redAccent;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFFCF8ACB);
       } else if (type == 'tuna') {
-        color1 = Colors.grey[200]!;
-        color2 = Colors.cyanAccent;
+        color1 = const Color(0xFFF2F0E5);
+        color2 = const Color(0xFF68C2D3);
       } else if (type == 'shrimp') {
-        color1 = Colors.cyan[200]!;
-        color2 = Colors.blueAccent;
+        color1 = const Color(0xFFCF8ACB);
+        color2 = const Color(0xFF4B80CA);
       } else if (type == 'seahorse') {
-        color1 = Colors.lightGreenAccent;
-        color2 = Colors.indigoAccent;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFF4B80CA);
       } else if (type == 'turtle') {
-        color1 = Colors.tealAccent;
-        color2 = Colors.amber[800]!;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFFD3A068);
       } else if (type == 'jellyfish') {
-        color1 = Colors.yellowAccent;
-        color2 = Colors.cyanAccent;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFF68C2D3);
       } else if (type == 'stingray') {
-        color1 = Colors.indigoAccent;
-        color2 = Colors.cyanAccent;
+        color1 = const Color(0xFF4B80CA);
+        color2 = const Color(0xFF68C2D3);
       } else if (type == 'carp') {
-        color1 = const Color(0xFFFFD700); // 찬란한 황금색 (Golden Koi)
-        color2 = const Color(0xFFD32F2F); // 강렬한 심홍색 무늬 (Crimson)
+        color1 = const Color(0xFFD3A068);
+        color2 = const Color(0xFF80493A);
       } else if (type == 'crab') {
-        color1 = const Color(0xFFE63946); // 깊은 크림슨 레드 등딱지 (Imperial Red)
-        color2 = const Color(0xFFE5A93C); // 금빛 집게발 및 마디 (Gold)
+        color1 = const Color(0xFFB45252);
+        color2 = const Color(0xFFD3A068);
       } else if (type == 'whale_shark') {
-        color1 = const Color(0xFF0F172A); // 심우주 블랙/네이비 (Cosmic Space)
-        color2 = const Color(0xFF38BDF8); // 빛나는 네온 청록 별빛 (Starry Cyan)
+        color1 = const Color(0xFF212123);
+        color2 = const Color(0xFF68C2D3);
       } else if (type == 'electric_eel') {
-        color1 = const Color(0xFF1E293B); // 어두운 화산석 블랙 (Obsidian Slate)
-        color2 = Colors.cyanAccent;       // 고전압 네온 블루 전류 (High-Voltage Cyan)
+        color1 = const Color(0xFF212123);
+        color2 = const Color(0xFF68C2D3);
       } else if (type == 'salmon') {
-        color1 = const Color(0xFFE07A5F); // 우아한 로즈골드 브론즈 (Rose Gold)
-        color2 = const Color(0xFFF1F5F9); // 은빛 플래티넘 실버 줄무늬 (Platinum Silver)
+        color1 = const Color(0xFFD3A068);
+        color2 = const Color(0xFFF2F0E5);
       } else {
         // puffer (default)
-        color1 = Colors.yellowAccent;
-        color2 = Colors.deepOrangeAccent;
+        color1 = const Color(0xFFEDE19E);
+        color2 = const Color(0xFFD3A068);
       }
     }
 
@@ -431,11 +431,11 @@ class PixelFishPainter extends CustomPainter {
             paint.color = color2;
           }
         } else if (pixels[y][x] == w) {
-          paint.color = Colors.white;
+          paint.color = const Color(0xFFF2F0E5);
         } else if (pixels[y][x] == b) {
-          paint.color = const Color(0xFF333333);
+          paint.color = const Color(0xFF212123);
         } else if (pixels[y][x] == a) {
-          paint.color = Colors.lightBlueAccent;
+          paint.color = const Color(0xFF68C2D3);
         }
 
         double dx = 0.0;

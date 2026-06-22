@@ -112,7 +112,11 @@ class _MissionScreenState extends State<MissionScreen>
 
     // 💡 이번 주 완료한 총 할 일 개수 계산
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
-    final weekStartDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    final weekStartDate = DateTime(
+      weekStart.year,
+      weekStart.month,
+      weekStart.day,
+    );
     int weeklyCompletedCount = 0;
     if (todosStr != null) {
       final List<dynamic> decoded = jsonDecode(todosStr);
@@ -120,8 +124,13 @@ class _MissionScreenState extends State<MissionScreen>
         if (item['date'] != null) {
           final parts = item['date'].toString().split('-');
           if (parts.length == 3) {
-            final tDate = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
-            if (tDate.compareTo(weekStartDate) >= 0 && tDate.compareTo(now) <= 0) {
+            final tDate = DateTime(
+              int.parse(parts[0]),
+              int.parse(parts[1]),
+              int.parse(parts[2]),
+            );
+            if (tDate.compareTo(weekStartDate) >= 0 &&
+                tDate.compareTo(now) <= 0) {
               if (item['isDone'] == true) {
                 weeklyCompletedCount++;
               }
@@ -195,10 +204,10 @@ class _MissionScreenState extends State<MissionScreen>
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFF2F0E5),
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -266,11 +275,11 @@ class _MissionScreenState extends State<MissionScreen>
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isClaimed ? Colors.grey[200] : Colors.white,
+        color: isClaimed ? const Color(0xFFB8B5B9) : const Color(0xFFF2F0E5),
         borderRadius: BorderRadius.circular(4),
         boxShadow: isClaimed
             ? null
-            : const [BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3))],
+            : const [BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3))],
       ),
       child: Row(
         children: [
@@ -285,7 +294,9 @@ class _MissionScreenState extends State<MissionScreen>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: isClaimed ? Colors.grey : Colors.black,
+                    color: isClaimed
+                        ? const Color(0xFF868188)
+                        : const Color(0xFF212123),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -294,7 +305,9 @@ class _MissionScreenState extends State<MissionScreen>
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isClaimed ? Colors.grey : Colors.black87,
+                    color: isClaimed
+                        ? const Color(0xFF868188)
+                        : const Color(0xFF45444F),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -305,7 +318,9 @@ class _MissionScreenState extends State<MissionScreen>
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: isClaimed ? Colors.grey : Colors.orange[800],
+                        color: isClaimed
+                            ? const Color(0xFF868188)
+                            : const Color(0xFFCF8ACB),
                       ),
                     ),
                   ],
@@ -320,9 +335,13 @@ class _MissionScreenState extends State<MissionScreen>
             child: BouncingWrapper(
               showShadow: isCompleted && !isClaimed,
               child: RetroGradientButton(
-                color: isCompleted ? Colors.yellowAccent : Colors.grey[300]!,
-                disabledColor: isClaimed ? Colors.grey : Colors.grey[300]!,
-                foregroundColor: Colors.black,
+                color: isCompleted
+                    ? const Color(0xFFD3A068)
+                    : const Color(0xFFBCB2A1),
+                disabledColor: isClaimed
+                    ? const Color(0xFF868188)
+                    : const Color(0xFFBCB2A1),
+                foregroundColor: const Color(0xFF212123),
                 disabledForegroundColor: Colors.black54,
                 onPressed: (isCompleted && !isClaimed) ? onClaim : null,
                 child: Text(
@@ -361,14 +380,14 @@ class _MissionScreenState extends State<MissionScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFFFFF), Color(0xFFE8E8E8)], // 💡 아주 옅은 그라데이션 배경
+            colors: [Color(0xFFF2F0E5), Color(0xFFD0CABB)], // 💡 아주 옅은 그라데이션 배경
           ),
         ),
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              '🔥 일일 미션'.tr,
+              '일일 미션'.tr,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),
@@ -404,7 +423,7 @@ class _MissionScreenState extends State<MissionScreen>
 
             const SizedBox(height: 24),
             Text(
-              '🏅 주간 미션'.tr,
+              '주간 미션'.tr,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),

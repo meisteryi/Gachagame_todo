@@ -30,10 +30,10 @@ class _TodoScreenState extends State<TodoScreen>
 
   // 💡 카테고리별 색상 정의 (도트 감성에 어울리는 쨍한 색상)
   final Map<String, Color> _categoryColors = {
-    '일상': Colors.greenAccent,
-    '공부': Colors.lightBlueAccent,
-    '운동': Colors.redAccent,
-    '업무': Colors.orangeAccent,
+    '일상': const Color(0xFF8AB060),
+    '공부': const Color(0xFF68C2D3),
+    '운동': const Color(0xFFCF8ACB),
+    '업무': const Color(0xFFD3A068),
   };
 
   // 전체 할 일 목록 (날짜 및 카테고리 포함)
@@ -205,7 +205,7 @@ class _TodoScreenState extends State<TodoScreen>
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -832,19 +832,19 @@ class _TodoScreenState extends State<TodoScreen>
   // 3. 카테고리 관리 바텀 시트
   void _showCategoryManagerBottomSheet() {
     String newCategoryName = '';
-    Color selectedColor = Colors.purpleAccent;
+    Color selectedColor = const Color(0xFFCF8ACB);
 
     // 선택 가능한 레트로 쨍한 색상 목록
     final List<Color> availableColors = [
-      Colors.greenAccent,
-      Colors.lightBlueAccent,
-      Colors.redAccent,
-      Colors.orangeAccent,
-      Colors.purpleAccent,
-      Colors.pinkAccent,
-      Colors.yellowAccent,
-      Colors.tealAccent,
-      Colors.cyanAccent,
+      const Color(0xFF8AB060),
+      const Color(0xFFC2D368),
+      const Color(0xFF68C2D3),
+      const Color(0xFFCF8ACB),
+      const Color(0xFFCF8ACB),
+      const Color(0xFFD3A068),
+      const Color(0xFFE5CEB4),
+      const Color(0xFF4B80CA),
+      const Color(0xFFEDE19E),
     ];
 
     showModalBottomSheet(
@@ -1119,7 +1119,7 @@ class _TodoScreenState extends State<TodoScreen>
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(4),
                 boxShadow: const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                  BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
                 ],
               ),
               child: Column(
@@ -1502,7 +1502,7 @@ class _TodoScreenState extends State<TodoScreen>
                 width: 56,
                 height: 56,
                 child: RetroGradientButton(
-                  color: Colors.lightGreenAccent,
+                  color: const Color(0xFFC2D368),
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(4), // 💡 네모 반듯한 도트 모서리 적용
                   onPressed: _showCategoryManagerBottomSheet,
@@ -1516,7 +1516,7 @@ class _TodoScreenState extends State<TodoScreen>
                 width: 56,
                 height: 56,
                 child: RetroGradientButton(
-                  color: Colors.yellowAccent,
+                  color: const Color(0xFFEDE19E),
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(4), // 💡 네모 반듯한 도트 모서리 적용
                   onPressed: () => _showTodoEditorBottomSheet(),
@@ -1593,7 +1593,7 @@ class PixelCheckbox extends StatelessWidget {
           boxShadow: isDone
               ? null // 체크되면 눌린 것처럼 그림자 제거
               : const [
-                  BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                  BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
                 ],
         ),
         child: isDone ? CustomPaint(painter: PixelCheckPainter()) : null,
@@ -1606,7 +1606,7 @@ class PixelCheckbox extends StatelessWidget {
 class PixelCheckPainter extends CustomPainter {
   final Color color;
 
-  PixelCheckPainter({this.color = const Color(0xFF333333)});
+  PixelCheckPainter({this.color = const Color(0xFF212123)});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1712,7 +1712,7 @@ class _PixelCalendarDialogState extends State<_PixelCalendarDialog> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(4),
           boxShadow: const [
-            BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+            BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
           ],
         ),
         child: Column(
@@ -1861,7 +1861,7 @@ class PixelTrophyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paintGold = Paint()..color = Colors.yellowAccent;
-    final paintBlack = Paint()..color = const Color(0xFF333333);
+    final paintBlack = Paint()..color = const Color(0xFF212123);
 
     // 7x7 해상도 미니 픽셀 트로피
     final List<List<int>> pixels = [

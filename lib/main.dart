@@ -45,7 +45,7 @@ class _GachaTodoAppState extends State<GachaTodoApp> {
           title: 'Gacha Todo',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFFFFB7B2),
+              seedColor: const Color(0xFFCF8ACB),
             ),
             useMaterial3: true,
             // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
@@ -90,7 +90,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFB4D8E7), // 귀여운 파스텔 하늘색 배경
+      backgroundColor: const Color(0xFF68C2D3), // 귀여운 파스텔 하늘색 배경
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onSkip, // 💡 화면 터치 시 상태를 변경하여 부드럽게 MainScreen으로 교체
@@ -109,7 +109,7 @@ class SplashScreen extends StatelessWidget {
                   fontSize: 28,
                   color: Colors.white,
                   shadows: const [
-                    Shadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                    Shadow(color: Color(0xFF212123), offset: Offset(3, 3)),
                   ],
                 ),
               ),
@@ -376,7 +376,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -527,7 +527,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: const [
-                    BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                    BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
                   ],
                 ),
                 child: Column(
@@ -588,7 +588,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       width: double.infinity,
                       height: 50,
                       child: RetroGradientButton(
-                        color: const Color(0xFFB4D8E7),
+                        color: const Color(0xFF68C2D3),
                         foregroundColor: Colors.white,
                         onPressed: _saveToCloud,
                         child: Text(
@@ -605,7 +605,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       width: double.infinity,
                       height: 50,
                       child: RetroGradientButton(
-                        color: const Color(0xFFA8E6CF),
+                        color: const Color(0xFFA2DCC7),
                         onPressed: _loadFromCloud,
                         child: Text(
                           '클라우드에서 불러오기 ☁️'.tr,
@@ -657,7 +657,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -694,7 +694,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     const SizedBox(width: 12),
                     Expanded(
                       child: RetroGradientButton(
-                        color: const Color(0xFFB4D8E7),
+                        color: const Color(0xFF68C2D3),
                         onPressed: () async {
                           if (userId.trim().isEmpty) return;
 
@@ -791,7 +791,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -1444,7 +1444,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          color: isSelected ? const Color(0xFFFFF3B0) : Colors.grey[200],
+          color: isSelected ? const Color(0xFF68C2D3) : const Color(0xFFF2F0E5),
           padding: const EdgeInsets.only(top: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1459,7 +1459,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: isSelected ? 13 : 11,
-                  color: isSelected ? Colors.black : Colors.grey[600],
+                  color: isSelected ? const Color(0xFF212123) : const Color(0xFF868188),
                 ),
               ),
             ],
@@ -1486,7 +1486,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               margin: const EdgeInsets.only(right: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFDAB9),
+                color: const Color(0xFFE5CEB4),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -1500,7 +1500,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       fontSize: 16,
                       color: Colors.white,
                       shadows: [
-                        Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                        Shadow(color: Color(0xFF212123), offset: Offset(2, 2)),
                       ],
                     ),
                   ),
@@ -1512,7 +1512,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFA8E6CF),
+                color: const Color(0xFF8AB060),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -1526,7 +1526,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       fontSize: 16,
                       color: Colors.white,
                       shadows: [
-                        Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                        Shadow(color: Color(0xFF212123), offset: Offset(2, 2)),
                       ],
                     ),
                   ),
@@ -1545,7 +1545,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFDAB9),
+                    color: const Color(0xFFE5CEB4),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
@@ -1560,7 +1560,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           color: Colors.white,
                           shadows: [
                             Shadow(
-                              color: Color(0xFF333333),
+                              color: Color(0xFF212123),
                               offset: Offset(2, 2),
                             ),
                           ],
@@ -1576,7 +1576,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD166),
+                    color: const Color(0xFFEDE19E),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
@@ -1591,7 +1591,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           color: Colors.white,
                           shadows: [
                             Shadow(
-                              color: Color(0xFF333333),
+                              color: Color(0xFF212123),
                               offset: Offset(2, 2),
                             ),
                           ],
@@ -1604,7 +1604,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
           if (_selectedIndex == 1) // 💡 할 일 탭에서만 톱니바퀴 표시를 우측 끝으로 이동
             IconButton(
-              icon: const Icon(Icons.settings, color: Colors.black),
+              icon: const Icon(Icons.settings, color: Color(0xFF212123)),
               onPressed: _showSettingsDialog, // 💡 설정 및 데이터 백업 버튼
               tooltip: '설정',
             ),

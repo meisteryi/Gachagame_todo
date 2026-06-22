@@ -127,7 +127,7 @@ class _BouncingWrapperState extends State<BouncingWrapper> {
               offset: const Offset(3, 3), // 💡 뚜렷한 도트 그림자
               child: ColorFiltered(
                 colorFilter: const ColorFilter.mode(
-                  Color(0xFF333333),
+                  Color(0xFF212123),
                   BlendMode.srcIn,
                 ),
                 child: widget.child,

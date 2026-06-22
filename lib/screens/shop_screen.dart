@@ -67,12 +67,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
     final random = Random();
     _particles.clear();
     final colors = [
-      const Color(0xFFFFB7B2),
-      const Color(0xFFFFF3B0),
-      const Color(0xFFB4D8E7),
-      const Color(0xFFA8E6CF),
-      const Color(0xFFFFC6D3),
-      const Color(0xFFFFDAB9),
+      const Color(0xFFCF8ACB),
+      const Color(0xFFEDE19E),
+      const Color(0xFF68C2D3),
+      const Color(0xFF8AB060),
+      const Color(0xFFCF8ACB),
+      const Color(0xFFE5CEB4),
     ];
 
     for (int j = 0; j < 3; j++) {
@@ -109,7 +109,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -216,7 +216,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -310,7 +310,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                     fontWeight: FontWeight.w900,
                                     fontSize: 10,
                                     color: isNew
-                                        ? const Color(0xFFFFB7B2)
+                                        ? const Color(0xFFCF8ACB)
                                         : Colors.grey,
                                   ),
                                 ),
@@ -363,7 +363,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           child: SizedBox(
                             height: 50,
                             child: RetroGradientButton(
-                              color: const Color(0xFFFFB7B2),
+                              color: const Color(0xFFCF8ACB),
                               foregroundColor: Colors.white,
                               onPressed: () {
                                 Navigator.of(context).pop();
@@ -399,10 +399,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   // --- 장식물 상점 ---
   Widget _buildDecoShop() {
     final decos = [
-      {'type': 'ammonite',      'name': '암모나이트 화석',  'color': const Color(0xFFBF8C3A)},
-      {'type': 'basalt',        'name': '큰 현무암',      'color': const Color(0xFF606060)},
-      {'type': 'spongebob_house','name': '스폰지밥 집',   'color': const Color(0xFFD4841A)},
-      {'type': 'sunken_ship',   'name': '침몰한 배 잔해', 'color': const Color(0xFF8B6340)},
+      {'type': 'ammonite',      'name': '암모나이트 화석',  'color': const Color(0xFFD3A068)},
+      {'type': 'basalt',        'name': '큰 현무암',      'color': const Color(0xFF45444F)},
+      {'type': 'spongebob_house','name': '스폰지밥 집',   'color': const Color(0xFFE5CEB4)},
+      {'type': 'sunken_ship',   'name': '침몰한 배 잔해', 'color': const Color(0xFFA77B5B)},
     ];
 
     return SingleChildScrollView(
@@ -496,7 +496,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(4),
-            boxShadow: const [BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3))],
+            boxShadow: const [BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3))],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -520,7 +520,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                 const SizedBox(width: 12),
                 Expanded(
                   child: RetroGradientButton(
-                    color: const Color(0xFFD4C4A0),
+                    color: const Color(0xFFD3A068),
                     onPressed: () {
                       Navigator.pop(ctx);
                       if (widget.coins >= 5) {
@@ -570,7 +570,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             'feed',
             1,
             5,
-            const Color(0xFFFFDAB9),
+            const Color(0xFFE5CEB4),
             const PixelEmoji('meat', size: 16),
           ),
           const SizedBox(height: 16),
@@ -579,7 +579,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             'supplement',
             1,
             1,
-            const Color(0xFFA8E6CF),
+            const Color(0xFFA2DCC7),
             const PixelSupplement(size: 16),
           ),
         ],
@@ -637,7 +637,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
               boxShadow: const [
-                BoxShadow(color: Color(0xFF333333), offset: Offset(3, 3)),
+                BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
               ],
             ),
             child: Column(
@@ -672,7 +672,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     const SizedBox(width: 12),
                     Expanded(
                       child: RetroGradientButton(
-                        color: const Color(0xFFA8E6CF),
+                        color: const Color(0xFFA2DCC7),
                         onPressed: () {
                           Navigator.pop(context);
                           if (widget.coins >= cost) {
@@ -728,7 +728,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
                   shadows: [
-                    Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                    Shadow(color: Color(0xFF212123), offset: Offset(2, 2)),
                   ],
                 ),
               ),
@@ -784,7 +784,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       foreground: Paint()
                         ..style = PaintingStyle.stroke
                         ..strokeWidth = 3
-                        ..color = const Color(0xFF333333),
+                        ..color = const Color(0xFF212123),
                     ),
                   ),
                   const Text(
@@ -793,9 +793,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       fontSize: 36,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 2,
-                      color: Color(0xFFFFF3B0),
+                      color: Color(0xFFEDE19E),
                       shadows: [
-                        Shadow(color: Color(0xFF333333), offset: Offset(2, 2)),
+                        Shadow(color: Color(0xFF212123), offset: Offset(2, 2)),
                       ],
                     ),
                   ),
@@ -817,7 +817,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                               child: _buildShopItem(
                                 '물고기 뽑기'.tr,
                                 const PixelEmoji('fish', size: 36),
-                                const Color(0xFFFFDAB9),
+                                const Color(0xFFE5CEB4),
                                 () => setState(() => _gachaMode = 'fish'),
                               ),
                             ),
@@ -826,7 +826,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                               child: _buildShopItem(
                                 '수초 뽑기'.tr,
                                 const PixelEmoji('seaweed', size: 36),
-                                const Color(0xFFA8E6CF),
+                                const Color(0xFFA2DCC7),
                                 () => setState(() => _gachaMode = 'seaweed'),
                               ),
                             ),
@@ -848,7 +848,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                                     PixelSupplement(size: 32),
                                   ],
                                 ),
-                                const Color(0xFFFFB7B2),
+                                const Color(0xFFCF8ACB),
                                 () => setState(() => _gachaMode = 'feed'),
                               ),
                             ),
@@ -857,7 +857,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                               child: _buildShopItem(
                                 '장식물 상점',
                                 const PixelDecoration(type: 'ammonite', isAnimated: false),
-                                const Color(0xFFD4C4A0),
+                                const Color(0xFFD3A068),
                                 () => setState(() => _gachaMode = 'deco'),
                               ),
                             ),
