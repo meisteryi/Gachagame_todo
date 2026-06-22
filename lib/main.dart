@@ -147,6 +147,9 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _selectedIndex = 1; // 💡 앱의 초기 화면을 수조(0)에서 '할 일(1)' 탭으로 변경
+  bool _isFishStorageExpanded = true;
+  bool _isSeaweedStorageExpanded = true;
+  bool _isDecoStorageExpanded = true;
 
   final List<Map<String, dynamic>> _ownedFishes = [];
   final List<Map<String, dynamic>> _ownedSeaweeds = []; // 💡 수초 보관 리스트
@@ -889,24 +892,42 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           children: [
                             // --- 물고기 보관함 영역 ---
                             Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  PixelEmoji('fish', size: 16),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '내 물고기'.tr,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  setSheetState(() {
+                                    _isFishStorageExpanded = !_isFishStorageExpanded;
+                                  });
+                                },
+                                child: Row(
+                                  children: [
+                                    PixelEmoji('fish', size: 16),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '내 물고기'.tr,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const Spacer(),
+                                    AnimatedRotation(
+                                      turns: _isFishStorageExpanded ? 0.0 : -0.25,
+                                      duration: const Duration(milliseconds: 200),
+                                      child: const PixelTriangle(isExpanded: true),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            _ownedFishes.isEmpty
-                                ? Text('아직 뽑은 물고기가 없어요!'.tr)
-                                : GridView.builder(
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              alignment: Alignment.topCenter,
+                              child: _isFishStorageExpanded
+                                  ? (_ownedFishes.isEmpty
+                                      ? Text('아직 뽑은 물고기가 없어요!'.tr)
+                                      : GridView.builder(
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(), // 스크롤은 부모가 대신함
@@ -1104,27 +1125,47 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         ),
                                       );
                                     },
-                                  ),
+                                  ))
+                                  : const SizedBox.shrink(),
+                            ),
                             const SizedBox(height: 24),
 
                             // --- 수초 보관함 영역 ---
                             Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  PixelEmoji('seaweed', size: 16),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '내 수초'.tr,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  setSheetState(() {
+                                    _isSeaweedStorageExpanded = !_isSeaweedStorageExpanded;
+                                  });
+                                },
+                                child: Row(
+                                  children: [
+                                    PixelEmoji('seaweed', size: 16),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '내 수초'.tr,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const Spacer(),
+                                    AnimatedRotation(
+                                      turns: _isSeaweedStorageExpanded ? 0.0 : -0.25,
+                                      duration: const Duration(milliseconds: 200),
+                                      child: const PixelTriangle(isExpanded: true),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            _ownedSeaweeds.isEmpty
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              alignment: Alignment.topCenter,
+                              child: _isSeaweedStorageExpanded
+                                  ? (_ownedSeaweeds.isEmpty
                                 ? Padding(
                                     padding: EdgeInsets.only(bottom: 20),
                                     child: Text(
@@ -1247,24 +1288,51 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         ),
                                       );
                                     },
-                                  ),
+                                  ))
+                                  : const SizedBox.shrink(),
+                            ),
                             const SizedBox(height: 20),
 
                             // --- 장식물 보관함 영역 ---
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  const PixelDecoration(type: 'ammonite', isAnimated: false),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '내 장식물',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                  ),
-                                ],
+                              child: InkWell(
+                                onTap: () {
+                                  setSheetState(() {
+                                    _isDecoStorageExpanded = !_isDecoStorageExpanded;
+                                  });
+                                },
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: FittedBox(
+                                        fit: BoxFit.contain,
+                                        child: const PixelDecoration(type: 'ammonite', isAnimated: false),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '내 장식물'.tr,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    const Spacer(),
+                                    AnimatedRotation(
+                                      turns: _isDecoStorageExpanded ? 0.0 : -0.25,
+                                      duration: const Duration(milliseconds: 200),
+                                      child: const PixelTriangle(isExpanded: true),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            _ownedDecorations.isEmpty
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              alignment: Alignment.topCenter,
+                              child: _isDecoStorageExpanded
+                                  ? (_ownedDecorations.isEmpty
                                 ? const Padding(
                                     padding: EdgeInsets.only(bottom: 20),
                                     child: Text('아직 산 장식물이 없어요!\n상점에서 장식물을 구매해보세요.'),
@@ -1349,7 +1417,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                         ),
                                       );
                                     },
-                                  ),
+                                  ))
+                                  : const SizedBox.shrink(),
+                            ),
                             const SizedBox(height: 20),
                           ],
                         ),
@@ -1681,3 +1751,83 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
   }
 }
+
+// --- 픽셀 감성 삼각형 접기/펼치기 아이콘 위젯 ---
+class PixelTriangle extends StatelessWidget {
+  final bool isExpanded;
+  final double size;
+  final Color color;
+
+  const PixelTriangle({
+    super.key,
+    required this.isExpanded,
+    this.size = 14,
+    this.color = const Color(0xFF212123),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _PixelTrianglePainter(isExpanded, color),
+    );
+  }
+}
+
+class _PixelTrianglePainter extends CustomPainter {
+  final bool isExpanded;
+  final Color color;
+
+  _PixelTrianglePainter(this.isExpanded, this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    // 💡 도트 아트 스타일 삼각형 패턴 (7x7 / 4x7 매트릭스)
+    final List<List<int>> pixels = isExpanded
+        ? [
+            [1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0],
+          ]
+        : [
+            [1, 0, 0, 0],
+            [1, 1, 0, 0],
+            [1, 1, 1, 0],
+            [1, 1, 1, 1],
+            [1, 1, 1, 0],
+            [1, 1, 0, 0],
+            [1, 0, 0, 0],
+          ];
+
+    final int rows = pixels.length;
+    final int cols = pixels[0].length;
+
+    final double cellSize = size.width / 7.0; // 7픽셀 기준으로 셀크기 통일
+    final double startX = (size.width - (cols * cellSize)) / 2;
+    final double startY = (size.height - (rows * cellSize)) / 2;
+
+    for (int y = 0; y < rows; y++) {
+      for (int x = 0; x < cols; x++) {
+        if (pixels[y][x] == 1) {
+          canvas.drawRect(
+            Rect.fromLTWH(
+              startX + x * cellSize,
+              startY + y * cellSize,
+              cellSize + 0.1,
+              cellSize + 0.1,
+            ),
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PixelTrianglePainter oldDelegate) {
+    return oldDelegate.isExpanded != isExpanded || oldDelegate.color != color;
+  }
+}
+

@@ -46,7 +46,8 @@ class _PixelFishState extends State<PixelFish>
   @override
   Widget build(BuildContext context) {
     final int lv = widget.level.clamp(1, 5);
-    final double scaleMultiplier = 1.0 + (lv - 1) * 0.125;
+    final double scaleMultiplier =
+        (1.0 + (lv - 1) * 0.125) * (widget.type == 'duck' ? 1.5 : 1.0);
 
     return AnimatedBuilder(
       animation: _controller,

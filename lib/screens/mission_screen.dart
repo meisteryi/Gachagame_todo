@@ -79,6 +79,7 @@ class _MissionScreenState extends State<MissionScreen>
       "daily_attendance_claimed": false,
       "daily_all_clear_claimed": false,
       "daily_tomorrow_prep_claimed": false, // 내일을 위한 준비 미션
+      "daily_five_claimed": false, // 성실한 하루 미션
       "weekly_attendance_progress": 0,
       "weekly_all_clear_progress": 0,
       "weekly_milestone_claimed": false,
@@ -158,6 +159,7 @@ class _MissionScreenState extends State<MissionScreen>
       data['daily_attendance_claimed'] = false;
       data['daily_all_clear_claimed'] = false;
       data['daily_tomorrow_prep_claimed'] = false; // 한 날이 지나면 리셋
+      data['daily_five_claimed'] = false; // 한 날이 지나면 리셋
       data['weekly_attendance_progress'] =
           ((data['weekly_attendance_progress'] ?? 0) as int) + 1;
       if (data['weekly_attendance_progress'] > 7) {
@@ -374,6 +376,7 @@ class _MissionScreenState extends State<MissionScreen>
 
     final bool dailyClearCompleted =
         _todayTodoTotal > 0 && _todayTodoDone == _todayTodoTotal;
+    final bool dailyFiveCompleted = _todayTodoTotal >= 5 && _todayTodoDone >= 5;
     final int weeklyAttProgress =
         _missionData['weekly_attendance_progress'] ?? 0;
     final int weeklyClearProgress =
@@ -421,8 +424,17 @@ class _MissionScreenState extends State<MissionScreen>
               onClaim: () => _claimReward('daily_all_clear_claimed', 3),
             ),
             _buildMissionCard(
-              title: '내일을 위한 준비',
-              desc: '밤 12시 전에 내일 할 일 추가하기',
+              title: '성실한 하루'.tr,
+              desc: '오늘 할 일 5개 이상 등록하고 완료하기'.tr,
+              reward: 2,
+              isCompleted: dailyFiveCompleted,
+              isClaimed: _missionData['daily_five_claimed'] == true,
+              progressText: '$_todayTodoDone/5',
+              onClaim: () => _claimReward('daily_five_claimed', 2),
+            ),
+            _buildMissionCard(
+              title: '내일을 위한 준비'.tr,
+              desc: '밤 12시 전에 내일 할 일 추가하기'.tr,
               reward: 1,
               isCompleted: _hasTomorrowTodo,
               isClaimed: _missionData['daily_tomorrow_prep_claimed'] == true,
