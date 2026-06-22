@@ -481,16 +481,9 @@ class PixelFishPainter extends CustomPainter {
             dy = cos(time * pi * 2.5) * 0.3;
           }
         } else if (type == 'puffer') {
-          // 🐡 복어: 꼬리(x < 3)를 제외한 몸통 부분(x >= 3)만 수축 팽창 모션 적용 (중심 7.5, 3.5 기준)
-          if (x >= 3) {
-            const double cx = 7.5;
-            const double cy = 3.5;
-            final double pulse = sin(time * pi * 1.5) * 0.08;
-            dx = (x - cx) * pulse;
-            dy = (y - cy) * pulse;
-          } else {
-            // 꼬리 부분은 자연스러운 꼬리 치기 모션 적용
-            dy = sin(time * pi * 2 - x * 0.4) * (3 - x) * 0.1;
+          // 🐡 복어: 수축 팽창 모션을 제거하고 일반 물고기처럼 자연스러운 꼬리 치기 모션 적용
+          if (x < 6) {
+            dy = sin(time * pi * 2 - x * 0.4) * (6 - x) * 0.15;
           }
         } else if (type == 'whale' || type == 'whale_shark') {
           // 🐋 대형 어류: 대형 크기에 어울리게 꼬리를 느리고 묵직하게 흔들림
