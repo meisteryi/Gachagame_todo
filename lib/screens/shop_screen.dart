@@ -399,10 +399,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   // --- 장식물 상점 ---
   Widget _buildDecoShop() {
     final decos = [
-      {'type': 'ammonite',      'name': '\uc554\ubaa8\ub098\uc774\ud2b8 \ud654\uc11d',  'color': const Color(0xFFBF8C3A)},
-      {'type': 'basalt',        'name': '\ud070 \ud604\ubb34\uc554',      'color': const Color(0xFF606060)},
-      {'type': 'spongebob_house','name': '\uc2a4\ud3f0\uc9c0\ubc25 \uc9d1',   'color': const Color(0xFFD4841A)},
-      {'type': 'sunken_ship',   'name': '\uce68\ubab0\ud55c \ubc30 \uc783\ud574', 'color': const Color(0xFF8B6340)},
+      {'type': 'ammonite',      'name': '암모나이트 화석',  'color': const Color(0xFFBF8C3A)},
+      {'type': 'basalt',        'name': '큰 현무암',      'color': const Color(0xFF606060)},
+      {'type': 'spongebob_house','name': '스폰지밥 집',   'color': const Color(0xFFD4841A)},
+      {'type': 'sunken_ship',   'name': '침몰한 배 잔해', 'color': const Color(0xFF8B6340)},
     ];
 
     return SingleChildScrollView(
@@ -411,12 +411,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
         child: Column(
           children: [
             const Text(
-              '\uc7a5\uc2dd\ubb3c \uc0c1\uc810',
+              '장식물 상점',
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 6),
             const Text(
-              '\uc218\uc870\ub97c \ub354 \uc544\ub984\ub2f5\uac8c \uaf43\ubc14\uacc4\uc694!',
+              '수조를 더 아름답게 꾸며봐요!',
               style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
@@ -486,10 +486,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('\uad6c\ub9e4 \ud655\uc778', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('구매 확인', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              Text(
-                '$name\n\ucf54\uc778 5\uac1c\ub97c \uc0ac\uc6a9\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?',
+               Text(
+                '$name\n코인 5개를 사용하시겠습니까?',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 15),
               ),
@@ -499,7 +499,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                   child: RetroGradientButton(
                     color: Colors.grey[300]!,
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('\ucde8\uc18c', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('취소', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -511,12 +511,12 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                       if (widget.coins >= 5) {
                         widget.onSpendCoin(5);
                         widget.onAddDeco({'type': type, 'name': name});
-                        _showNoticeDialog('\uad6c\ub9e4 \uc644\ub8cc! \ub0b4 \ubcf4\uad00\ud568\uc5d0 \ucd94\uac00\ub418\uc5c8\uc2b5\ub2c8\ub2e4 \ud83c\udf89');
+                        _showNoticeDialog('구매 완료! 내 보관함에 추가되었습니다 🎉');
                       } else {
-                        _showNoticeDialog('\ucf54\uc778\uc774 \ubd80\uc871\ud569\ub2c8\ub2e4! \ud83e\ude99');
+                        _showNoticeDialog('코인이 부족합니다! 🪙');
                       }
                     },
-                    child: const Text('\uad6c\ub9e4', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('구매', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ]),

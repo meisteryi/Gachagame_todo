@@ -892,7 +892,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                         _buildRuleItem(
                           'mood_great',
                           '기분 시스템',
-                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n 각 기분에 따라서 경험치의 증가량이 달라집니다!',
+                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n기분에 따라서 경험치의 증가량이 달라집니다!',
                           const Color(0xFFFFB7B2),
                           const Color(0xFFA8003A),
                         ),

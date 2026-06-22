@@ -1328,7 +1328,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                   const PixelDecoration(type: 'ammonite', isAnimated: false),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '\ub0b4 \uc7a5\uc2dd\ubb3c',
+                                    '내 장식물',
                                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
                                 ],
@@ -1337,7 +1337,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             _ownedDecorations.isEmpty
                                 ? const Padding(
                                     padding: EdgeInsets.only(bottom: 20),
-                                    child: Text('\uc544\uc9c1 \uc0b0 \uc7a5\uc2dd\ubb3c\uc774 \uc5c6\uc5b4\uc694!\n\uc0c1\uc810\uc5d0\uc11c \uc7a5\uc2dd\ubb3c\uc744 \uad6c\ub9e4\ud574\ub3c4\uc138\uc694.'),
+                                    child: Text('아직 산 장식물이 없어요!\n상점에서 장식물을 구매해보세요.'),
                                   )
                                 : GridView.builder(
                                     shrinkWrap: true,
