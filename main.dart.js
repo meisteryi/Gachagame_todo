@@ -91849,7 +91849,7 @@ r===$&&A.b()
 return A.iu(B.K,A.cP(s,s,s,new A.NU(p,r,q.e,s),B.WY),this.b)},
 $S:228}
 A.NU.prototype={
-az(c4,c5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3
+az(c1,c2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0
 $.a0()
 s=A.ax()
 r=this.b
@@ -91934,39 +91934,37 @@ m=B.GW}else if(r==="whale_shark"){n=B.Hw
 m=B.G7}else if(r==="electric_eel"){n=B.Jk
 m=B.dg}else if(r==="salmon"){n=B.GU
 m=B.JR}else{n=B.bH
-m=B.mi}k=c5.a/14
-j=c5.b/8
-for(q=c4.a,p=r!=="whale",l=r==="puffer",i=r==="turtle",h=r==="seahorse",g=r==="electric_eel",f=r==="stingray",e=r==="crab",d=r==="jellyfish",c=this.c*3.141592653589793,b=c*8,r=r==="whale_shark",a=c*2,a0=c*1.5,a1=c*2.5,a2=c*12,a3=c*3,a4=c*6,a5=c*4,a6=0;a6<8;++a6)for(a7=a6*j,a8=a6-3.5,a9=a6>=5,b0=a6>=3,b1=a6<=5,b2=a6<=2,b3=a6-4,b4=3-a6,b5=a6===6,b6=a5-a6*0.8,b7=0;b7<14;++b7){b8=o[a6][b7]
-if(b8===0)continue
-if(b8===1)s.r=n.gn()
-else if(b8===2)if(g)s.r=A.z(m,B.h,(Math.sin(b)+1)/2).gn()
+m=B.mi}k=c2.a/14
+j=c2.b/8
+for(q=c1.a,p=r!=="whale",l=r==="puffer",i=r==="turtle",h=r==="seahorse",g=r==="electric_eel",f=r==="stingray",e=r==="crab",d=r==="jellyfish",c=this.c*3.141592653589793,b=c*8,r=r==="whale_shark",a=c*2,a0=c*2.5,a1=c*12,a2=c*3,a3=c*6,a4=c*4,a5=0;a5<8;++a5)for(a6=a5*j,a7=a5>=5,a8=a5>=3,a9=a5<=5,b0=a5<=2,b1=a5-4,b2=3-a5,b3=a5===6,b4=a4-a5*0.8,b5=0;b5<14;++b5){b6=o[a5][b5]
+if(b6===0)continue
+if(b6===1)s.r=n.gn()
+else if(b6===2)if(g)s.r=A.z(m,B.h,(Math.sin(b)+1)/2).gn()
 else s.r=m.gn()
-else if(b8===3)s.r=B.h.gn()
-else if(b8===4)s.r=B.ah.gn()
-else if(b8===5)s.r=B.df.gn()
-b9=0
-c0=0
-if(d)if(a9)b9=Math.sin(b6)*b3*0.2
-else c0=-Math.sin(a)*0.15
-else if(e)if(b2&&b7<=3)c0=Math.sin(a5)*0.4
-else if(b2&&b7>=8)c0=-Math.sin(a5)*0.4
-else b9=b5?Math.sin(a4+b7)*0.4:0
-else if(f)if(b2)c0=Math.sin(a1-b7*0.3)*b4*0.3
-else c0=a9?-Math.sin(a1-b7*0.3)*b3*0.3:0
-else if(g)c0=Math.sin(a3-b7*0.5)*0.7
-else if(h)if(b7<=6&&b0&&b1)b9=Math.sin(a2)*0.8
-else c0=Math.sin(a)*0.2
-else if(i){if((b7<=4||b7>=9)&&a9){b9=Math.sin(a1)*0.6
-c0=Math.cos(a1)*0.3}}else if(l)if(b7>=3){c1=Math.sin(a0)*0.08
-b9=(b7-7.5)*c1
-c0=a8*c1}else c0=Math.sin(a-b7*0.4)*(3-b7)*0.1
-else if(!p||r)c0=b7<6?Math.sin(c-b7*0.3)*(6-b7)*0.12:0
-else c0=b7<6?Math.sin(a-b7*0.4)*(6-b7)*0.15:0
-b8=b7*k+b9*k
-c2=a7+c0*j
-c3=s.cb()
-q.drawRect(A.bL(new A.p(b8,c2,b8+k,c2+j)),c3)
-c3.delete()}},
+else if(b6===3)s.r=B.h.gn()
+else if(b6===4)s.r=B.ah.gn()
+else if(b6===5)s.r=B.df.gn()
+b7=0
+b8=0
+if(d)if(a7)b7=Math.sin(b4)*b1*0.2
+else b8=-Math.sin(a)*0.15
+else if(e)if(b0&&b5<=3)b8=Math.sin(a4)*0.4
+else if(b0&&b5>=8)b8=-Math.sin(a4)*0.4
+else b7=b3?Math.sin(a3+b5)*0.4:0
+else if(f)if(b0)b8=Math.sin(a0-b5*0.3)*b2*0.3
+else b8=a7?-Math.sin(a0-b5*0.3)*b1*0.3:0
+else if(g)b8=Math.sin(a2-b5*0.5)*0.7
+else if(h)if(b5<=6&&a8&&a9)b7=Math.sin(a1)*0.8
+else b8=Math.sin(a)*0.2
+else if(i){if((b5<=4||b5>=9)&&a7){b7=Math.sin(a0)*0.6
+b8=Math.cos(a0)*0.3}}else if(l)b8=b5<6?Math.sin(a-b5*0.4)*(6-b5)*0.15:0
+else if(!p||r)b8=b5<6?Math.sin(c-b5*0.3)*(6-b5)*0.12:0
+else b8=b5<6?Math.sin(a-b5*0.4)*(6-b5)*0.15:0
+b6=b5*k+b7*k
+b9=a6+b8*j
+c0=s.cb()
+q.drawRect(A.bL(new A.p(b6,b9,b6+k,b9+j)),c0)
+c0.delete()}},
 cJ(a){return a.b!==this.b||a.c!==this.c||a.d!==this.d}}
 A.IA.prototype={
 l(){var s=this,r=s.b0$
