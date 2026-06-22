@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 
 // --- 귀여운 2D 도트 수초를 그리는 위젯 ---
 class PixelSeaweed extends StatefulWidget {
@@ -212,6 +213,10 @@ class PixelSeaweedPainter extends CustomPainter {
         [e, c1, c1, e, e],
       ];
     }
+
+    final resolvedColors = AppTheme.getSeaweedColors(type);
+    color1 = resolvedColors['c1']!;
+    color2 = resolvedColors['c2']!;
 
     final pixelWidth = size.width / pixels[0].length;
     final pixelHeight = size.height / pixels.length;

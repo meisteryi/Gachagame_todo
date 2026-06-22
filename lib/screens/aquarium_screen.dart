@@ -9,6 +9,7 @@ import '../pixel_emoji.dart';
 import '../bouncing_wrapper.dart'; // 💡 그라데이션 함수 불러오기
 import '../pixel_supplement.dart';
 import '../translations.dart';
+import '../theme_manager.dart';
 
 class AquariumScreen extends StatefulWidget {
   final List<Map<String, dynamic>> swimmingFishes;
@@ -1183,11 +1184,11 @@ class _AquariumScreenState extends State<AquariumScreen>
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFFB1C1D3), Color(0xFF68C2D3)],
+                colors: AppTheme.aquariumGradient,
               ),
             ),
             child: Center(
@@ -1199,7 +1200,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF212123).withValues(alpha: 0.1),
+                      color: AppTheme.borderColor.withValues(alpha: 0.1),
                       blurRadius: 0,
                       spreadRadius: 0,
                     ),
@@ -1216,7 +1217,7 @@ class _AquariumScreenState extends State<AquariumScreen>
                       bottom: 4,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF68C2D3).withValues(alpha: 0.35),
+                          color: AppTheme.tankWaterBg,
                           borderRadius: const BorderRadius.vertical(
                             bottom: Radius.circular(4),
                           ),
@@ -1834,8 +1835,8 @@ class _AquariumScreenState extends State<AquariumScreen>
             child: Row(
               children: [
                 PixelButton(
-                  color: const Color(0xFFD3A068),
-                  textColor: const Color(0xFFF2F0E5),
+                  color: AppTheme.feedButtonColor,
+                  textColor: AppTheme.panelBg,
                   onPressed: () =>
                       _startFeeding('feed'), // 💡 올바른 함수 호출 방식으로 변경
                   child: Row(
@@ -1849,8 +1850,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                 ),
                 const SizedBox(width: 8),
                 PixelButton(
-                  color: const Color(0xFFCF8ACB),
-                  textColor: const Color(0xFFF2F0E5),
+                  color: AppTheme.supplementButtonColor,
+                  textColor: AppTheme.panelBg,
                   onPressed: () =>
                       _startFeeding('supplement'), // 💡 영양제 주기 버튼 추가
                   child: Row(

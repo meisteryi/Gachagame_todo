@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 
 // --- 귀여운 2D 도트 물고기를 그리는 위젯 ---
 class PixelFish extends StatefulWidget {
@@ -346,70 +347,9 @@ class PixelFishPainter extends CustomPainter {
       ];
     }
 
-    if (level >= 5) {
-      if (type == 'goldfish') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFFD3A068);
-      } else if (type == 'mackerel') {
-        color1 = const Color(0xFF68C2D3);
-        color2 = const Color(0xFFCF8ACB);
-      } else if (type == 'shark') {
-        color1 = const Color(0xFF212123);
-        color2 = const Color(0xFFF2F0E5);
-      } else if (type == 'whale') {
-        color1 = const Color(0xFF212123);
-        color2 = const Color(0xFFCF8ACB);
-      } else if (type == 'betta') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFFCF8ACB);
-      } else if (type == 'nemo') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFF212123);
-      } else if (type == 'guppy') {
-        color1 = const Color(0xFFCF8ACB);
-        color2 = const Color(0xFFEDE19E);
-      } else if (type == 'axolotl') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFFCF8ACB);
-      } else if (type == 'tuna') {
-        color1 = const Color(0xFFF2F0E5);
-        color2 = const Color(0xFF68C2D3);
-      } else if (type == 'shrimp') {
-        color1 = const Color(0xFFCF8ACB);
-        color2 = const Color(0xFF4B80CA);
-      } else if (type == 'seahorse') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFF4B80CA);
-      } else if (type == 'turtle') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFFD3A068);
-      } else if (type == 'jellyfish') {
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFF68C2D3);
-      } else if (type == 'stingray') {
-        color1 = const Color(0xFF4B80CA);
-        color2 = const Color(0xFF68C2D3);
-      } else if (type == 'carp') {
-        color1 = const Color(0xFFD3A068);
-        color2 = const Color(0xFF80493A);
-      } else if (type == 'crab') {
-        color1 = const Color(0xFFB45252);
-        color2 = const Color(0xFFD3A068);
-      } else if (type == 'whale_shark') {
-        color1 = const Color(0xFF212123);
-        color2 = const Color(0xFF68C2D3);
-      } else if (type == 'electric_eel') {
-        color1 = const Color(0xFF212123);
-        color2 = const Color(0xFF68C2D3);
-      } else if (type == 'salmon') {
-        color1 = const Color(0xFFD3A068);
-        color2 = const Color(0xFFF2F0E5);
-      } else {
-        // puffer (default)
-        color1 = const Color(0xFFEDE19E);
-        color2 = const Color(0xFFD3A068);
-      }
-    }
+    final resolvedColors = AppTheme.getFishColors(type, level);
+    color1 = resolvedColors['c1']!;
+    color2 = resolvedColors['c2']!;
 
     final pixelWidth = size.width / pixels[0].length;
     final pixelHeight = size.height / pixels.length;
@@ -431,11 +371,11 @@ class PixelFishPainter extends CustomPainter {
             paint.color = color2;
           }
         } else if (pixels[y][x] == w) {
-          paint.color = const Color(0xFFF2F0E5);
+          paint.color = AppTheme.emojiColors['w']!;
         } else if (pixels[y][x] == b) {
-          paint.color = const Color(0xFF212123);
+          paint.color = AppTheme.borderColor;
         } else if (pixels[y][x] == a) {
-          paint.color = const Color(0xFF68C2D3);
+          paint.color = AppTheme.emojiColors['c']!;
         }
 
         double dx = 0.0;

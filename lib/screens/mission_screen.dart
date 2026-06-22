@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
 import '../translations.dart';
+import '../theme_manager.dart';
 
 class MissionScreen extends StatefulWidget {
   final bool isActive;
@@ -275,11 +276,16 @@ class _MissionScreenState extends State<MissionScreen>
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isClaimed ? const Color(0xFFB8B5B9) : const Color(0xFFF2F0E5),
+        color: isClaimed ? const Color(0xFFB8B5B9) : AppTheme.panelBg,
         borderRadius: BorderRadius.circular(4),
         boxShadow: isClaimed
             ? null
-            : const [BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3))],
+            : [
+                BoxShadow(
+                  color: AppTheme.borderColor,
+                  offset: const Offset(3, 3),
+                ),
+              ],
       ),
       child: Row(
         children: [
@@ -296,7 +302,7 @@ class _MissionScreenState extends State<MissionScreen>
                     fontWeight: FontWeight.w900,
                     color: isClaimed
                         ? const Color(0xFF868188)
-                        : const Color(0xFF212123),
+                        : AppTheme.borderColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -320,7 +326,7 @@ class _MissionScreenState extends State<MissionScreen>
                         fontWeight: FontWeight.bold,
                         color: isClaimed
                             ? const Color(0xFF868188)
-                            : const Color(0xFFCF8ACB),
+                            : AppTheme.themeSeed,
                       ),
                     ),
                   ],
@@ -336,12 +342,12 @@ class _MissionScreenState extends State<MissionScreen>
               showShadow: isCompleted && !isClaimed,
               child: RetroGradientButton(
                 color: isCompleted
-                    ? const Color(0xFFD3A068)
+                    ? AppTheme.weeklyMilestoneClaimButtonBg
                     : const Color(0xFFBCB2A1),
                 disabledColor: isClaimed
                     ? const Color(0xFF868188)
                     : const Color(0xFFBCB2A1),
-                foregroundColor: const Color(0xFF212123),
+                foregroundColor: AppTheme.borderColor,
                 disabledForegroundColor: Colors.black54,
                 onPressed: (isCompleted && !isClaimed) ? onClaim : null,
                 child: Text(
@@ -376,11 +382,14 @@ class _MissionScreenState extends State<MissionScreen>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF2F0E5), Color(0xFFD0CABB)], // 💡 아주 옅은 그라데이션 배경
+            colors: [
+              AppTheme.panelBg,
+              AppTheme.unselectedTabBg,
+            ], // 💡 아주 옅은 그라데이션 배경
           ),
         ),
         child: ListView(

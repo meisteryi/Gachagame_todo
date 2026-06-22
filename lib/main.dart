@@ -10,6 +10,7 @@ import 'screens/aquarium_screen.dart';
 import 'screens/todo_screen.dart';
 import 'screens/shop_screen.dart';
 import 'screens/mission_screen.dart';
+import 'screens/settings_screen.dart';
 import 'translations.dart';
 import 'pixel_fish.dart';
 import 'pixel_seaweed.dart';
@@ -18,9 +19,11 @@ import 'bouncing_wrapper.dart';
 import 'pixel_emoji.dart';
 import 'slot_machine.dart';
 import 'pixel_supplement.dart';
+import 'theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
+  await AppTheme.init(); // 💡 테마 설정 초기화
   await Tr.init(); // 💡 언어 설정 초기화
 
   runApp(const GachaTodoApp());
@@ -38,45 +41,50 @@ class _GachaTodoAppState extends State<GachaTodoApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AppLang>(
-      valueListenable: Tr.langNotifier,
-      builder: (context, lang, child) {
-        return MaterialApp(
-          title: 'Gacha Todo',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFFCF8ACB),
-            ),
-            useMaterial3: true,
-            // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
-            fontFamily: kIsWeb ? '-apple-system' : null,
-            fontFamilyFallback: kIsWeb
-                ? const [
-                    'BlinkMacSystemFont',
-                    'Apple Color Emoji',
-                    'Segoe UI Emoji',
-                  ]
-                : null,
-          ),
-          // 💡 웹/PC 환경에서 화면이 너무 넓게 퍼지지 않도록 모바일 비율(최대 너비 450px)로 고정!
-          builder: (context, child) {
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 450),
-                child: child,
+    return ValueListenableBuilder<ThemeType>(
+      valueListenable: AppTheme.themeNotifier,
+      builder: (context, theme, child) {
+        return ValueListenableBuilder<AppLang>(
+          valueListenable: Tr.langNotifier,
+          builder: (context, lang, child) {
+            return MaterialApp(
+              title: 'Gacha Todo',
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: AppTheme.themeSeed,
+                ),
+                useMaterial3: true,
+                // 💡 웹에서만 애플 기본 폰트와 이모지(🍎)를 강제 지정하고, 앱(시뮬레이터)에서는 예쁜 기본값 유지!
+                fontFamily: kIsWeb ? '-apple-system' : null,
+                fontFamilyFallback: kIsWeb
+                    ? const [
+                        'BlinkMacSystemFont',
+                        'Apple Color Emoji',
+                        'Segoe UI Emoji',
+                      ]
+                    : null,
+              ),
+              // 💡 웹/PC 환경에서 화면이 너무 넓게 퍼지지 않도록 모바일 비율(최대 너비 450px)로 고정!
+              builder: (context, child) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 450),
+                    child: child,
+                  ),
+                );
+              },
+              // 💡 Navigator 버그를 원천 차단하기 위해 AnimatedSwitcher를 사용한 직접 상태 전환 방식으로 변경!
+              home: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                child: _showSplash
+                    ? SplashScreen(
+                        key: const ValueKey('splash'),
+                        onSkip: () => setState(() => _showSplash = false),
+                      )
+                    : const MainScreen(key: ValueKey('main')),
               ),
             );
           },
-          // 💡 Navigator 버그를 원천 차단하기 위해 AnimatedSwitcher를 사용한 직접 상태 전환 방식으로 변경!
-          home: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: _showSplash
-                ? SplashScreen(
-                    key: const ValueKey('splash'),
-                    onSkip: () => setState(() => _showSplash = false),
-                  )
-                : const MainScreen(key: ValueKey('main')),
-          ),
         );
       },
     );
@@ -511,140 +519,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     });
   }
 
-  // 💡 설정 및 데이터 백업/복구 다이얼로그
-  void _showSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return ValueListenableBuilder<AppLang>(
-          valueListenable: Tr.langNotifier,
-          builder: (context, lang, _) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.settings, size: 24),
-                        const SizedBox(width: 8),
-                        Text(
-                          '게임 설정'.tr,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '언어 / Language'.tr,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: AppLang.values.map((l) {
-                        final isSelected = l == Tr.lang;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: GestureDetector(
-                            onTap: () => Tr.changeLang(l),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.yellowAccent
-                                    : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                l.name.toUpperCase(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: RetroGradientButton(
-                        color: const Color(0xFF68C2D3),
-                        foregroundColor: Colors.white,
-                        onPressed: _saveToCloud,
-                        child: Text(
-                          '클라우드에 저장 ☁️'.tr,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: RetroGradientButton(
-                        color: const Color(0xFFA2DCC7),
-                        onPressed: _loadFromCloud,
-                        child: Text(
-                          '클라우드에서 불러오기 ☁️'.tr,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: RetroGradientButton(
-                        color: Colors.grey[300]!,
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          '닫기'.tr,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+
 
   // ☁️ 파이어베이스 REST API: 클라우드 저장
   void _saveToCloud() {
-    Navigator.pop(context); // 설정 창 닫기
     String userId = '';
     showDialog(
       context: context,
@@ -778,7 +656,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   // ☁️ 파이어베이스 REST API: 클라우드 불러오기
   void _loadFromCloud() {
-    Navigator.pop(context); // 설정 창 닫기
     String userId = '';
     showDialog(
       context: context,
@@ -1444,7 +1321,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          color: isSelected ? const Color(0xFF68C2D3) : const Color(0xFFF2F0E5),
+          color: isSelected ? AppTheme.selectedTabBg : AppTheme.unselectedTabBg,
           padding: const EdgeInsets.only(top: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1459,7 +1336,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: isSelected ? 13 : 11,
-                  color: isSelected ? const Color(0xFF212123) : const Color(0xFF868188),
+                  color: isSelected ? AppTheme.selectedTabText : AppTheme.unselectedTabText,
                 ),
               ),
             ],
@@ -1533,7 +1410,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
-          if (_selectedIndex >= 2) // 미션 탭이나 상점 탭일 때는 코인/먹이 표시
+          if (_selectedIndex == 2 || _selectedIndex == 3) // 미션 탭이나 상점 탭일 때는 코인/먹이 표시
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1601,12 +1478,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   ),
                 ),
               ],
-            ),
-          if (_selectedIndex == 1) // 💡 할 일 탭에서만 톱니바퀴 표시를 우측 끝으로 이동
-            IconButton(
-              icon: const Icon(Icons.settings, color: Color(0xFF212123)),
-              onPressed: _showSettingsDialog, // 💡 설정 및 데이터 백업 버튼
-              tooltip: '설정',
             ),
         ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -1731,6 +1602,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             },
             onNavigateToAquarium: _navigateToAquariumAndShowStorage,
           ),
+          // 5. 설정 탭 (게임 설정)
+          SettingsScreen(
+            onSaveToCloud: _saveToCloud,
+            onLoadFromCloud: _loadFromCloud,
+          ),
         ],
       ),
       // 3. 픽셀 스타일 하단 네비게이션 바
@@ -1744,6 +1620,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               _buildPixelBottomNavItem(1, 'memo', '할 일'),
               _buildPixelBottomNavItem(2, 'trophy', '미션'),
               _buildPixelBottomNavItem(3, 'coin', '상점'),
+              _buildPixelBottomNavItem(4, 'gear', '설정'),
             ],
           ),
         ),

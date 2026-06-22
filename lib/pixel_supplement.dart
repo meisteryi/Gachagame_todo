@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 
 // --- 귀여운 2D 도트 영양제(알약) 캡슐을 그리는 위젯 ---
 class PixelSupplement extends StatelessWidget {
@@ -48,13 +49,13 @@ class PixelSupplementPainter extends CustomPainter {
         }
 
         if (pixels[y][x] == b) {
-          paint.color = const Color(0xFF212123);
+          paint.color = AppTheme.borderColor;
         } else if (pixels[y][x] == r) {
-          paint.color = const Color(0xFFCF8ACB);
+          paint.color = AppTheme.emojiColors['r']!;
         } else if (pixels[y][x] == w) {
-          paint.color = const Color(0xFFF2F0E5);
+          paint.color = AppTheme.emojiColors['w']!;
         } else if (pixels[y][x] == s) {
-          paint.color = const Color(0xFFF2F0E5).withValues(alpha: 0.7);
+          paint.color = AppTheme.emojiColors['w']!.withValues(alpha: 0.7);
         }
 
         canvas.drawRect(

@@ -5,6 +5,7 @@ import 'pixel_seaweed.dart';
 import 'bouncing_wrapper.dart';
 import 'pixel_emoji.dart';
 import 'translations.dart';
+import 'theme_manager.dart';
 
 class SlotMachine extends StatefulWidget {
   final String gachaType; // 'fish' 또는 'seaweed'
@@ -237,13 +238,13 @@ class _SlotMachineState extends State<SlotMachine> {
                     height: 180,
                     decoration: BoxDecoration(
                       color: widget.gachaType == 'seaweed'
-                          ? const Color(0xFF85CAC5)
-                          : const Color(0xFFCF8ACB), // 부드러운 기계 색상
+                          ? AppTheme.seaweedGachaMachineBg
+                          : AppTheme.fishGachaMachineBg, // 부드러운 기계 색상
                       borderRadius: BorderRadius.circular(4),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0xFF212123),
-                          offset: Offset(3, 3),
+                          color: AppTheme.borderColor,
+                          offset: const Offset(3, 3),
                         ),
                       ],
                     ),
@@ -386,8 +387,8 @@ class _SlotMachineState extends State<SlotMachine> {
                     color: _isSpinning
                         ? Colors.grey
                         : (widget.gachaType == 'seaweed'
-                              ? const Color(0xFFA8D8B9)
-                              : const Color(0xFFEDC8C4)),
+                              ? AppTheme.seaweedGachaButton1x
+                              : AppTheme.fishGachaButton1x),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -429,8 +430,8 @@ class _SlotMachineState extends State<SlotMachine> {
                     color: _isSpinning
                         ? Colors.grey
                         : (widget.gachaType == 'seaweed'
-                              ? const Color(0xFF85CAC5)
-                              : const Color(0xFFFFAAA5)),
+                              ? AppTheme.seaweedGachaButton10x
+                              : AppTheme.fishGachaButton10x),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,

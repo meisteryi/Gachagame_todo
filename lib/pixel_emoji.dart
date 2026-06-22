@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 
 // --- 모든 기기에서 동일하게 보이는 수제 도트 이모지 ---
 class PixelEmoji extends StatelessWidget {
@@ -244,32 +245,27 @@ class _PixelEmojiPainter extends CustomPainter {
         '.gg.....',
         '........',
       ],
+      'gear': [
+        // ⚙️ 톱니바퀴 (설정)
+        '..s..s..',
+        '.ssssss.',
+        's.ssss.s',
+        '.ss..ss.',
+        '.ss..ss.',
+        's.ssss.s',
+        '.ssssss.',
+        '..s..s..',
+      ],
     };
 
     // 💡 픽셀 색상 팔레트
-    final Map<String, Color> colors = {
-      '.': Colors.transparent,
-      'y': const Color(0xFFEDE19E),
-      'w': const Color(0xFFF2F0E5),
-      'o': const Color(0xFFD3A068),
-      'b': const Color(0xFF4B80CA),
-      'c': const Color(0xFF68C2D3),
-      'd': const Color(0xFF352B42),
-      'm': const Color(0xFFA77B5B),
-      'r': const Color(0xFFB45252),
-      'g': const Color(0xFF8AB060),
-      'l': const Color(0xFFC2D368),
-      'p': const Color(0xFFE5CEB4),
-      'k': const Color(0xFF212123),
-      't': const Color(0xFFB2B47E),
-      's': const Color(0xFFB8B5B9),
-    };
+    final Map<String, Color> colors = AppTheme.emojiColors;
 
     final List<String> data = emojiData[name] ?? emojiData['coin']!;
     final double pw = size.width / 8;
     final double ph = size.height / 8;
     final paint = Paint();
-    final outlinePaint = Paint()..color = const Color(0xFF212123);
+    final outlinePaint = Paint()..color = AppTheme.borderColor;
 
     // 💡 1px 실선이 아닌, 영양제와 완벽하게 일치하는 픽셀 단위의 두꺼운 레트로 외곽선을 그립니다.
     final outlineOffsets = [

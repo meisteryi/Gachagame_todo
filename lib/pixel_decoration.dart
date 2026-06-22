@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 
 // --- 수조 장식물 도트 픽셀 위젯 ---
 class PixelDecoration extends StatefulWidget {
@@ -198,6 +199,8 @@ class PixelDecorationPainter extends CustomPainter {
         ];
         break;
     }
+
+    palette = AppTheme.getDecorationPalette(type);
 
     final int rows = pixels.length;
     final int cols = pixels[0].length;

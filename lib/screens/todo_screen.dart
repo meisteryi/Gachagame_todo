@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
 import '../translations.dart';
+import '../theme_manager.dart';
 
 class TodoScreen extends StatefulWidget {
   final VoidCallback? onSecretCommand;
@@ -29,12 +30,7 @@ class _TodoScreenState extends State<TodoScreen>
   );
 
   // 💡 카테고리별 색상 정의 (도트 감성에 어울리는 쨍한 색상)
-  final Map<String, Color> _categoryColors = {
-    '일상': const Color(0xFF8AB060),
-    '공부': const Color(0xFF68C2D3),
-    '운동': const Color(0xFFCF8ACB),
-    '업무': const Color(0xFFD3A068),
-  };
+  late final Map<String, Color> _categoryColors = Map.from(AppTheme.defaultCategoryColors);
 
   // 전체 할 일 목록 (날짜 및 카테고리 포함)
   final List<Map<String, dynamic>> _todoList = [];
@@ -1502,7 +1498,7 @@ class _TodoScreenState extends State<TodoScreen>
                 width: 56,
                 height: 56,
                 child: RetroGradientButton(
-                  color: const Color(0xFFC2D368),
+                  color: AppTheme.categoryEditButtonColor,
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(4), // 💡 네모 반듯한 도트 모서리 적용
                   onPressed: _showCategoryManagerBottomSheet,
@@ -1516,7 +1512,7 @@ class _TodoScreenState extends State<TodoScreen>
                 width: 56,
                 height: 56,
                 child: RetroGradientButton(
-                  color: const Color(0xFFEDE19E),
+                  color: AppTheme.addTodoButtonColor,
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(4), // 💡 네모 반듯한 도트 모서리 적용
                   onPressed: () => _showTodoEditorBottomSheet(),
