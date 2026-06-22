@@ -39,6 +39,8 @@ class SlotMachine extends StatefulWidget {
     {'type': 'whale_shark', 'name': '점박이 고래상어'},
     {'type': 'electric_eel', 'name': '짜릿한 전기뱀장어'},
     {'type': 'salmon', 'name': '강을 거스르는 연어'},
+    {'type': 'duck', 'name': '둥둥 오리'},
+    {'type': 'snail', 'name': '느릿느릿 달팽이'},
   ];
 
   // 💡 수초 목록 추가!

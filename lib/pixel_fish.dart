@@ -7,12 +7,14 @@ class PixelFish extends StatefulWidget {
   final String type;
   final bool isAnimated;
   final int level;
+  final bool useLevel5Color;
 
   const PixelFish({
     super.key,
     this.type = 'puffer',
     this.isAnimated = true,
     this.level = 1,
+    this.useLevel5Color = true,
   });
 
   @override
@@ -58,6 +60,7 @@ class _PixelFishState extends State<PixelFish>
               widget.type,
               _controller.value,
               widget.level,
+              useLevel5Color: widget.useLevel5Color,
             ),
           ),
         );
@@ -70,7 +73,8 @@ class PixelFishPainter extends CustomPainter {
   final String type;
   final double time;
   final int level;
-  PixelFishPainter(this.type, this.time, this.level);
+  final bool useLevel5Color;
+  PixelFishPainter(this.type, this.time, this.level, {this.useLevel5Color = true});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -332,6 +336,32 @@ class PixelFishPainter extends CustomPainter {
         [e, e, e, e, e, e, e, c2, c2, e, e, e, e, e],
         [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
       ];
+    } else if (type == 'duck') {
+      // 🦆 흰 오리 도트: w(몸체), c1(몸체 main), c2(주둥이와 발)
+      // 몸통 부분을 1칸씩 높이고 뒤쪽 꼬리와 아랫부분을 더 통통하게 채움
+      pixels = [
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, c1, c1, c1, c2, c2, e, e, e],
+        [e, e, e, e, e, e, c1, w, b, c1, e, e, e, e],
+        [e, e, c1, c1, c1, c1, c1, c1, c1, e, e, e, e],
+        [e, c1, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e],
+        [e, c1, c1, c1, c1, c1, c1, c1, c1, e, e, e, e],
+        [e, e, c1, c2, c1, c1, c2, c1, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
+    } else if (type == 'snail') {
+      // 🐌 달팽이 도트: c1(등껍질), c2(몸체와 더듬이), w(눈흰자), b(눈동자)
+      // 더듬이 끝부분 근처에 눈(w, b)을 배치하여 귀엽게 만듦
+      pixels = [
+        [e, e, e, e, e, e, e, e, w, b, e, w, b, e],
+        [e, e, e, e, e, e, e, e, e, c2, e, c2, e, e],
+        [e, e, e, e, c1, c1, c1, e, e, c2, c2, c2, e, e],
+        [e, e, c1, c1, c1, c1, c1, c1, e, c2, c2, e, e, e],
+        [e, c1, c1, c1, c1, c1, c1, c1, c1, c2, c2, e, e, e],
+        [e, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+        [e, e, e, e, e, e, e, e, e, e, e, e, e, e],
+      ];
     } else {
       // puffer (default)
       color1 = const Color(0xFFD3A068);
@@ -347,7 +377,7 @@ class PixelFishPainter extends CustomPainter {
       ];
     }
 
-    final resolvedColors = AppTheme.getFishColors(type, level);
+    final resolvedColors = AppTheme.getFishColors(type, level, useLevel5Color: useLevel5Color);
     color1 = resolvedColors['c1']!;
     color2 = resolvedColors['c2']!;
 
@@ -419,6 +449,24 @@ class PixelFishPainter extends CustomPainter {
           if ((x <= 4 || x >= 9) && y >= 5) {
             dx = sin(time * pi * 2.5) * 0.6;
             dy = cos(time * pi * 2.5) * 0.3;
+          }
+        } else if (type == 'duck') {
+          // 🦆 오리: 수면에 둥실둥실(bobbing) 떠있고 발(y == 6, c2)을 빠르게 저음
+          if (y == 6) {
+            dx = sin(time * pi * 8 + x) * 0.5; // 발을 좌우로 빠르게 움직임
+          } else {
+            dy = sin(time * pi * 2) * 0.15; // 몸통은 수면에서 위아래로 부드럽게 흔들림
+          }
+        } else if (type == 'snail') {
+          // 🐌 달팽이: 더듬이(y == 1, x == 9 또는 x == 11)와 눈(y == 0, x == 8/9/11/12)을 번갈아 꼼지락거림
+          if (y == 1 && (x == 9 || x == 11)) {
+            dy = sin(time * pi * 4 + x) * 0.3;
+          } else if (y == 0 && (x >= 8 && x <= 12)) {
+            // 눈도 더듬이 움직임에 맞추어 함께 움직이게 처리
+            dy = sin(time * pi * 4 + (x == 8 || x == 9 ? 9 : 11)) * 0.3;
+          } else {
+            // 본체와 등껍질은 아주 약하게 상하 움직임
+            dy = sin(time * pi * 1.5) * 0.05;
           }
         } else if (type == 'puffer') {
           // 🐡 복어: 수축 팽창 모션을 제거하고 일반 물고기처럼 자연스러운 꼬리 치기 모션 적용

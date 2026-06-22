@@ -219,6 +219,42 @@ class _AquariumScreenState extends State<AquariumScreen>
       x = (w * 0.15) + (w * 0.7 * progress) + dxShift;
       y = h * 0.7 + sin(t * pi * 4) * (h * 0.12) * ampScale + dyShift;
       flipX = !isMovingRight;
+    } else if (type == 'duck') {
+      // 🦆 오리: 수면(y = 20.0 근처)에 구속되어 수평 이동만 수행하며, 부드러운 사인파 bobbing 모션을 가짐.
+      double t = v; // 30초 동안 1회 왕복
+      bool isMovingRight = t < 0.5;
+      double progress = isMovingRight ? (t / 0.5) : ((1.0 - t) / 0.5);
+
+      x = (w * 0.1) + (w * 0.8 * progress) + dxShift * 0.5;
+      y = 12.0 + sin(t * pi * 8) * 3.0; // 수면에 둥실둥실 떠있는 높이
+      flipX = !isMovingRight;
+    } else if (type == 'snail') {
+      // 🐌 달팽이: 수조 바닥면과 좌우 벽면에 붙어서 기어다님.
+      // 바닥(y = 268.0), 좌측 벽(x = -24.0), 우측 벽(x = 284.0) 경계선에 일치하게 조율.
+      double t = (v * 0.3) % 1.0; // 30초 동안 0.3회 왕복 (꽃게와 비슷하게 매우 느림)
+      bool isForward = t < 0.5;
+      double progress = isForward ? (t / 0.5) : ((1.0 - t) / 0.5);
+
+      // progress: 0.0 ~ 1.0
+      // 0.0 ~ 0.2: 좌측 벽면(x = -24.0)을 따라 아래로 내려감 (y = 140.0 -> 268.0)
+      // 0.2 ~ 0.8: 바닥면(y = 268.0)을 따라 좌에서 우로 이동 (x = -24.0 -> 284.0)
+      // 0.8 ~ 1.0: 우측 벽면(x = 284.0)을 따라 위로 올라감 (y = 268.0 -> 140.0)
+      if (progress < 0.2) {
+        double subT = progress / 0.2;
+        x = -24.0;
+        y = 140.0 + (268.0 - 140.0) * subT;
+        flipX = false;
+      } else if (progress < 0.8) {
+        double subT = (progress - 0.2) / 0.6;
+        x = -24.0 + (284.0 - (-24.0)) * subT;
+        y = 268.0;
+        flipX = !isForward; // 진행 방향에 따라 반전
+      } else {
+        double subT = (progress - 0.8) / 0.2;
+        x = 284.0;
+        y = 268.0 - (268.0 - 140.0) * subT;
+        flipX = false;
+      }
     } else {
       // 🐟 일반 물고기 그룹 (10단계 다채로운 모션)
       double timeV = v;
@@ -297,8 +333,13 @@ class _AquariumScreenState extends State<AquariumScreen>
     }
 
     // 💡 수조 벽면 밖으로 튀어나가지 않도록 위치 제한(Clamping)
-    x = x.clamp(15.0, w - 15.0);
-    y = y.clamp(15.0, h - 15.0);
+    if (type == 'snail') {
+      x = x.clamp(-24.0, 284.0);
+      y = y.clamp(140.0, 268.0);
+    } else {
+      x = x.clamp(15.0, w - 15.0);
+      y = y.clamp(15.0, h - 15.0);
+    }
 
     return (Offset(x, y), flipX);
   }
@@ -512,6 +553,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                                         type: fish['type'] ?? 'puffer',
                                         isAnimated: false,
                                         level: fish['level'] ?? 1,
+                                        useLevel5Color:
+                                            fish['useLevel5Color'] ?? true,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
@@ -1051,6 +1094,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                                             type: fish['type'] ?? 'puffer',
                                             isAnimated: false,
                                             level: fish['level'] ?? 1,
+                                            useLevel5Color:
+                                                fish['useLevel5Color'] ?? true,
                                           ),
                                         ),
                                         const SizedBox(width: 12),
@@ -1703,10 +1748,29 @@ class _AquariumScreenState extends State<AquariumScreen>
                               }
                             }
 
+                            bool finalFlipX = flipX;
+                            bool finalFlipY = false;
                             if (fish['type'] == 'jellyfish' ||
                                 fish['type'] == 'seahorse' ||
-                                fish['type'] == 'crab') {
+                                fish['type'] == 'crab' ||
+                                fish['type'] == 'duck') {
                               tiltAngle = 0.0;
+                            } else if (fish['type'] == 'snail') {
+                              double dy = nextPose.$2 - y;
+                              if (x <= -23.0) {
+                                tiltAngle = pi / 2; // 좌측 벽면: 시계 방향 90도
+                                finalFlipX = false;
+                                finalFlipY =
+                                    dy < 0; // 올라갈 때(dy < 0)는 y축 반전하여 머리가 위로 향함
+                              } else if (x >= 283.0) {
+                                tiltAngle = -pi / 2; // 우측 벽면: 반시계 방향 90도
+                                finalFlipX = false;
+                                finalFlipY =
+                                    dy > 0; // 내려갈 때(dy > 0)는 y축 반전하여 머리가 아래로 향함
+                              } else {
+                                tiltAngle = 0.0;
+                                finalFlipY = false;
+                              }
                             }
                             if (fish['type'] == 'shrimp') {
                               tiltAngle *= 0.3;
@@ -1722,8 +1786,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                                     Transform(
                                       alignment: Alignment.center,
                                       transform: Matrix4.diagonal3Values(
-                                        flipX ? -1.0 : 1.0, // 좌우 반전 적용
-                                        1.0,
+                                        finalFlipX ? -1.0 : 1.0, // 좌우 반전 적용
+                                        finalFlipY ? -1.0 : 1.0, // 상하 반전 적용
                                         1.0,
                                       )..rotateZ(tiltAngle), // 이동 방향에 맞게 회전 추가
                                       child: GestureDetector(
@@ -1764,6 +1828,8 @@ class _AquariumScreenState extends State<AquariumScreen>
                                           child: PixelFish(
                                             type: fish['type'] ?? 'puffer',
                                             level: fish['level'] ?? 1,
+                                            useLevel5Color:
+                                                fish['useLevel5Color'] ?? true,
                                           ),
                                         ),
                                       ),

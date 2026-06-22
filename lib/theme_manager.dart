@@ -210,7 +210,7 @@ class AppTheme {
 
   // --- Dynamic Fish Colors ---
 
-  static Map<String, Color> getFishColors(String type, int level) {
+  static Map<String, Color> getFishColors(String type, int level, {bool useLevel5Color = true}) {
     Color c1 = Colors.orangeAccent;
     Color c2 = Colors.transparent;
 
@@ -272,11 +272,17 @@ class AppTheme {
       } else if (type == 'salmon') {
         c1 = const Color(0xFFE5CEB4);
         c2 = const Color(0xFFB8B5B9);
+      } else if (type == 'duck') {
+        c1 = const Color(0xFFF2F0E5); // 흰 오리 몸통
+        c2 = const Color(0xFFD3A068); // 주황색 주둥이와 발
+      } else if (type == 'snail') {
+        c1 = const Color(0xFFA77B5B); // 등껍질 (갈색)
+        c2 = const Color(0xFFE5CEB4); // 본체 (살구색)
       } else {
         c1 = const Color(0xFFD3A068);
       }
 
-      if (level >= 5) {
+      if (level >= 5 && useLevel5Color) {
         if (type == 'goldfish') {
           c1 = const Color(0xFFEDE19E);
           c2 = const Color(0xFFD3A068);
@@ -334,6 +340,12 @@ class AppTheme {
         } else if (type == 'salmon') {
           c1 = const Color(0xFFD3A068);
           c2 = const Color(0xFFF2F0E5);
+        } else if (type == 'duck') {
+          c1 = const Color(0xFFEDE19E); // 황금 오리
+          c2 = const Color(0xFFB45252); // 빨간 주둥이와 발
+        } else if (type == 'snail') {
+          c1 = const Color(0xFF6A536E); // 보라색 등껍질
+          c2 = const Color(0xFFCF8ACB); // 분홍빛 본체
         } else {
           c1 = const Color(0xFFEDE19E);
           c2 = const Color(0xFFD3A068);
@@ -397,11 +409,17 @@ class AppTheme {
       } else if (type == 'salmon') {
         c1 = const Color(0xFFFA8072);
         c2 = const Color(0xFFE2E8F0);
+      } else if (type == 'duck') {
+        c1 = Colors.white;
+        c2 = Colors.orange;
+      } else if (type == 'snail') {
+        c1 = Colors.brown;
+        c2 = Colors.yellow[100]!;
       } else {
         c1 = Colors.orangeAccent;
       }
 
-      if (level >= 5) {
+      if (level >= 5 && useLevel5Color) {
         if (type == 'goldfish') {
           c1 = Colors.amberAccent[400]!;
           c2 = Colors.deepOrangeAccent;
@@ -459,6 +477,12 @@ class AppTheme {
         } else if (type == 'salmon') {
           c1 = const Color(0xFFE07A5F);
           c2 = const Color(0xFFF1F5F9);
+        } else if (type == 'duck') {
+          c1 = Colors.yellowAccent;
+          c2 = Colors.red;
+        } else if (type == 'snail') {
+          c1 = Colors.purple;
+          c2 = Colors.pinkAccent;
         } else {
           c1 = Colors.yellowAccent;
           c2 = Colors.deepOrangeAccent;

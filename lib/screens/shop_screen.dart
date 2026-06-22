@@ -399,10 +399,22 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
   // --- 장식물 상점 ---
   Widget _buildDecoShop() {
     final decos = [
-      {'type': 'ammonite',      'name': '암모나이트 화석',  'color': const Color(0xFFD3A068)},
-      {'type': 'basalt',        'name': '큰 현무암',      'color': const Color(0xFF45444F)},
-      {'type': 'spongebob_house','name': '스폰지밥 집',   'color': const Color(0xFFE5CEB4)},
-      {'type': 'sunken_ship',   'name': '침몰한 배 잔해', 'color': const Color(0xFFA77B5B)},
+      {
+        'type': 'ammonite',
+        'name': '암모나이트 화석',
+        'color': const Color(0xFFD3A068),
+      },
+      {'type': 'basalt', 'name': '큰 현무암', 'color': const Color(0xFF45444F)},
+      {
+        'type': 'spongebob_house',
+        'name': '스폰지밥 집',
+        'color': const Color(0xFFE5CEB4),
+      },
+      {
+        'type': 'sunken_ship',
+        'name': '침몰한 배 잔해',
+        'color': const Color(0xFFA77B5B),
+      },
     ];
 
     return SingleChildScrollView(
@@ -417,7 +429,11 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
             const SizedBox(height: 6),
             const Text(
               '수조를 더 아름답게 꾸며봐요!',
-              style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 32),
             ...decos.map((deco) {
@@ -431,7 +447,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     child: RetroGradientButton(
                       color: col,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       borderRadius: BorderRadius.circular(6),
                       borderWidth: 2,
                       onPressed: () => _confirmBuyDeco(
@@ -462,7 +481,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           Expanded(
                             child: Text(
                               deco['name'] as String,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -471,7 +493,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           const SizedBox(width: 4),
                           const Text(
                             '5',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -496,45 +521,58 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(4),
-            boxShadow: const [BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3))],
+            boxShadow: const [
+              BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('구매 확인', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                '구매 확인',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
-               Text(
+              Text(
                 '$name\n코인 5개를 사용하시겠습니까?',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 15),
               ),
               const SizedBox(height: 24),
-              Row(children: [
-                Expanded(
-                  child: RetroGradientButton(
-                    color: Colors.grey[300]!,
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('취소', style: TextStyle(fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Expanded(
+                    child: RetroGradientButton(
+                      color: Colors.grey[300]!,
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: RetroGradientButton(
-                    color: const Color(0xFFD3A068),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      if (widget.coins >= 5) {
-                        widget.onSpendCoin(5);
-                        widget.onAddDeco({'type': type, 'name': name});
-                        _showNoticeDialog('구매 완료! 내 보관함에 추가되었습니다 🎉');
-                      } else {
-                        _showNoticeDialog('코인이 부족합니다! 🪙');
-                      }
-                    },
-                    child: const Text('구매', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: RetroGradientButton(
+                      color: const Color(0xFFD3A068),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        if (widget.coins >= 5) {
+                          widget.onSpendCoin(5);
+                          widget.onAddDeco({'type': type, 'name': name});
+                          _showNoticeDialog('구매 완료! 내 보관함에 추가되었습니다 🎉');
+                        } else {
+                          _showNoticeDialog('코인이 부족합니다! 🪙');
+                        }
+                      },
+                      child: const Text(
+                        '구매',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ],
           ),
         ),
@@ -815,7 +853,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           children: [
                             Expanded(
                               child: _buildShopItem(
-                                '물고기 뽑기'.tr,
+                                '동물 뽑기'.tr,
                                 const PixelEmoji('fish', size: 36),
                                 const Color(0xFFE5CEB4),
                                 () => setState(() => _gachaMode = 'fish'),
@@ -856,7 +894,10 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             Expanded(
                               child: _buildShopItem(
                                 '장식물 상점',
-                                const PixelDecoration(type: 'ammonite', isAnimated: false),
+                                const PixelDecoration(
+                                  type: 'ammonite',
+                                  isAnimated: false,
+                                ),
                                 const Color(0xFFD3A068),
                                 () => setState(() => _gachaMode = 'deco'),
                               ),

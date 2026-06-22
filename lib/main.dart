@@ -915,7 +915,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                           crossAxisCount: 3,
                                           crossAxisSpacing: 6,
                                           mainAxisSpacing: 12,
-                                          childAspectRatio: 1.25,
+                                          childAspectRatio: 1.1,
                                         ),
                                     itemCount: _ownedFishes.length,
                                     itemBuilder: (context, index) {
@@ -993,6 +993,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                           level:
                                                               fish['level'] ??
                                                               1,
+                                                          useLevel5Color:
+                                                              fish['useLevel5Color'] ??
+                                                              true,
                                                         ),
                                                       ),
                                                       const SizedBox(height: 6),
@@ -1012,6 +1015,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                       ),
+                                                      if ((fish['level'] ?? 0) >= 5)
+                                                        const SizedBox(height: 12),
                                                     ],
                                                   ),
                                                   if (isSwimming)
@@ -1044,6 +1049,54 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                                       ),
                                                     ),
                                                   ),
+                                                  if ((fish['level'] ?? 0) >= 5)
+                                                    Positioned(
+                                                      left: 0,
+                                                      right: 0,
+                                                      bottom: 4,
+                                                      child: Center(
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            setSheetState(() {
+                                                              fish['useLevel5Color'] =
+                                                                  !(fish['useLevel5Color'] ?? true);
+                                                            });
+                                                            setState(() {});
+                                                            _saveMainData();
+                                                          },
+                                                          child: Container(
+                                                            padding: const EdgeInsets.symmetric(
+                                                              horizontal: 6,
+                                                              vertical: 2,
+                                                            ),
+                                                            decoration: BoxDecoration(
+                                                              color: (fish['useLevel5Color'] ?? true)
+                                                                  ? Colors.amber.shade100
+                                                                  : Colors.grey.shade300,
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              border: Border.all(
+                                                                color: (fish['useLevel5Color'] ?? true)
+                                                                    ? Colors.amber
+                                                                    : Colors.grey,
+                                                                width: 1,
+                                                              ),
+                                                            ),
+                                                            child: Text(
+                                                              (fish['useLevel5Color'] ?? true)
+                                                                  ? '특수색 ON'.tr
+                                                                  : '특수색 OFF'.tr,
+                                                              style: TextStyle(
+                                                                fontSize: 8,
+                                                                fontWeight: FontWeight.bold,
+                                                                color: (fish['useLevel5Color'] ?? true)
+                                                                    ? Colors.amber.shade900
+                                                                    : Colors.grey.shade700,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
                                                 ],
                                               ),
                                             ),
