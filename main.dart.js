@@ -92418,7 +92418,7 @@ return A.d_(B.aR,A.a([A.yx(A.aD(4),A.t6(s,B.cR,s,B.eq,s,B.dc,s,s,s,s,b.b*B.e.cj(
 $S:85}
 A.akI.prototype={
 $1(a){var s=null,r=A.aD(4),q=A.kK(B.af,3),p=A.jv(B.cs),o=A.aD(4),n=this.a,m=t.p
-return A.fB(B.r,A.aN(s,A.bf(A.a([A.aN(s,B.Fy,B.n,s,s,new A.aL(s,s,A.kK(B.af,2),o,s,p,B.v),s,s,s,B.pK,s,s,1/0),B.BQ,A.bv(A.lM(A.bf(A.a([n.xx("fish","\ub808\ubca8 \uc2dc\uc2a4\ud15c","\uba39\uc774\ub97c \uc8fc\uba74 \uacbd\ud5d8\uce58(EXP)\uac00 \uc313\uc774\uba70 \ub808\ubca8\uc774 \uc624\ub985\ub2c8\ub2e4.\n\ub808\ubca8\uc774 \uc624\ub97c\uc218\ub85d \ubb3c\uace0\uae30 \ud06c\uae30\uac00 \ucee4\uc9d1\ub2c8\ub2e4.\n5\ub808\ubca8\uc774 \ub418\uba74 \uc5c4\uccad\ub09c \uc77c\uc774 \uc77c\uc5b4\ub0a0\uc9c0\ub3c4....",B.JX,B.H3),n.xx("meat","\uba39\uc774 \uc2dc\uc2a4\ud15c","\ud560 \uc77c \uc644\ub8cc \u2192 \ucf54\uc778 \ud68d\ub4dd \u2192 \uc0c1\uc810\uc5d0\uc11c \uba39\uc774 \uad6c\ub9e4!\n\uba39\uc774 1\uac1c = +10 EXP\n\ubb3c\uace0\uae30\ub97c \uc120\ud0dd\ud574 \uac1c\ubcc4\uc801\uc73c\ub85c \uba39\uc774\ub97c \uc904 \uc218 \uc788\uc5b4\uc694.",B.em,B.II),n.xx("seaweed","\uc601\uc591\uc81c \uc2dc\uc2a4\ud15c","\uc601\uc591\uc81c\ub97c \ud22c\uc5ec\ud558\uba74 \uc218\uc870 \uc804\uccb4\uc5d0 \ud6a8\uacfc\uac00 \ud37c\uc9d1\ub2c8\ub2e4!\n\ub2e4\uc74c \uba39\uc774 \uc8fc\uae30 \uacbd\ud5d8\uce58\uac00 2\ubc30\uac00 \ub429\ub2c8\ub2e4.",B.dI,B.GL),n.xx("mood_great","\uae30\ubd84 \uc2dc\uc2a4\ud15c","\ubb3c\uace0\uae30\uc5d0\uac8c\ub294 4\uac00\uc9c0 \uae30\ubd84\uc774 \uc788\uc5b4\uc694.\n\ub098\uc068 / \ubcf4\ud1b5 / \uc88b\uc74c / \ucd5c\uace0\uc57c!\n \uac01 \uae30\ubd84\uc5d0 \ub530\ub77c\uc11c \uacbd\ud5d8\uce58\uc758 \uc99d\uac00\ub7c9\uc774 \ub2ec\ub77c\uc9d1\ub2c8\ub2e4!",B.cs,B.J8)],m),B.a7,B.m,B.q,0,B.w),s,s,B.ao)),B.BQ,A.bZ(A.cp(B.a3,3,B.a1E,B.cs,s,s,B.l,new A.akH(a),s),48,1/0)],m),B.a7,B.m,B.q,0,B.w),B.n,s,s,new A.aL(B.Hd,s,q,r,B.OI,s,B.v),s,520,s,B.dM,s,s,340),s,s,s)},
+return A.fB(B.r,A.aN(s,A.bf(A.a([A.aN(s,B.Fy,B.n,s,s,new A.aL(s,s,A.kK(B.af,2),o,s,p,B.v),s,s,s,B.pK,s,s,1/0),B.BQ,A.bv(A.lM(A.bf(A.a([n.xx("fish","\ub808\ubca8 \uc2dc\uc2a4\ud15c","\uba39\uc774\ub97c \uc8fc\uba74 \uacbd\ud5d8\uce58(EXP)\uac00 \uc313\uc774\uba70 \ub808\ubca8\uc774 \uc624\ub985\ub2c8\ub2e4.\n\ub808\ubca8\uc774 \uc624\ub97c\uc218\ub85d \ubb3c\uace0\uae30 \ud06c\uae30\uac00 \ucee4\uc9d1\ub2c8\ub2e4.\n5\ub808\ubca8\uc774 \ub418\uba74 \uc5c4\uccad\ub09c \uc77c\uc774 \uc77c\uc5b4\ub0a0\uc9c0\ub3c4....",B.JX,B.H3),n.xx("meat","\uba39\uc774 \uc2dc\uc2a4\ud15c","\ud560 \uc77c \uc644\ub8cc \u2192 \ucf54\uc778 \ud68d\ub4dd \u2192 \uc0c1\uc810\uc5d0\uc11c \uba39\uc774 \uad6c\ub9e4!\n\uba39\uc774 1\uac1c = +10 EXP\n\ubb3c\uace0\uae30\ub97c \uc120\ud0dd\ud574 \uac1c\ubcc4\uc801\uc73c\ub85c \uba39\uc774\ub97c \uc904 \uc218 \uc788\uc5b4\uc694.",B.em,B.II),n.xx("seaweed","\uc601\uc591\uc81c \uc2dc\uc2a4\ud15c","\uc601\uc591\uc81c\ub97c \ud22c\uc5ec\ud558\uba74 \uc218\uc870 \uc804\uccb4\uc5d0 \ud6a8\uacfc\uac00 \ud37c\uc9d1\ub2c8\ub2e4!\n\ub2e4\uc74c \uba39\uc774 \uc8fc\uae30 \uacbd\ud5d8\uce58\uac00 2\ubc30\uac00 \ub429\ub2c8\ub2e4.",B.dI,B.GL),n.xx("mood_great","\uae30\ubd84 \uc2dc\uc2a4\ud15c","\ubb3c\uace0\uae30\uc5d0\uac8c\ub294 4\uac00\uc9c0 \uae30\ubd84\uc774 \uc788\uc5b4\uc694.\n\ub098\uc068 / \ubcf4\ud1b5 / \uc88b\uc74c / \ucd5c\uace0\uc57c!\n\uae30\ubd84\uc5d0 \ub530\ub77c\uc11c \uacbd\ud5d8\uce58\uc758 \uc99d\uac00\ub7c9\uc774 \ub2ec\ub77c\uc9d1\ub2c8\ub2e4!",B.cs,B.J8)],m),B.a7,B.m,B.q,0,B.w),s,s,B.ao)),B.BQ,A.bZ(A.cp(B.a3,3,B.a1E,B.cs,s,s,B.l,new A.akH(a),s),48,1/0)],m),B.a7,B.m,B.q,0,B.w),B.n,s,s,new A.aL(B.Hd,s,q,r,B.OI,s,B.v),s,520,s,B.dM,s,s,340),s,s,s)},
 $S:23}
 A.akH.prototype={
 $0(){A.bT(this.a,!1).cu(null)
@@ -93104,7 +93104,7 @@ else q=n?"\uc0c8\ub85c\uc6b4 %s\ub97c \ud68d\ub4dd\ud588\uc2b5\ub2c8\ub2e4!\n\ub
 s=this.c
 s.toString
 A.fV(p,p,!0,p,new A.avA(this,n,r,o,b,a,q),s,p,!0,t.z)},
-a7E(){var s=t.N,r=t.K,q=A.a([A.ak(["type","ammonite","name","\uc554\ubaa8\ub098\uc774\ud2b8 \ud654\uc11d","color",B.ox],s,r),A.ak(["type","basalt","name","\ud070 \ud604\ubb34\uc554","color",B.HC],s,r),A.ak(["type","spongebob_house","name","\uc2a4\ud3f0\uc9c0\ubc25 \uc9d1","color",B.pb],s,r),A.ak(["type","sunken_ship","name","\uce68\ubab0\ud55c \ubc30 \uc783\ud574","color",B.pf],s,r)],t.Mq)
+a7E(){var s=t.N,r=t.K,q=A.a([A.ak(["type","ammonite","name","\uc554\ubaa8\ub098\uc774\ud2b8 \ud654\uc11d","color",B.ox],s,r),A.ak(["type","basalt","name","\ud070 \ud604\ubb34\uc554","color",B.HC],s,r),A.ak(["type","spongebob_house","name","\uc2a4\ud3f0\uc9c0\ubc25 \uc9d1","color",B.pb],s,r),A.ak(["type","sunken_ship","name","\uce68\ubab0\ud55c \ubc30 \uc794\ud574","color",B.pf],s,r)],t.Mq)
 r=A.a([B.a1F,B.hi,B.a1v,B.X8],t.p)
 B.b.U(r,new A.a5(q,new A.avk(this),t.sn))
 return A.lM(new A.b0(B.Ld,A.bf(r,B.o,B.m,B.q,0,B.w),null),null,null,B.ao)},
@@ -101642,7 +101642,7 @@ B.T3=new A.NB(1,"end")
 B.T4=new A.NC(0,"nearestOverlay")
 B.T5=new A.NC(1,"rootOverlay")
 B.KX=new A.af(0,0,0,20)
-B.a1C=new A.dX("\uc544\uc9c1 \uc0b0 \uc7a5\uc2dd\ubb3c\uc774 \uc5c6\uc5b4\uc694!\n\uc0c1\uc810\uc5d0\uc11c \uc7a5\uc2dd\ubb3c\uc744 \uad6c\ub9e4\ud574\ub3c4\uc138\uc694.",null,null,null,null,null,null,null,null,null)
+B.a1C=new A.dX("\uc544\uc9c1 \uc0b0 \uc7a5\uc2dd\ubb3c\uc774 \uc5c6\uc5b4\uc694!\n\uc0c1\uc810\uc5d0\uc11c \uc7a5\uc2dd\ubb3c\uc744 \uad6c\ub9e4\ud574\ubcf4\uc138\uc694.",null,null,null,null,null,null,null,null,null)
 B.T6=new A.b0(B.KX,B.a1C,null)
 B.T8=new A.Bf(null)
 B.cA=new A.NH(0,"fill")
@@ -102403,7 +102403,7 @@ B.a0k=new A.m(!0,B.l,null,".AppleSystemUIFont",null,null,null,null,null,null,nul
 B.Yk=new A.m(!0,B.l,null,".AppleSystemUIFont",null,null,null,null,null,null,null,null,null,null,null,null,null,B.j,null,null,null,"blackRedwoodCity labelSmall",null,null,null,null)
 B.a1u=new A.eb(B.a_a,B.Z2,B.a_b,B.a_G,B.YK,B.YS,B.Zm,B.a_A,B.Zz,B.a01,B.Yd,B.Yw,B.a_Z,B.a0k,B.Yk)
 B.a0S=new A.m(!0,B.Y,null,null,null,null,14,B.U,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.a1v=new A.dX("\uc218\uc870\ub97c \ub354 \uc544\ub984\ub2f5\uac8c \uaf43\ubc14\uacc4\uc694!",null,B.a0S,null,null,null,null,null,null,null)
+B.a1v=new A.dX("\uc218\uc870\ub97c \ub354 \uc544\ub984\ub2f5\uac8c \uafb8\uba70\ubd10\uc694!",null,B.a0S,null,null,null,null,null,null,null)
 B.VM=new A.hK(B.af,B.xb,0)
 B.Oy=s([B.VM],t.kO)
 B.a_v=new A.m(!0,B.cS,null,null,null,null,28,B.I,null,2,null,null,null,null,null,null,null,null,null,null,null,null,B.Oy,null,null,null)
