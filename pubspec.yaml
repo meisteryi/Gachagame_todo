@@ -51,7 +51,7 @@ dev_dependencies:
   flutter_launcher_icons: any
 
 flutter_launcher_icons:
-  android: false
+  android: true
   ios: false
   web:
     generate: true
