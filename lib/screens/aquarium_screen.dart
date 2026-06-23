@@ -761,7 +761,6 @@ class _AquariumScreenState extends State<AquariumScreen>
       decoration: BoxDecoration(
         gradient: getRetroGradient(Colors.white),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF212123), width: 3),
         boxShadow: const [
           BoxShadow(color: Color(0xFF212123), offset: Offset(3, 3)),
         ],

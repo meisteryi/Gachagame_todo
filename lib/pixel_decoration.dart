@@ -89,7 +89,6 @@ class PixelDecorationPainter extends CustomPainter {
     late List<List<int>> pixels;
 
     switch (type) {
-
       // ════════════════════════════════════════
       // 암모나이트 화석 (나선형, 황금갈색)
       // ════════════════════════════════════════
@@ -152,7 +151,7 @@ class PixelDecorationPainter extends CustomPainter {
           const Color(0xFFEDE19E), // 노란 하이라이트
         ];
         pixels = [
-          [e, e, e, c2, c2, c2, e, e, e, e],  // 잎 꼭대기
+          [e, e, e, c2, c2, c2, e, e, e, e], // 잎 꼭대기
           [e, e, c2, e, c2, e, c2, e, e, e],
           [e, c2, e, c2, e, c2, e, c2, e, e],
           [e, e, c2, c2, c2, c2, c2, e, e, e],
@@ -189,12 +188,88 @@ class PixelDecorationPainter extends CustomPainter {
           [e, e, e, e, e, c5, c2, c2, c5, e, e, e, e, e, e, e, e, e], // 돛대 잔해
           [e, e, e, e, e, e, c5, c5, e, e, e, e, e, e, e, e, e, e],
           [e, e, e, c5, c5, c5, c5, c5, c5, c5, c5, e, e, e, e, e, e, e],
-          [e, c5, c5, c2, c2, c4, c2, c2, c4, c2, c2, c5, c5, e, e, e, e, e], // 갑판선
+          [
+            e,
+            c5,
+            c5,
+            c2,
+            c2,
+            c4,
+            c2,
+            c2,
+            c4,
+            c2,
+            c2,
+            c5,
+            c5,
+            e,
+            e,
+            e,
+            e,
+            e,
+          ], // 갑판선
           [c5, c2, c2, c4, c2, c2, c2, c2, c2, c2, c2, c2, c2, c5, e, e, e, e],
-          [c5, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c1, c2, c5, e, e, e], // 어두운 안쪽 선체
-          [c5, c2, c3, c2, c5, c2, c3, c2, c5, c2, c3, c2, c2, c2, c2, c5, e, e], // 이끼와 구멍
+          [
+            c5,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c1,
+            c2,
+            c5,
+            e,
+            e,
+            e,
+          ], // 어두운 안쪽 선체
+          [
+            c5,
+            c2,
+            c3,
+            c2,
+            c5,
+            c2,
+            c3,
+            c2,
+            c5,
+            c2,
+            c3,
+            c2,
+            c2,
+            c2,
+            c2,
+            c5,
+            e,
+            e,
+          ], // 이끼와 구멍
           [e, c5, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c2, c5, c5, e, e],
-          [e, e, c5, c2, c3, c2, c2, c2, c3, c2, c2, c2, c2, c5, e, e, e, e], // 선체 하부
+          [
+            e,
+            e,
+            c5,
+            c2,
+            c3,
+            c2,
+            c2,
+            c2,
+            c3,
+            c2,
+            c2,
+            c2,
+            c2,
+            c5,
+            e,
+            e,
+            e,
+            e,
+          ], // 선체 하부
           [e, e, e, c5, c5, c5, c5, c5, c5, c5, c5, c5, c5, e, e, e, e, e],
         ];
         break;
