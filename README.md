@@ -1,17 +1,95 @@
-# gacha_todo
+# 🐠 Gacha To-Do (가챠 투두)
 
-A new Flutter project.
+할 일을 완료하고 코인을 모아 나만의 아름다운 픽셀 아쿠아리움을 꾸며보세요! **가챠 투두(Gacha To-Do)**는 일상적인 할 일 관리(To-Do List)에 가챠(Gacha)와 방치형 육성 요소를 결합하여 지속적인 동기부여를 제공하는 Flutter 기반 모바일 애플리케이션입니다.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🌟 주요 기능 (Key Features)
 
-A few resources to get you started if this is your first Flutter project:
+### 1. 📝 체계적인 할 일 관리 (To-Do List)
+* **간편한 할 일 관리**: 할 일 추가, 수정, 삭제 및 완료 처리
+* **세부 정보 설정**: 시간 설정, 푸시 알림 알람(Alarm), 장소(Location) 지정 및 메모(Memo) 작성 기능 제공
+* **카테고리 분류**: 공부, 운동, 업무, 일상 등 카테고리를 자유롭게 추가/관리하여 체계적으로 일과를 분류 가능
+* **일일 달성률 시각화**: 오늘 완료한 할 일의 비율을 게이지 바와 퍼센트로 한눈에 파악
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### 2. 🪙 가챠 샵 (Gacha Shop)
+* **물고기 & 수초 뽑기**: 할 일을 완료해 모은 코인으로 1회 뽑기 또는 10연속 뽑기를 진행
+* **수집 요소**: 평범한 금붕어부터 상어, 전설의 흰수염고래, 우파루파 등 **20여 종의 독특한 물고기**와 **10여 종의 다채로운 수초** 수집 가능
+* **중복 방지 및 컬렉션**: 이미 보유한 물고기/수초 획득 시 보관함 정보를 바탕으로 중복 여부 확인
+* **소모품 상점**: 물고기에게 줄 '일반 먹이'와 경험치 버프를 주는 '영양제' 구매 가능
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 3. 🌊 나만의 수조 (Aquarium System)
+* **자유로운 배치**: 최대 5마리의 물고기를 수조에 넣어 함께 헤엄치게 설정 가능
+* **수초 편집 모드**: 획득한 수초를 드래그 앤 드롭으로 원하는 위치에 배치하고, 더블 탭으로 수조에서 제거하는 간편한 인테리어 편집 기능
+* **물고기 육성**: 먹이를 주어 물고기를 레벨업(Lv.Max 5) 시킬 수 있으며, 레벨업 시 특별한 이펙트 제공
+* **영양제 버프**: 영양제를 사용하여 수조 전체에 경험치 2배 버프(20 EXP) 부여 효과 적용
+* **특수색 피쉬**: 동일한 종류의 물고기라도 희귀한 '특수색(Special Color)' 스위치를 통해 개성 있는 연출 가능
+
+### 4. 📅 일일 및 주간 미션 (Missions)
+* **일일 미션**: 매일 앱 접속(출석체크), 일일 모든 할 일 완료, 밤 12시 전 내일 계획 등록하기, 오늘 할 일 5개 이상 등록 및 완료하기
+* **주간 미션**: 일주일 연속 출석, 일주일 내내 할 일 모두 완료, 이번 주 할 일 30개 완료 등 강력한 보상 제공
+
+### 5. ☁️ 클라우드 데이터 백업 & 복구 (Cloud Save/Restore)
+* 회원가입 없이 고유의 **알파뉴메릭 ID**를 생성하여 현재의 수조 구성, 캐릭터 컬렉션, 코인, 완료 기록 등을 클라우드 서버에 안전하게 저장하고 언제든 불러올 수 있습니다.
+
+### 6. 🌐 4개국 다국어 지원 (Localization)
+* 전 세계 사용자를 위해 **한국어**, **영어 (English)**, **일본어 (日本語)**, **스페인어 (Español)** 번역 시스템을 완벽하게 내장하고 있습니다.
+
+---
+
+## 🛠 기술 스택 (Tech Stack)
+
+* **프레임워크**: Flutter (Dart)
+* **상태 관리 & 반응형**: Flutter State / ValueNotifier / Custom ThemeManager
+* **로컬 스토리지**: `shared_preferences` (설정 및 데이터 로컬 저장)
+* **네트워크 통신**: `http` (클라우드 데이터 세이브/로드 API 연동)
+* **폰트**: `google_fonts` (픽셀 아트 스타일과 어우러지는 미려한 타이포그래피)
+
+---
+
+## 🚀 시작하기 (Getting Started)
+
+### 요구 사항 (Prerequisites)
+* Flutter SDK (최신 Stable 버전 권장)
+* Dart SDK
+
+### 설치 및 실행 방법 (Installation & Run)
+
+1. **레포지토리 클론**
+   ```bash
+   git clone https://github.com/meisteryi/Gachagame_todo.git
+   cd Gachagame_todo
+   ```
+
+2. **의존성 패키지 설치**
+   ```bash
+   flutter pub get
+   ```
+
+3. **애플리케이션 실행**
+   ```bash
+   flutter run
+   ```
+
+---
+
+## 📂 폴더 구조 (Project Structure)
+
+```text
+lib/
+├── screens/                  # 주요 UI 화면 구성
+│   ├── aquarium_screen.dart  # 수조(메인 아쿠아리움) 및 배치/육성 편집 화면
+│   ├── todo_screen.dart      # 할 일(To-Do) 관리 및 카테고리 설정 화면
+│   ├── mission_screen.dart   # 일일/주간 미션 현황 및 보상 수령 화면
+│   ├── shop_screen.dart      # 물고기/수초 가챠 및 먹이 상점 화면
+│   └── settings_screen.dart  # 언어 변경, 클라우드 저장/불러오기 등 설정 화면
+├── theme_manager.dart        # 게임 테마 및 스타일 설정 관리
+├── translations.dart         # 다국어(한국어, 영어, 일본어, 스페인어) 번역 사전
+├── slot_machine.dart         # 가챠 연출 및 뽑기 애니메이션 컴포넌트
+├── bouncing_wrapper.dart     # 터치 피드백용 바운싱 애니메이션 래퍼
+├── pixel_emoji.dart          # 픽셀 아트 물고기 렌더링 엔진
+├── pixel_fish.dart           # 물고기 움직임 알고리즘 및 생태 로직
+├── pixel_seaweed.dart        # 수초 배치 오브젝트 클래스
+├── pixel_supplement.dart     # 보조 유틸리티 데코레이터
+└── main.dart                 # 앱 실행 진입점 및 코어 데이터 모델
+```
