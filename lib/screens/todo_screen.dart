@@ -5,6 +5,7 @@ import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
 import '../translations.dart';
 import '../theme_manager.dart';
+import '../services/notification_service.dart';
 
 class TodoScreen extends StatefulWidget {
   final VoidCallback? onSecretCommand;
@@ -81,10 +82,15 @@ class _TodoScreenState extends State<TodoScreen>
       final String? todosStr = prefs.getString('todos');
       if (todosStr != null) {
         final List<dynamic> decoded = jsonDecode(todosStr);
+        bool needsSave = false;
         setState(() {
           _todoList.clear();
           for (var item in decoded) {
             final map = Map<String, dynamic>.from(item);
+            if (map['id'] == null) {
+              map['id'] = ((DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF) - _todoList.length - (item.hashCode & 0xFFFFF)).abs();
+              needsSave = true;
+            }
             // JSON에 저장할 수 없는 TimeOfDay 객체를 문자열에서 다시 복구
             if (map['time'] != null && map['time'].toString().contains(':')) {
               final parts = map['time'].toString().split(':');
@@ -104,6 +110,9 @@ class _TodoScreenState extends State<TodoScreen>
             _todoList.add(map);
           }
         });
+        if (needsSave) {
+          _saveData();
+        }
       } else {
         _setInitialData();
       }
@@ -144,6 +153,41 @@ class _TodoScreenState extends State<TodoScreen>
       return copy;
     }).toList();
     await prefs.setString('todos', jsonEncode(encodedTodos));
+  }
+
+  void _scheduleTodoNotification(Map<String, dynamic> todo) async {
+    if (todo['isAlarmOn'] != true || todo['alarmTime'] == null || todo['isDone'] == true) {
+      return;
+    }
+    try {
+      final dateParts = todo['date'].toString().split('-');
+      if (dateParts.length != 3) return;
+      final year = int.parse(dateParts[0]);
+      final month = int.parse(dateParts[1]);
+      final day = int.parse(dateParts[2]);
+
+      final TimeOfDay alarmTime = todo['alarmTime'] as TimeOfDay;
+      final scheduledDateTime = DateTime(year, month, day, alarmTime.hour, alarmTime.minute);
+
+      if (scheduledDateTime.isAfter(DateTime.now())) {
+        await NotificationService().scheduleNotification(
+          id: todo['id'] as int,
+          title: '할 일 알림'.tr,
+          body: todo['task']?.toString() ?? '',
+          scheduledDate: scheduledDateTime,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error scheduling notification: $e');
+    }
+  }
+
+  void _cancelTodoNotification(int id) async {
+    try {
+      await NotificationService().cancelNotification(id);
+    } catch (e) {
+      debugPrint('Error canceling notification: $e');
+    }
   }
 
   // 날짜 포맷팅 함수 (yyyy-MM-dd)
@@ -250,6 +294,15 @@ class _TodoScreenState extends State<TodoScreen>
       _todoList[originalIndex]['isDone'] = value;
     });
     _saveData(); // 상태 변경 시 저장
+
+    final todo = _todoList[originalIndex];
+    if (value) {
+      if (todo['id'] != null) {
+        _cancelTodoNotification(todo['id'] as int);
+      }
+    } else {
+      _scheduleTodoNotification(todo);
+    }
   }
 
   // 2. 할 일 추가/수정 바텀 시트
@@ -374,7 +427,10 @@ class _TodoScreenState extends State<TodoScreen>
                         ),
                         Switch(
                           value: isAlarmOn,
-                          onChanged: (val) {
+                          onChanged: (val) async {
+                            if (val) {
+                              await NotificationService().requestPermission();
+                            }
                             setSheetState(() {
                               isAlarmOn = val;
                               if (val && selectedAlarmTime == null) {
@@ -562,6 +618,13 @@ class _TodoScreenState extends State<TodoScreen>
                                   }
 
                                   if (newTask.trim().isNotEmpty) {
+                                    final int todoId = isEdit
+                                        ? (_todoList[safeIndex]['id'] as int)
+                                        : (DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF);
+
+                                    // Cancel any existing scheduled notification for this ID
+                                    _cancelTodoNotification(todoId);
+
                                     setState(() {
                                       if (isEdit) {
                                         _todoList[safeIndex]['task'] = newTask
@@ -580,6 +643,7 @@ class _TodoScreenState extends State<TodoScreen>
                                             .trim();
                                       } else {
                                         _todoList.add({
+                                          'id': todoId,
                                           'task': newTask.trim(),
                                           'isDone': false,
                                           'category': selectedCategory,
@@ -593,6 +657,14 @@ class _TodoScreenState extends State<TodoScreen>
                                       }
                                     });
                                     _saveData(); // 추가/수정 완료 시 저장
+
+                                    // Schedule the new notification if needed
+                                    if (isEdit) {
+                                      _scheduleTodoNotification(_todoList[safeIndex]);
+                                    } else {
+                                      _scheduleTodoNotification(_todoList.last);
+                                    }
+
                                     Navigator.pop(context); // 💡 바텀 시트를 먼저 닫음
                                     if (isAlarmOn &&
                                         selectedAlarmTime != null) {
@@ -758,11 +830,16 @@ class _TodoScreenState extends State<TodoScreen>
                           color: Colors.redAccent,
                           foregroundColor: Colors.white,
                           onPressed: () {
+                            final todo = _todoList[originalIndex];
+                            final todoId = todo['id'] as int?;
                             Navigator.pop(context); // 상세 뷰를 닫고
                             setState(() {
                               _todoList.removeAt(originalIndex);
                             });
                             _saveData(); // 삭제 후 저장
+                            if (todoId != null) {
+                              _cancelTodoNotification(todoId);
+                            }
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,

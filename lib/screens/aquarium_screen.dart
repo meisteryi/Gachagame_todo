@@ -23,8 +23,6 @@ class AquariumScreen extends StatefulWidget {
   final ValueChanged<List<Map<String, dynamic>>> onUpdateSeaweeds;
   final ValueChanged<List<Map<String, dynamic>>> onUpdateDecorations;
   final VoidCallback onShowStorage;
-  final VoidCallback onCheatAllLevel5;
-  final VoidCallback onCheatResetLevel;
 
   const AquariumScreen({
     super.key,
@@ -39,8 +37,6 @@ class AquariumScreen extends StatefulWidget {
     required this.onUpdateSeaweeds,
     required this.onUpdateDecorations,
     required this.onShowStorage,
-    required this.onCheatAllLevel5,
-    required this.onCheatResetLevel,
   });
 
   @override
@@ -2015,82 +2011,6 @@ class _AquariumScreenState extends State<AquariumScreen>
                   PixelEmoji(_isEditMode ? 'check' : 'pencil', size: 16),
                   const SizedBox(width: 6),
                   Text(_isEditMode ? '편집 완료'.tr : '편집'.tr),
-                ],
-              ),
-            ),
-          ),
-          // ⚡ 개발용 치트 버튼 (상단 중앙)
-          Positioned(
-            top: 16,
-            left: 100,
-            right: 100,
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: widget.onCheatAllLevel5,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: const Color(0xFF212123),
-                          width: 2,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0xFF212123),
-                            offset: Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Text(
-                        'Lv.5 ⚡',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: widget.onCheatResetLevel,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: const Color(0xFF212123),
-                          width: 2,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0xFF212123),
-                            offset: Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Text(
-                        'Reset 🔄',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

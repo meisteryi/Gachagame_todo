@@ -20,11 +20,13 @@ import 'pixel_emoji.dart';
 import 'slot_machine.dart';
 import 'pixel_supplement.dart';
 import 'theme_manager.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 💡 앱 시작 전 저장소 통신 채널을 완벽하게 초기화
   await AppTheme.init(); // 💡 테마 설정 초기화
   await Tr.init(); // 💡 언어 설정 초기화
+  await NotificationService().init(); // 💡 알림 서비스 초기화
 
   runApp(const GachaTodoApp());
 }
@@ -340,27 +342,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _saveMainData();
   }
 
-  void _cheatAllFishesToLevel5() {
-    setState(() {
-      for (var fish in _ownedFishes) {
-        fish['level'] = 5;
-        fish['exp'] = 0;
-      }
-    });
-    _saveMainData();
-    _showNoticeDialog('치트: 모든 물고기가 5레벨이 되었습니다! ⚡');
-  }
 
-  void _resetAllFishesLevel() {
-    setState(() {
-      for (var fish in _ownedFishes) {
-        fish['level'] = 1;
-        fish['exp'] = 0;
-      }
-    });
-    _saveMainData();
-    _showNoticeDialog('치트: 모든 물고기 레벨이 초기화되었습니다! 🔄');
-  }
 
   // 탭 변경 시 상태를 업데이트하여 화면을 다시 그리도록 함
   void _onItemTapped(int index) {
@@ -1643,8 +1625,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               _saveMainData();
             },
             onShowStorage: _showStorage,
-            onCheatAllLevel5: _cheatAllFishesToLevel5,
-            onCheatResetLevel: _resetAllFishesLevel,
           ),
           // 2. 할 일 탭 (전체 화면)
           TodoScreen(
