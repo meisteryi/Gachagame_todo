@@ -6,11 +6,13 @@ import '../bouncing_wrapper.dart';
 class SettingsScreen extends StatelessWidget {
   final VoidCallback onSaveToCloud;
   final VoidCallback onLoadFromCloud;
+  final VoidCallback onClearTodos;
 
   const SettingsScreen({
     super.key,
     required this.onSaveToCloud,
     required this.onLoadFromCloud,
+    required this.onClearTodos,
   });
 
   Widget _buildSettingsGroup({required String title, required Widget child}) {
@@ -201,6 +203,25 @@ class SettingsScreen extends StatelessWidget {
                                 onPressed: onLoadFromCloud,
                                 child: Text(
                                   '클라우드에서 불러오기 ☁️'.tr,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: BouncingWrapper(
+                              child: RetroGradientButton(
+                                color: const Color(0xFFEDC8C4),
+                                foregroundColor: AppTheme.borderColor,
+                                onPressed: onClearTodos,
+                                child: Text(
+                                  '할 일 초기화'.tr,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14,

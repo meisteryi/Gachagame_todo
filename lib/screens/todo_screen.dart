@@ -212,6 +212,39 @@ class _TodoScreenState extends State<TodoScreen>
 
     bool updated = false;
     for (var routine in _routines) {
+      // 💡 시작일/종료일 기간 확인
+      final String? startDateStr = routine['startDate'];
+      final String? endDateStr = routine['endDate'];
+      final checkDate = DateTime(date.year, date.month, date.day);
+
+      if (startDateStr != null) {
+        final startParts = startDateStr.split('-');
+        if (startParts.length == 3) {
+          final start = DateTime(
+            int.parse(startParts[0]),
+            int.parse(startParts[1]),
+            int.parse(startParts[2]),
+          );
+          if (checkDate.isBefore(start)) {
+            continue; // 시작일 이전이면 추가하지 않음
+          }
+        }
+      }
+
+      if (endDateStr != null) {
+        final endParts = endDateStr.split('-');
+        if (endParts.length == 3) {
+          final end = DateTime(
+            int.parse(endParts[0]),
+            int.parse(endParts[1]),
+            int.parse(endParts[2]),
+          );
+          if (checkDate.isAfter(end)) {
+            continue; // 종료일 이후면 추가하지 않음
+          }
+        }
+      }
+
       final List<int> repeatDays = List<int>.from(routine['repeatDays'] ?? []);
       // repeatDays가 비어있으면 매일 반복, 또는 해당 요일이 포함되어 있으면
       if (repeatDays.isEmpty || repeatDays.contains(weekday)) {
@@ -1368,7 +1401,12 @@ class _TodoScreenState extends State<TodoScreen>
     List<int> repeatDays = editRoutine != null
         ? List<int>.from(editRoutine['repeatDays'])
         : [];
-
+    String? startDate = editRoutine?['startDate']?.toString();
+    if (startDate == null && !isEdit) {
+      startDate = _formatDate(DateTime.now());
+    }
+    String? endDate = editRoutine?['endDate']?.toString();
+ 
     final weekdaysMap = {
       1: '월'.tr,
       2: '화'.tr,
@@ -1378,7 +1416,7 @@ class _TodoScreenState extends State<TodoScreen>
       6: '토'.tr,
       7: '일'.tr,
     };
-
+ 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1549,6 +1587,101 @@ class _TodoScreenState extends State<TodoScreen>
                         ),
                       ),
                     ],
+                    const SizedBox(height: 16),
+                    // 💡 기간 설정
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_month_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Text('기간 설정'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('시작일'.tr, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              BouncingWrapper(
+                                showShadow: false,
+                                child: RetroGradientButton(
+                                  color: Colors.white,
+                                  onPressed: () async {
+                                    final initialDate = startDate != null ? DateTime.parse(startDate!) : DateTime.now();
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: initialDate,
+                                      firstDate: DateTime(2020),
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (picked != null) {
+                                      setSheetState(() {
+                                        startDate = _formatDate(picked);
+                                      });
+                                    }
+                                  },
+                                  child: Text(
+                                    startDate != null ? startDate! : '설정 안 함'.tr,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('종료일'.tr, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                  if (endDate != null)
+                                    GestureDetector(
+                                      onTap: () {
+                                        setSheetState(() {
+                                          endDate = null;
+                                        });
+                                      },
+                                      child: const Icon(Icons.clear, size: 16, color: Colors.red),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              BouncingWrapper(
+                                showShadow: false,
+                                child: RetroGradientButton(
+                                  color: Colors.white,
+                                  onPressed: () async {
+                                    final initialDate = endDate != null ? DateTime.parse(endDate!) : DateTime.now();
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: initialDate,
+                                      firstDate: DateTime(2020),
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (picked != null) {
+                                      setSheetState(() {
+                                        endDate = _formatDate(picked);
+                                      });
+                                    }
+                                  },
+                                  child: Text(
+                                    endDate != null ? endDate! : '설정 안 함'.tr,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 24),
                     // 저장 버튼
                     SizedBox(
@@ -1566,6 +1699,8 @@ class _TodoScreenState extends State<TodoScreen>
                             'isAlarmOn': isAlarmOn,
                             'alarmTime': selectedAlarmTime,
                             'repeatDays': repeatDays,
+                            'startDate': startDate,
+                            'endDate': endDate,
                           };
 
                           setState(() {
