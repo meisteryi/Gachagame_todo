@@ -42,6 +42,19 @@ class _GachaTodoAppState extends State<GachaTodoApp> {
   bool _showSplash = true; // 💡 스플래시 화면 표시 여부 상태
 
   @override
+  void initState() {
+    super.initState();
+    // 💡 1초 후에 자동으로 메인 화면으로 이동
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeType>(
       valueListenable: AppTheme.themeNotifier,
@@ -121,15 +134,6 @@ class SplashScreen extends StatelessWidget {
                   shadows: const [
                     Shadow(color: Color(0xFF212123), offset: Offset(3, 3)),
                   ],
-                ),
-              ),
-              const SizedBox(height: 30),
-              Text(
-                '- 화면을 터치해서 시작 -'.tr,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white70,
                 ),
               ),
             ],

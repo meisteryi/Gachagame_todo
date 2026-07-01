@@ -10,7 +10,8 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
     // Initialize Timezone
@@ -30,19 +31,18 @@ class NotificationService {
     // iOS Initialization settings
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+        );
 
-    await _notificationsPlugin.initialize(
-      settings: initializationSettings,
-    );
+    await _notificationsPlugin.initialize(settings: initializationSettings);
 
     // Schedule 10 PM daily reminder
     await scheduleDailyNotification(
@@ -58,15 +58,20 @@ class NotificationService {
   Future<bool> requestPermission() async {
     // Android
     final androidImplementation = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     bool? androidGranted = false;
     if (androidImplementation != null) {
-      androidGranted = await androidImplementation.requestNotificationsPermission();
+      androidGranted = await androidImplementation
+          .requestNotificationsPermission();
     }
 
     // iOS
     final iosImplementation = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     bool? iosGranted = false;
     if (iosImplementation != null) {
       iosGranted = await iosImplementation.requestPermissions(
@@ -91,15 +96,19 @@ class NotificationService {
       return;
     }
 
-    final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
-
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'gacha_todo_channel_id',
-      'Todo Notifications',
-      channelDescription: 'Channel for To-Do reminders',
-      importance: Importance.max,
-      priority: Priority.high,
+    final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(
+      scheduledDate,
+      tz.local,
     );
+
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'gacha_todo_channel_id',
+          'Todo Notifications',
+          channelDescription: 'Channel for To-Do reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       presentAlert: true,
@@ -143,13 +152,14 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'gacha_todo_daily_channel_id',
-      'Daily Reminder Notifications',
-      channelDescription: 'Channel for daily task check reminder',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'gacha_todo_daily_channel_id',
+          'Daily Reminder Notifications',
+          channelDescription: 'Channel for daily task check reminder',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       presentAlert: true,

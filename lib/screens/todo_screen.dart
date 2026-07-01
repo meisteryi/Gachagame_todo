@@ -36,6 +36,9 @@ class _TodoScreenState extends State<TodoScreen>
   // 전체 할 일 목록 (날짜 및 카테고리 포함)
   final List<Map<String, dynamic>> _todoList = [];
 
+  // 💡 반복되는 할 일 루틴 목록
+  final List<Map<String, dynamic>> _routines = [];
+
   int _dateToIndex(DateTime date) {
     // 일광절약시간(DST) 문제를 방지하기 위해 강제로 UTC로 계산
     final utcDate = DateTime.utc(date.year, date.month, date.day);
@@ -116,6 +119,35 @@ class _TodoScreenState extends State<TodoScreen>
       } else {
         _setInitialData();
       }
+
+      // 3. 루틴 목록 불러오기
+      final String? routinesStr = prefs.getString('routines');
+      if (routinesStr != null) {
+        final List<dynamic> decoded = jsonDecode(routinesStr);
+        setState(() {
+          _routines.clear();
+          for (var item in decoded) {
+            final map = Map<String, dynamic>.from(item);
+            if (map['alarmTime'] != null && map['alarmTime'].toString().contains(':')) {
+              final parts = map['alarmTime'].toString().split(':');
+              map['alarmTime'] = TimeOfDay(
+                hour: int.parse(parts[0]),
+                minute: int.parse(parts[1]),
+              );
+            }
+            if (map['repeatDays'] != null) {
+              map['repeatDays'] = List<int>.from(map['repeatDays']);
+            } else {
+              map['repeatDays'] = <int>[];
+            }
+            _routines.add(map);
+          }
+        });
+      }
+
+      // 데이터 로드 완료 후 현재 선택된 날짜에 루틴 동기화 실행
+      _syncRoutinesForDate(_selectedDate);
+
     } catch (e) {
       debugPrint('투두 데이터 로드 에러: $e');
       _setInitialData(); // 에러 발생 시 임시 데이터로 안전하게 덮어쓰기
@@ -125,6 +157,7 @@ class _TodoScreenState extends State<TodoScreen>
   void _setInitialData() {
     setState(() {
       _todoList.clear();
+      _routines.clear();
     });
     _saveData();
   }
@@ -153,6 +186,60 @@ class _TodoScreenState extends State<TodoScreen>
       return copy;
     }).toList();
     await prefs.setString('todos', jsonEncode(encodedTodos));
+
+    // 3. 루틴 목록 저장
+    final encodedRoutines = _routines.map((routine) {
+      final copy = Map<String, dynamic>.from(routine);
+      if (copy['alarmTime'] != null) {
+        final t = copy['alarmTime'] as TimeOfDay;
+        copy['alarmTime'] = '${t.hour}:${t.minute}';
+      }
+      return copy;
+    }).toList();
+    await prefs.setString('routines', jsonEncode(encodedRoutines));
+  }
+
+  // 💡 선택된 날짜의 루틴 동기화 로직
+  void _syncRoutinesForDate(DateTime date) {
+    final dateStr = _formatDate(date);
+    final weekday = date.weekday; // 1 = Monday, 7 = Sunday
+
+    // 이미 해당 날짜에 등록된 루틴 ID 목록
+    final existingRoutineIds = _todoList
+        .where((todo) => todo['date'] == dateStr && todo['routineId'] != null)
+        .map((todo) => todo['routineId'] as int)
+        .toSet();
+
+    bool updated = false;
+    for (var routine in _routines) {
+      final List<int> repeatDays = List<int>.from(routine['repeatDays'] ?? []);
+      // repeatDays가 비어있으면 매일 반복, 또는 해당 요일이 포함되어 있으면
+      if (repeatDays.isEmpty || repeatDays.contains(weekday)) {
+        final int routineId = routine['id'] as int;
+        if (!existingRoutineIds.contains(routineId)) {
+          // 새로 추가
+          final newTodo = {
+            'id': ((DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF) - _todoList.length - (routine.hashCode & 0xFFFFF)).abs(),
+            'task': routine['task'],
+            'category': routine['category'] ?? '기본'.tr,
+            'isDone': false,
+            'date': dateStr,
+            'isAlarmOn': routine['isAlarmOn'] ?? false,
+            'alarmTime': routine['alarmTime'],
+            'routineId': routineId,
+          };
+          setState(() {
+            _todoList.add(newTodo);
+          });
+          _scheduleTodoNotification(newTodo);
+          updated = true;
+        }
+      }
+    }
+
+    if (updated) {
+      _saveData();
+    }
   }
 
   void _scheduleTodoNotification(Map<String, dynamic> todo) async {
@@ -1070,6 +1157,447 @@ class _TodoScreenState extends State<TodoScreen>
     );
   }
 
+  // 💡 루틴 관리 바텀시트
+  void _showRoutineManagerBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final weekdaysMap = {
+              1: '월'.tr,
+              2: '화'.tr,
+              3: '수'.tr,
+              4: '목'.tr,
+              5: '금'.tr,
+              6: '토'.tr,
+              7: '일'.tr,
+            };
+
+            return FractionallySizedBox(
+              heightFactor: 0.8,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              '루틴 관리'.tr,
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.repeat, size: 22),
+                          ],
+                        ),
+                        BouncingWrapper(
+                          child: RetroGradientButton(
+                            color: const Color(0xFF68C2D3),
+                            foregroundColor: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                            onPressed: () {
+                              _showRoutineEditorBottomSheet();
+                              Future.delayed(const Duration(milliseconds: 300), () {
+                                setSheetState(() {});
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                const Icon(Icons.add, size: 16),
+                                const SizedBox(width: 4),
+                                Text('루틴 추가'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24, thickness: 1.5, color: Colors.black),
+                    Expanded(
+                      child: _routines.isEmpty
+                          ? Center(
+                              child: Text(
+                                '등록된 루틴이 없습니다.\n상단의 버튼을 눌러 추가해보세요!'.tr,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _routines.length,
+                              itemBuilder: (context, index) {
+                                final routine = _routines[index];
+                                final List<int> repeatDays = List<int>.from(routine['repeatDays'] ?? []);
+                                
+                                String daysText = '';
+                                if (repeatDays.isEmpty) {
+                                  daysText = '매일'.tr;
+                                } else {
+                                  daysText = repeatDays.map((d) => weekdaysMap[d]).join(', ');
+                                }
+
+                                final category = routine['category']?.toString() ?? '기본'.tr;
+                                final catColor = _categoryColors[category] ?? Colors.grey;
+
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(color: Colors.black, width: 1.5),
+                                    borderRadius: BorderRadius.circular(4),
+                                    boxShadow: const [
+                                      BoxShadow(color: Color(0xFF212123), offset: Offset(2, 2)),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: catColor,
+                                                    borderRadius: BorderRadius.circular(2),
+                                                  ),
+                                                  child: Text(
+                                                    category,
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  routine['task']?.toString() ?? '',
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.repeat, size: 14, color: Colors.grey),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  daysText,
+                                                  style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+                                                ),
+                                                if (routine['isAlarmOn'] == true && routine['alarmTime'] != null) ...[
+                                                  const SizedBox(width: 12),
+                                                  const Icon(Icons.notifications_active_outlined, size: 14, color: Colors.grey),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    '${(routine['alarmTime'] as TimeOfDay).hour.toString().padLeft(2, '0')}:${(routine['alarmTime'] as TimeOfDay).minute.toString().padLeft(2, '0')}',
+                                                    style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ]
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.edit, color: Colors.blue),
+                                        onPressed: () {
+                                          _showRoutineEditorBottomSheet(editRoutine: routine);
+                                          Future.delayed(const Duration(milliseconds: 300), () {
+                                            setSheetState(() {});
+                                          });
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () {
+                                          setState(() {
+                                            _routines.removeAt(index);
+                                          });
+                                          _saveData();
+                                          setSheetState(() {});
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: RetroGradientButton(
+                        color: Colors.grey[300]!,
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          '닫기'.tr,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 💡 루틴 등록/수정 에디터 바텀시트
+  void _showRoutineEditorBottomSheet({Map<String, dynamic>? editRoutine}) {
+    final bool isEdit = editRoutine != null;
+    String task = editRoutine?['task']?.toString() ?? '';
+    String selectedCategory = editRoutine?['category']?.toString() ??
+        (_categoryColors.keys.isNotEmpty ? _categoryColors.keys.first : '없음'.tr);
+    TimeOfDay? selectedAlarmTime = editRoutine?['alarmTime'] as TimeOfDay?;
+    bool isAlarmOn = editRoutine?['isAlarmOn'] == true;
+    List<int> repeatDays = editRoutine != null
+        ? List<int>.from(editRoutine['repeatDays'])
+        : [];
+
+    final weekdaysMap = {
+      1: '월'.tr,
+      2: '화'.tr,
+      3: '수'.tr,
+      4: '목'.tr,
+      5: '금'.tr,
+      6: '토'.tr,
+      7: '일'.tr,
+    };
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          isEdit ? '루틴 수정'.tr : '루틴 추가'.tr,
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.repeat, size: 20),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      initialValue: task,
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        labelText: '루틴으로 반복할 일 입력'.tr,
+                      ),
+                      onChanged: (val) => task = val,
+                    ),
+                    const SizedBox(height: 16),
+                    // 카테고리 선택 Dropdown
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('카테고리'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        DropdownButton<String>(
+                          value: selectedCategory,
+                          items: _categoryColors.keys.map((cat) {
+                            return DropdownMenuItem(
+                              value: cat,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    color: _categoryColors[cat],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(cat),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setSheetState(() => selectedCategory = val);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // 요일 반복 설정
+                    Text('반복 요일'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // 💡 가운데 정렬로 모으기
+                      children: weekdaysMap.entries.map((entry) {
+                        final isSelected = repeatDays.contains(entry.key);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.0), // 💡 좁은 간격 적용
+                          child: BouncingWrapper(
+                            child: GestureDetector(
+                              onTap: () {
+                                setSheetState(() {
+                                  if (isSelected) {
+                                    repeatDays.remove(entry.key);
+                                  } else {
+                                    repeatDays.add(entry.key);
+                                  }
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? const Color(0xFF68C2D3) : Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(4), // 💡 외곽선 제거
+                                ),
+                                child: Text(
+                                  entry.value,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      repeatDays.isEmpty ? '매일 반복됩니다.'.tr : '선택한 요일에만 반복됩니다.'.tr,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    // 알림 설정
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.notifications_active_outlined),
+                            const SizedBox(width: 8),
+                            Text('알림 설정'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        Switch(
+                          value: isAlarmOn,
+                          onChanged: (val) {
+                            setSheetState(() {
+                              isAlarmOn = val;
+                              if (isAlarmOn && selectedAlarmTime == null) {
+                                selectedAlarmTime = const TimeOfDay(hour: 9, minute: 0);
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    if (isAlarmOn) ...[
+                      const SizedBox(height: 8),
+                      BouncingWrapper(
+                        showShadow: false,
+                        child: RetroGradientButton(
+                          color: Colors.white,
+                          onPressed: () async {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: selectedAlarmTime ?? TimeOfDay.now(),
+                            );
+                            if (time != null) {
+                              setSheetState(() => selectedAlarmTime = time);
+                            }
+                          },
+                          child: Text(
+                            selectedAlarmTime != null
+                                ? '알림 시간: %s시 %s분'.trArgs([
+                                    selectedAlarmTime!.hour.toString(),
+                                    selectedAlarmTime!.minute.toString(),
+                                  ])
+                                : '알림 시간 선택'.tr,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    // 저장 버튼
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: RetroGradientButton(
+                        color: const Color(0xFF68C2D3),
+                        foregroundColor: Colors.white,
+                        onPressed: () {
+                          if (task.trim().isEmpty) return;
+                          final routineData = {
+                            'id': editRoutine?['id'] ?? DateTime.now().millisecondsSinceEpoch,
+                            'task': task.trim(),
+                            'category': selectedCategory,
+                            'isAlarmOn': isAlarmOn,
+                            'alarmTime': selectedAlarmTime,
+                            'repeatDays': repeatDays,
+                          };
+
+                          setState(() {
+                            if (isEdit) {
+                              final idx = _routines.indexWhere((r) => r['id'] == editRoutine['id']);
+                              if (idx != -1) {
+                                _routines[idx] = routineData;
+                              }
+                            } else {
+                              _routines.add(routineData);
+                            }
+                          });
+                          _saveData();
+                          _syncRoutinesForDate(_selectedDate);
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          isEdit ? '수정 완료'.tr : '추가 완료'.tr,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   // 4. 커스텀 도트 달력 팝업 띄우기
   void _showPixelCalendar() async {
     final DateTime? picked = await showDialog<DateTime>(
@@ -1112,72 +1640,125 @@ class _TodoScreenState extends State<TodoScreen>
               color: Colors.transparent, // 💡 단색 흰색을 투명하게 변경하여 배경이 비치게 함
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  BouncingWrapper(
-                    showShadow: false,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
-                      icon: const Icon(Icons.arrow_back_ios, size: 20),
-                      onPressed: () {
-                        final newDate = _selectedDate.subtract(
-                          const Duration(days: 1),
-                        );
-                        _datePageController.animateToPage(
-                          _dateToIndex(newDate),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
-                  ),
-                  BouncingWrapper(
-                    child: GestureDetector(
-                      onTap: _showPixelCalendar,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: getRetroGradient(Colors.white),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          children: [
-                            const PixelEmoji('calendar', size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              _formatLocalizedDate(
-                                _selectedDate,
-                              ), // 💡 현지화된 날짜 형식
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                  // 💡 오늘 날짜로 즉시 이동 버튼 (너비 고정하여 좌우 대칭 유지)
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: BouncingWrapper(
+                        showShadow: false,
+                        child: GestureDetector(
+                          onTap: () {
+                            _datePageController.animateToPage(
+                              _dateToIndex(DateTime.now()),
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          child: const PixelEmoji('calendar', size: 20),
                         ),
                       ),
                     ),
                   ),
-                  BouncingWrapper(
-                    showShadow: false,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(), // 버튼의 기본 여백 제거
-                      icon: const Icon(Icons.arrow_forward_ios, size: 20),
-                      onPressed: () {
-                        final newDate = _selectedDate.add(
-                          const Duration(days: 1),
-                        );
-                        _datePageController.animateToPage(
-                          _dateToIndex(newDate),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // 💡 왼쪽 화살표 (SizedBox 고정폭 + Center 정렬로 비대칭 해결)
+                        BouncingWrapper(
+                          showShadow: false,
+                          child: GestureDetector(
+                            onTap: () {
+                              final newDate = _selectedDate.subtract(
+                                const Duration(days: 1),
+                              );
+                              _datePageController.animateToPage(
+                                _dateToIndex(newDate),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: const SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Center(
+                                child: Icon(Icons.arrow_back_ios_new, size: 18),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        BouncingWrapper(
+                          child: GestureDetector(
+                            onTap: _showPixelCalendar,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: getRetroGradient(Colors.white),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const PixelEmoji('calendar', size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _formatLocalizedDate(
+                                      _selectedDate,
+                                    ), // 💡 현지화된 날짜 형식
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // 💡 오른쪽 화살표 (SizedBox 고정폭 + Center 정렬로 비대칭 해결)
+                        BouncingWrapper(
+                          showShadow: false,
+                          child: GestureDetector(
+                            onTap: () {
+                              final newDate = _selectedDate.add(
+                                const Duration(days: 1),
+                              );
+                              _datePageController.animateToPage(
+                                _dateToIndex(newDate),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: const SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Center(
+                                child: Icon(Icons.arrow_forward_ios, size: 18),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 💡 루틴 관리 바텀시트 열기 버튼 (너비 고정하여 좌우 대칭 유지)
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: BouncingWrapper(
+                        showShadow: false,
+                        child: GestureDetector(
+                          onTap: _showRoutineManagerBottomSheet,
+                          child: const PixelEmoji('routine', size: 20),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -1240,6 +1821,7 @@ class _TodoScreenState extends State<TodoScreen>
                   setState(() {
                     _selectedDate = _indexToDate(index);
                   });
+                  _syncRoutinesForDate(_selectedDate);
                 },
                 itemBuilder: (context, index) {
                   final pageDate = _indexToDate(index);

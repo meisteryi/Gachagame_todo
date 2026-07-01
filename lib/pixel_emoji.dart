@@ -157,6 +157,17 @@ class _PixelEmojiPainter extends CustomPainter {
         'wwwwwwww',
         '........',
       ],
+      'routine': [
+        // 🔁 루틴(순환 화살표)
+        '..kkkk..',
+        '.k....k.',
+        'k...k..k',
+        'k..kkk.k',
+        'k...k..k',
+        'k......k',
+        '.k....k.',
+        '..kkkk..',
+      ],
       'plus': [
         // ➕ 플러스(할 일 추가)
         '........',
