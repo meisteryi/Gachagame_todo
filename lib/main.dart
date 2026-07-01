@@ -1976,18 +1976,21 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ],
       ),
       // 3. 픽셀 스타일 하단 네비게이션 바
-      bottomNavigationBar: SafeArea(
-        top: false, // 하단 아이폰 홈 바 여백 보호
-        child: SizedBox(
-          height: 56, // IntrinsicHeight 대신 안전하고 렌더링이 빠른 고정 높이 사용
-          child: Row(
-            children: [
-              _buildPixelBottomNavItem(0, 'fish', '내 수조'),
-              _buildPixelBottomNavItem(1, 'memo', '할 일'),
-              _buildPixelBottomNavItem(2, 'trophy', '미션'),
-              _buildPixelBottomNavItem(3, 'coin', '상점'),
-              _buildPixelBottomNavItem(4, 'gear', '설정'),
-            ],
+      bottomNavigationBar: Container(
+        color: AppTheme.unselectedTabBg,
+        child: SafeArea(
+          top: false, // 하단 아이폰 홈 바 여백 보호
+          child: SizedBox(
+            height: 56, // IntrinsicHeight 대신 안전하고 렌더링이 빠른 고정 높이 사용
+            child: Row(
+              children: [
+                _buildPixelBottomNavItem(0, 'fish', '내 수조'),
+                _buildPixelBottomNavItem(1, 'memo', '할 일'),
+                _buildPixelBottomNavItem(2, 'trophy', '미션'),
+                _buildPixelBottomNavItem(3, 'coin', '상점'),
+                _buildPixelBottomNavItem(4, 'gear', '설정'),
+              ],
+            ),
           ),
         ),
       ),

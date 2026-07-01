@@ -422,14 +422,14 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: Column(
           children: [
-            const Text(
-              '장식물 상점',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
+            Text(
+              '장식물 상점'.tr,
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 6),
-            const Text(
-              '수조를 더 아름답게 꾸며봐요!',
-              style: TextStyle(
+            Text(
+              '수조를 더 아름답게 꾸며봐요!'.tr,
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
                 fontWeight: FontWeight.bold,
@@ -480,7 +480,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              deco['name'] as String,
+                              (deco['name'] as String).tr,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -528,13 +528,13 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                '구매 확인',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                '구매 확인'.tr,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Text(
-                '$name\n코인 5개를 사용하시겠습니까?',
+                '%s\n정말 %s코인으로 구매하시겠습니까?'.trArgs([name.tr, '5']),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 15),
               ),
@@ -545,9 +545,9 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                     child: RetroGradientButton(
                       color: Colors.grey[300]!,
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text(
-                        '취소',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      child: Text(
+                        '취소'.tr,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -560,14 +560,14 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                         if (widget.coins >= 5) {
                           widget.onSpendCoin(5);
                           widget.onAddDeco({'type': type, 'name': name});
-                          _showNoticeDialog('구매 완료! 내 보관함에 추가되었습니다 🎉');
+                          _showNoticeDialog('구매 완료! 내 보관함에 추가되었습니다 🎉'.tr);
                         } else {
-                          _showNoticeDialog('코인이 부족합니다! 🪙');
+                          _showNoticeDialog('코인이 부족합니다! 🪙'.tr);
                         }
                       },
-                      child: const Text(
-                        '구매',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      child: Text(
+                        '구매'.tr,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -893,7 +893,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             const SizedBox(width: 16),
                             Expanded(
                               child: _buildShopItem(
-                                '장식물 상점',
+                                '장식물 상점'.tr,
                                 const PixelDecoration(
                                   type: 'ammonite',
                                   isAnimated: false,

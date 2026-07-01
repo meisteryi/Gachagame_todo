@@ -39,6 +39,9 @@ class _TodoScreenState extends State<TodoScreen>
   // 💡 반복되는 할 일 루틴 목록
   final List<Map<String, dynamic>> _routines = [];
 
+  // 💡 통계 분석 기간 (7: 주간, 30: 월간)
+  int _selectedStatsPeriod = 7;
+
   int _dateToIndex(DateTime date) {
     // 일광절약시간(DST) 문제를 방지하기 위해 강제로 UTC로 계산
     final utcDate = DateTime.utc(date.year, date.month, date.day);
@@ -1022,6 +1025,369 @@ class _TodoScreenState extends State<TodoScreen>
     );
   }
 
+  // 💡 주간/월간 통계 분석 바텀시트
+  void _showStatsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final bool isWeekly = _selectedStatsPeriod == 7;
+            final data = _getStatsData(_selectedStatsPeriod);
+
+            // Compute summary metrics
+            int totalSum = 0;
+            int completedSum = 0;
+            double ratioSum = 0.0;
+            int daysWithTasks = 0;
+            for (var d in data) {
+              final t = d['total'] as int;
+              totalSum += t;
+              completedSum += d['completed'] as int;
+              if (t > 0) {
+                ratioSum += d['ratio'] as double;
+                daysWithTasks++;
+              }
+            }
+            final double avgProgress = daysWithTasks == 0 ? 0.0 : ratioSum / daysWithTasks;
+
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                border: Border(
+                  top: BorderSide(color: AppTheme.borderColor, width: 3),
+                  left: BorderSide(color: AppTheme.borderColor, width: 3),
+                  right: BorderSide(color: AppTheme.borderColor, width: 3),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const PixelEmoji('trophy', size: 24),
+                          const SizedBox(width: 8),
+                          Text(
+                            '통계 분석'.tr,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+                      BouncingWrapper(
+                        showShadow: false,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.close, size: 24),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Period Selector Toggle
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setSheetState(() {
+                              _selectedStatsPeriod = 7;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isWeekly
+                                  ? Colors.yellowAccent
+                                  : AppTheme.unselectedTabBg,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: AppTheme.borderColor, width: 2),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '주간'.tr,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isWeekly
+                                      ? Colors.black
+                                      : AppTheme.unselectedTabText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setSheetState(() {
+                              _selectedStatsPeriod = 30;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: !isWeekly
+                                  ? Colors.yellowAccent
+                                  : AppTheme.unselectedTabBg,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: AppTheme.borderColor, width: 2),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '월간'.tr,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: !isWeekly
+                                      ? Colors.black
+                                      : AppTheme.unselectedTabText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Summary metrics card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.panelBg,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppTheme.borderColor, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.borderColor,
+                          offset: const Offset(3, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              '평균 달성률'.tr,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.unselectedTabText,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${(avgProgress * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          width: 2,
+                          height: 40,
+                          color: AppTheme.borderColor.withValues(alpha: 0.3),
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              '총 완료한 할 일'.tr,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.unselectedTabText,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '%s / %s 완료'.trArgs([completedSum.toString(), totalSum.toString()]),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Chart Header Description
+                  Text(
+                    isWeekly ? '최근 7일'.tr : '최근 30일'.tr,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Custom Retro Bar Chart Widget
+                  SizedBox(
+                    height: 180,
+                    child: _buildBarChart(data, !isWeekly),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 💡 Helper to build bar chart
+  Widget _buildBarChart(List<Map<String, dynamic>> data, bool isMonthly) {
+    const double chartHeight = 120.0;
+    final double barWidth = isMonthly ? double.infinity : 36.0;
+    final double spacing = isMonthly ? 0.0 : 12.0;
+
+    final childWidgets = data.asMap().entries.map<Widget>((entry) {
+      final int index = entry.key;
+      final d = entry.value;
+      final double ratio = d['ratio'] as double;
+      final int total = d['total'] as int;
+      final int completed = d['completed'] as int;
+      final String label = d['label'] as String;
+
+      final double filledHeight = chartHeight * ratio;
+
+      // 월간 뷰일 경우 날짜 라벨 겹침 방지를 위해 첫날, 마지막날 및 5일 간격으로만 표시
+      final bool showLabel = !isMonthly ||
+          (index == 0 || index == data.length - 1 || index % 5 == 0);
+
+      final barWidget = Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Bar element
+          GestureDetector(
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  duration: const Duration(seconds: 1),
+                  backgroundColor: const Color(0xFF212123),
+                  behavior: SnackBarBehavior.floating,
+                  content: Text(
+                    '${d['dateStr']}: %s / %s %s'.trArgs([
+                      completed.toString(),
+                      total.toString(),
+                      '완료'.tr,
+                    ]),
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              );
+            },
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                // Empty background line or bar holder
+                Container(
+                  width: isMonthly ? null : barWidth,
+                  height: chartHeight,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(isMonthly ? 0 : 2),
+                    border: isMonthly
+                        ? null
+                        : Border.all(
+                            color: AppTheme.borderColor.withValues(alpha: 0.15),
+                            width: 1,
+                          ),
+                  ),
+                ),
+                // Filled progress bar
+                if (total > 0)
+                  Container(
+                    width: isMonthly ? null : barWidth,
+                    height: filledHeight > 2 ? filledHeight : 2,
+                    decoration: BoxDecoration(
+                      color: ratio == 1.0
+                          ? const Color(0xFF8AB060) // Green for 100%
+                          : const Color(0xFF68C2D3), // Cyan for partial
+                      borderRadius: BorderRadius.circular(isMonthly ? 0 : 2),
+                      border: isMonthly
+                          ? null
+                          : Border.all(color: AppTheme.borderColor, width: 2),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Label text
+          Opacity(
+            opacity: showLabel ? 1.0 : 0.0,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: isMonthly ? 8 : 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      );
+
+      if (isMonthly) {
+        return Expanded(child: barWidget);
+      } else {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+          child: barWidget,
+        );
+      }
+    }).toList();
+
+    return Row(
+      mainAxisAlignment: isMonthly ? MainAxisAlignment.center : MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: childWidgets,
+    );
+  }
+
+  // 💡 Helper to generate past data points
+  List<Map<String, dynamic>> _getStatsData(int daysCount) {
+    final List<Map<String, dynamic>> list = [];
+    final now = DateTime.now();
+    for (int i = daysCount - 1; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final dateStr = _formatDate(date);
+      final dayTodos = _todoList.where((t) => t['date'] == dateStr).toList();
+      final total = dayTodos.length;
+      final completed = dayTodos.where((t) => t['isDone'] == true).length;
+      list.add({
+        'date': date,
+        'dateStr': dateStr,
+        'label': '${date.month}/${date.day}',
+        'total': total,
+        'completed': completed,
+        'ratio': total == 0 ? 0.0 : completed / total,
+      });
+    }
+    return list;
+  }
+
   // 3. 카테고리 관리 바텀 시트
   void _showCategoryManagerBottomSheet() {
     String newCategoryName = '';
@@ -1930,15 +2296,47 @@ class _TodoScreenState extends State<TodoScreen>
                           PixelEmoji('trophy', size: 16),
                         ],
                       ),
-                      Text(
-                        '%s / %s 완료'.trArgs([
-                          done.toString(),
-                          total.toString(),
-                        ]), // 💡 달성률 텍스트 번역
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            '%s / %s 완료'.trArgs([
+                              done.toString(),
+                              total.toString(),
+                            ]), // 💡 달성률 텍스트 번역
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          BouncingWrapper(
+                            showShadow: false,
+                            child: GestureDetector(
+                              onTap: _showStatsBottomSheet,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.unselectedTabBg,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const PixelEmoji('chart', size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '통계'.tr,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

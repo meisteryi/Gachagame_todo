@@ -889,10 +889,10 @@ class _AquariumScreenState extends State<AquariumScreen>
                       width: 2,
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      '시스템 안내',
-                      style: TextStyle(
+                      '시스템 안내'.tr,
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w900,
                         color: Color(0xFF212123),
@@ -909,29 +909,29 @@ class _AquariumScreenState extends State<AquariumScreen>
                       children: [
                         _buildRuleItem(
                           'fish',
-                          '레벨 시스템',
-                          '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n5레벨이 되면 엄청난 일이 일어날지도....',
+                          '레벨 시스템'.tr,
+                          '먹이를 주면 경험치(EXP)가 쌓이며 레벨이 오릅니다.\n레벨이 오를수록 물고기 크기가 커집니다.\n5레벨이 되면 엄청난 일이 일어날지도....'.tr,
                           const Color(0xFFEDE19E),
                           const Color(0xFFD3A068),
                         ),
                         _buildRuleItem(
                           'meat',
-                          '먹이 시스템',
-                          '할 일 완료 → 코인 획득 → 상점에서 먹이 구매!\n먹이 1개 = +10 EXP\n물고기를 선택해 개별적으로 먹이를 줄 수 있어요.',
+                          '먹이 시스템'.tr,
+                          '할 일 완료 → 코인 획득 → 상점에서 먹이 구매!\n먹이 1개 = +10 EXP\n물고기를 선택해 개별적으로 먹이를 줄 수 있어요.'.tr,
                           const Color(0xFFE5CEB4),
                           const Color(0xFFA77B5B),
                         ),
                         _buildRuleItem(
                           'seaweed',
-                          '영양제 시스템',
-                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 경험치가 2배가 됩니다.',
+                          '영양제 시스템'.tr,
+                          '영양제를 투여하면 수조 전체에 효과가 퍼집니다!\n다음 먹이 주기 경험치가 2배가 됩니다.'.tr,
                           const Color(0xFFA2DCC7),
                           const Color(0xFF8AB060),
                         ),
                         _buildRuleItem(
                           'mood_great',
-                          '기분 시스템',
-                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n기분에 따라서 경험치의 증가량이 달라집니다!',
+                          '기분 시스템'.tr,
+                          '물고기에게는 4가지 기분이 있어요.\n나쁨 / 보통 / 좋음 / 최고야!\n기분에 따라서 경험치의 증가량이 달라집니다!'.tr,
                           const Color(0xFFEDC8C4),
                           const Color(0xFFB45252),
                         ),
@@ -946,9 +946,9 @@ class _AquariumScreenState extends State<AquariumScreen>
                   child: RetroGradientButton(
                     color: const Color(0xFFCF8ACB),
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      '확인!',
-                      style: TextStyle(
+                    child: Text(
+                      '확인!'.tr,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
                         color: Color(0xFF212123),

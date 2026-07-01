@@ -3,6 +3,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../translations.dart';
 
 class NotificationService {
@@ -44,14 +45,44 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(settings: initializationSettings);
 
-    // Schedule 10 PM daily reminder
-    await scheduleDailyNotification(
-      id: 99999,
-      title: '일일 확인'.tr,
-      body: '오늘 할 일을 모두 확인하셨나요?'.tr,
-      hour: 22,
-      minute: 0,
-    );
+    // Update notifications based on user settings
+    await updateDailyReminders();
+  }
+
+  // Update daily reminder schedules based on Settings
+  Future<void> updateDailyReminders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final notifyUncompleted = prefs.getBool('notify_uncompleted') ?? true;
+    final notifyDayStart = prefs.getBool('notify_day_start') ?? true;
+
+    // 1. 11 PM Uncompleted To-Dos Reminder (ID: 99998)
+    if (notifyUncompleted) {
+      await scheduleDailyNotification(
+        id: 99998,
+        title: '미완료 할 일 알림'.tr,
+        body: '아직 끝내지 않은 할 일이 있어요!'.tr,
+        hour: 23,
+        minute: 0,
+      );
+    } else {
+      await cancelNotification(99998);
+    }
+
+    // 2. 8 AM Day Start Reminder (ID: 99997)
+    if (notifyDayStart) {
+      await scheduleDailyNotification(
+        id: 99997,
+        title: '하루 시작 알림'.tr,
+        body: '좋은 아침입니다. 계획을 세워 볼까요?'.tr,
+        hour: 8,
+        minute: 0,
+      );
+    } else {
+      await cancelNotification(99997);
+    }
+
+    // Cancel old 10 PM daily reminder (ID: 99999) to clean up
+    await cancelNotification(99999);
   }
 
   // Request notifications permission (Android 13+ & iOS)
