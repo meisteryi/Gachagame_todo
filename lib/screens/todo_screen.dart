@@ -1724,11 +1724,128 @@ class _TodoScreenState extends State<TodoScreen>
                                       IconButton(
                                         icon: const Icon(Icons.delete, color: Colors.red),
                                         onPressed: () {
-                                          setState(() {
-                                            _routines.removeAt(index);
-                                          });
-                                          _saveData();
-                                          setSheetState(() {});
+                                          showDialog(
+                                            context: context,
+                                            builder: (ctx) {
+                                              return Dialog(
+                                                backgroundColor: Colors.transparent,
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(24),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: Color(0xFF212123),
+                                                        offset: Offset(3, 3),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        '루틴 삭제'.tr,
+                                                        style: const TextStyle(
+                                                          fontSize: 20,
+                                                          fontWeight: FontWeight.w900,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 16),
+                                                      Text(
+                                                        '이 루틴의 현재 선택된 날짜 이후 일정을 모두 삭제하시겠습니까?'.tr,
+                                                        textAlign: TextAlign.center,
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 24),
+                                                      // 버튼 1: 이후 일정까지 모두 삭제
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        height: 48,
+                                                        child: RetroGradientButton(
+                                                          color: Colors.redAccent,
+                                                          foregroundColor: Colors.white,
+                                                          onPressed: () {
+                                                            Navigator.pop(ctx);
+                                                            final routineId = routine['id'];
+                                                            final selectedDateStr = _formatDate(_selectedDate);
+                                                            final List<int> cancelledIds = [];
+                                                            setState(() {
+                                                              _routines.removeAt(index);
+                                                              _todoList.removeWhere((todo) {
+                                                                if (todo['routineId'] == routineId) {
+                                                                  final todoDate = todo['date']?.toString();
+                                                                  if (todoDate != null && todoDate.compareTo(selectedDateStr) >= 0) {
+                                                                    final id = todo['id'] as int?;
+                                                                    if (id != null) {
+                                                                      cancelledIds.add(id);
+                                                                    }
+                                                                    return true;
+                                                                  }
+                                                                }
+                                                                return false;
+                                                              });
+                                                            });
+                                                            _saveData();
+                                                            for (final id in cancelledIds) {
+                                                              _cancelTodoNotification(id);
+                                                            }
+                                                            setSheetState(() {});
+                                                          },
+                                                          child: Text(
+                                                            '이후 일정까지 모두 삭제'.tr,
+                                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 10),
+                                                      // 버튼 2: 루틴만 삭제 (기존 일정 유지)
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        height: 48,
+                                                        child: RetroGradientButton(
+                                                          color: const Color(0xFFBCB2A1),
+                                                          foregroundColor: Colors.white,
+                                                          onPressed: () {
+                                                            Navigator.pop(ctx);
+                                                            setState(() {
+                                                              _routines.removeAt(index);
+                                                            });
+                                                            _saveData();
+                                                            setSheetState(() {});
+                                                          },
+                                                          child: Text(
+                                                            '루틴만 삭제 (기존 일정 유지)'.tr,
+                                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 10),
+                                                      // 버튼 3: 취소
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        height: 48,
+                                                        child: RetroGradientButton(
+                                                          color: Colors.grey[300]!,
+                                                          foregroundColor: Colors.black87,
+                                                          onPressed: () {
+                                                            Navigator.pop(ctx);
+                                                          },
+                                                          child: Text(
+                                                            '취소'.tr,
+                                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
                                         },
                                       ),
                                     ],

@@ -141,6 +141,11 @@ class Tr {
       '%s / %s 완료': '%s / %s Done',
       '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.':
           'No plans yet!\nTap the bottom right button to add.',
+      '루틴 삭제': 'Delete Routine',
+      '이 루틴의 현재 선택된 날짜 이후 일정을 모두 삭제하시겠습니까?':
+          'Would you like to delete all schedules of this routine after the selected date?',
+      '이후 일정까지 모두 삭제': 'Delete future schedules too',
+      '루틴만 삭제 (기존 일정 유지)': 'Delete routine only (keep schedules)',
       '새로운 할 일 ': 'New To-Do ',
       '할 일 수정 ': 'Edit To-Do ',
       '할 일을 입력하세요': 'Enter to-do',
@@ -380,6 +385,11 @@ class Tr {
       '오늘의 달성률 ': '今日の達成率 ',
       '%s / %s 완료': '%s / %s 完了',
       '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.': '予定がないよ！\n右下のボタンから追加してね。',
+      '루틴 삭제': 'ルーチン削除',
+      '이 루틴의 현재 선택된 날짜 이후 일정을 모두 삭제하시겠습니까?':
+          '選択された日付以降のこのルーチンのすべてのスケジュールも削除しますか？',
+      '이후 일정까지 모두 삭제': '以降의スケジュールもすべて削除',
+      '루틴만 삭제 (기존 일정 유지)': 'ルーチンのみ削除 (既存スケジュール維持)',
       '새로운 할 일 ': '新しいタスク ',
       '할 일 수정 ': 'タスク編集 ',
       '할 일을 입력하세요': 'タスクを入力',
@@ -628,6 +638,11 @@ class Tr {
       '%s / %s 완료': '%s / %s Hecho',
       '예정된 계획이 없습니다!\n우측 하단 버튼을 눌러 추가해보세요.':
           '¡No hay planes!\nToca el botón para añadir.',
+      '루틴 삭제': 'Eliminar Rutina',
+      '이 루틴의 현재 선택된 날짜 이후 일정을 모두 삭제하시겠습니까?':
+          '¿Desea eliminar también todos los horarios de esta rutina después de la fecha seleccionada?',
+      '이후 일정까지 모두 삭제': 'Eliminar también horarios futuros',
+      '루틴만 삭제 (기존 일정 유지)': 'Eliminar solo rutina (mantener horarios)',
       '새로운 할 일 ': 'Nueva Tarea ',
       '할 일 수정 ': 'Editar Tarea ',
       '할 일을 입력하세요': 'Ingresa tarea',
