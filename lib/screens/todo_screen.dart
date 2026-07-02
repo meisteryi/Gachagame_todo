@@ -1393,17 +1393,21 @@ class _TodoScreenState extends State<TodoScreen>
     String newCategoryName = '';
     Color selectedColor = const Color(0xFFCF8ACB);
 
-    // 선택 가능한 레트로 쨍한 색상 목록
     final List<Color> availableColors = [
       const Color(0xFF8AB060),
       const Color(0xFFC2D368),
       const Color(0xFF68C2D3),
       const Color(0xFFCF8ACB),
-      const Color(0xFFCF8ACB),
       const Color(0xFFD3A068),
       const Color(0xFFE5CEB4),
       const Color(0xFF4B80CA),
       const Color(0xFFEDE19E),
+      const Color(0xFFE68A8A),
+      const Color(0xFF988AE6),
+      const Color(0xFFE6B88A),
+      const Color(0xFF8AE6D3),
+      const Color(0xFFD368A0),
+      const Color(0xFF68D39E),
     ];
 
     showModalBottomSheet(

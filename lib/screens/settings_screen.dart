@@ -57,6 +57,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await NotificationService().updateDailyReminders();
   }
 
+
+
   Widget _buildSettingsGroup({required String title, required Widget child}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
