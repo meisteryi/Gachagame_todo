@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 import '../slot_machine.dart';
 import '../pixel_fish.dart';
@@ -961,6 +962,7 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
                             onSpinStart: (cost) {
                               if (widget.coins >= cost) {
                                 widget.onSpendCoin(cost);
+                                _incrementGachaCount(cost);
                                 return true;
                               } else {
                                 _showNoticeDialog('코인이 부족합니다! 🪙');
@@ -1021,6 +1023,19 @@ class _ShopScreenState extends State<ShopScreen> with TickerProviderStateMixin {
         ),
       ],
     );
+  }
+
+  Future<void> _incrementGachaCount(int amount) async {
+    final prefs = await SharedPreferences.getInstance();
+    final questDate = _getQuestDate();
+    final key = 'daily_gacha_count_$questDate';
+    final current = prefs.getInt(key) ?? 0;
+    await prefs.setInt(key, current + amount);
+  }
+
+  String _getQuestDate() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
 }
 

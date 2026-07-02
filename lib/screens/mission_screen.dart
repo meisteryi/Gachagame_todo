@@ -1,19 +1,23 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../bouncing_wrapper.dart';
 import '../pixel_emoji.dart';
 import '../translations.dart';
 import '../theme_manager.dart';
+import '../pixel_supplement.dart';
 
 class MissionScreen extends StatefulWidget {
   final bool isActive;
   final void Function(int amount) onAddCoin;
+  final void Function(String type, int amount) onAddItem;
 
   const MissionScreen({
     super.key,
     required this.isActive,
     required this.onAddCoin,
+    required this.onAddItem,
   });
 
   @override
@@ -32,10 +36,33 @@ class _MissionScreenState extends State<MissionScreen>
   bool _isLoading = true;
   bool _hasTomorrowTodo = false; // 내일 할 일 추가 여부
 
+  // 📅 아침 5시 기준 일일 퀘스트 상태 변수
+  int _gachaQuestCount = 0;
+  int _feedQuestCount = 0;
+  bool _isGachaQuestClaimed = false;
+  bool _isFeedQuestClaimed = false;
+  bool _isTodoQuestClaimed = false;
+  Timer? _remainingTimeTimer;
+
   @override
   void initState() {
     super.initState();
     _evaluateMissions();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _remainingTimeTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _remainingTimeTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) {
+        setState(() {}); // 30초마다 남은 시간 텍스트 업데이트
+      }
+    });
   }
 
   @override
@@ -185,6 +212,14 @@ class _MissionScreenState extends State<MissionScreen>
       await prefs.setString('mission_data', jsonEncode(data));
     }
 
+    // 💡 00시 리셋 일일 퀘스트 데이터 조회
+    final questDate = _getQuestDate();
+    final gachaCount = prefs.getInt('daily_gacha_count_$questDate') ?? 0;
+    final feedCount = prefs.getInt('daily_feed_count_$questDate') ?? 0;
+    final gachaClaimed = prefs.getBool('quest_gacha_claimed_$questDate') == true;
+    final feedClaimed = prefs.getBool('quest_feed_claimed_$questDate') == true;
+    final todoClaimed = prefs.getBool('quest_todo_claimed_$questDate') == true;
+
     if (mounted) {
       setState(() {
         _missionData = data;
@@ -192,9 +227,41 @@ class _MissionScreenState extends State<MissionScreen>
         _todayTodoDone = done;
         _weeklyCompletedCount = weeklyCompletedCount;
         _hasTomorrowTodo = hasTomorrowTodo;
+        _gachaQuestCount = gachaCount;
+        _feedQuestCount = feedCount;
+        _isGachaQuestClaimed = gachaClaimed;
+        _isFeedQuestClaimed = feedClaimed;
+        _isTodoQuestClaimed = todoClaimed;
         _isLoading = false;
       });
     }
+  }
+
+  String _getQuestDate() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  }
+
+  String _getRemainingTimeText() {
+    final now = DateTime.now();
+    final target = DateTime(now.year, now.month, now.day, 24, 0, 0); // 다음 자정(00:00) 기준
+    final diff = target.difference(now);
+    final hours = diff.inHours;
+    final minutes = diff.inMinutes % 60;
+    return "%s시간 %s분 남음".trArgs([hours.toString(), minutes.toString()]);
+  }
+
+  Future<void> _claimQuestReward(String type, String rewardType, int rewardAmount) async {
+    final prefs = await SharedPreferences.getInstance();
+    final questDate = _getQuestDate();
+    final key = 'quest_${type}_claimed_$questDate';
+    await prefs.setBool(key, true);
+
+    widget.onAddItem(rewardType, rewardAmount);
+    await _evaluateMissions();
+
+    final rewardName = rewardType == 'feed' ? '먹이'.tr : '영양제'.tr;
+    _showNoticeDialog('보상 %s %s개를 획득했습니다! 🎉'.trArgs([rewardName, rewardAmount.toString()]));
   }
 
   // 공통 안내 팝업창
@@ -273,13 +340,25 @@ class _MissionScreenState extends State<MissionScreen>
     required bool isClaimed,
     required String progressText,
     required VoidCallback onClaim,
+    bool isSpecial = false,
+    String rewardType = 'coin', // 'coin', 'feed', 'supplement'
   }) {
+    Color bg = AppTheme.panelBg;
+    if (isClaimed) {
+      bg = const Color(0xFFB8B5B9);
+    } else if (isSpecial) {
+      bg = const Color(0xFFFFF3CD); // 특수한 퀘스트 카드 분위기를 내기 위한 부드러운 노란색
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isClaimed ? const Color(0xFFB8B5B9) : AppTheme.panelBg,
+        color: bg,
         borderRadius: BorderRadius.circular(4),
+        border: isSpecial && !isClaimed
+            ? Border.all(color: const Color(0xFFEAA15F), width: 2) // 레트로 테마 오렌지 외곽선
+            : null,
         boxShadow: isClaimed
             ? null
             : [
@@ -291,7 +370,11 @@ class _MissionScreenState extends State<MissionScreen>
       ),
       child: Row(
         children: [
-          const PixelEmoji('coin', size: 24),
+          rewardType == 'feed'
+              ? const PixelEmoji('meat', size: 24)
+              : rewardType == 'supplement'
+                  ? const PixelSupplement(size: 24)
+                  : const PixelEmoji('coin', size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -322,7 +405,11 @@ class _MissionScreenState extends State<MissionScreen>
                 Row(
                   children: [
                     Text(
-                      '보상: 코인 %s개'.trArgs([reward.toString()]),
+                      rewardType == 'feed'
+                          ? '보상: 먹이 %s개'.trArgs([reward.toString()])
+                          : rewardType == 'supplement'
+                              ? '보상: 영양제 %s개'.trArgs([reward.toString()])
+                              : '보상: 코인 %s개'.trArgs([reward.toString()]),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -398,9 +485,63 @@ class _MissionScreenState extends State<MissionScreen>
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            // 📅 일일 퀘스트 섹션 (오전 5시 리셋)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '일일 퀘스트 (00시 리셋)'.tr,
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: const Color(0xFFC05C3B)),
+                ),
+                Text(
+                  _getRemainingTimeText(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.themeSeed,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildMissionCard(
+              title: '오늘 가챠 1번 돌리기'.tr,
+              desc: '가챠샵에서 물고기나 수초 뽑기'.tr,
+              reward: 2,
+              isCompleted: _gachaQuestCount >= 1,
+              isClaimed: _isGachaQuestClaimed,
+              progressText: '$_gachaQuestCount/1',
+              onClaim: () => _claimQuestReward('gacha', 'feed', 2),
+              isSpecial: true,
+              rewardType: 'feed',
+            ),
+            _buildMissionCard(
+              title: '먹이 2번 주기'.tr,
+              desc: '내 수조에서 물고기에게 먹이 투여'.tr,
+              reward: 1,
+              isCompleted: _feedQuestCount >= 2,
+              isClaimed: _isFeedQuestClaimed,
+              progressText: '$_feedQuestCount/2',
+              onClaim: () => _claimQuestReward('feed', 'supplement', 1),
+              isSpecial: true,
+              rewardType: 'supplement',
+            ),
+            _buildMissionCard(
+              title: '투두 3개 달성하기'.tr,
+              desc: '오늘 등록된 투두 항목 3개 완료'.tr,
+              reward: 3,
+              isCompleted: _todayTodoDone >= 3,
+              isClaimed: _isTodoQuestClaimed,
+              progressText: '$_todayTodoDone/3',
+              onClaim: () => _claimQuestReward('todo', 'feed', 3),
+              isSpecial: true,
+              rewardType: 'feed',
+            ),
+
+            const SizedBox(height: 24),
             Text(
               '일일 미션'.tr,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),
             _buildMissionCard(
@@ -445,7 +586,7 @@ class _MissionScreenState extends State<MissionScreen>
             const SizedBox(height: 24),
             Text(
               '주간 미션'.tr,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),
             _buildMissionCard(

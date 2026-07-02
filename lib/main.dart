@@ -1870,6 +1870,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 _gainExp(10, fishId);
               });
               _saveMainData();
+              _incrementFeedCount();
             },
             onSupplement: () {
               setState(() {
@@ -1939,6 +1940,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               setState(() => _coins += amount);
               _saveMainData();
             },
+            onAddItem: (type, amount) {
+              setState(() {
+                if (type == 'feed') {
+                  _feedCount += amount;
+                } else if (type == 'supplement') {
+                  _supplementCount += amount;
+                }
+              });
+              _saveMainData();
+            },
           ),
           // 4. 상점 탭 (상점 메인 메뉴 또는 가챠 기계 + 폭죽 오버레이)
           ShopScreen(
@@ -1995,6 +2006,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  Future<void> _incrementFeedCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final questDate =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    final key = 'daily_feed_count_$questDate';
+    final current = prefs.getInt(key) ?? 0;
+    await prefs.setInt(key, current + 1);
   }
 }
 
