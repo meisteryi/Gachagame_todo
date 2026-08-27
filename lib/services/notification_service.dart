@@ -2,7 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../translations.dart';
 
@@ -15,6 +15,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
+    if (kIsWeb) return;
     // Initialize Timezone
     tz.initializeTimeZones();
     try {
@@ -51,6 +52,7 @@ class NotificationService {
 
   // Update daily reminder schedules based on Settings
   Future<void> updateDailyReminders() async {
+    if (kIsWeb) return;
     final prefs = await SharedPreferences.getInstance();
     final notifyUncompleted = prefs.getBool('notify_uncompleted') ?? true;
     final notifyDayStart = prefs.getBool('notify_day_start') ?? true;
@@ -87,6 +89,7 @@ class NotificationService {
 
   // Request notifications permission (Android 13+ & iOS)
   Future<bool> requestPermission() async {
+    if (kIsWeb) return false;
     // Android
     final androidImplementation = _notificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -122,6 +125,7 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
+    if (kIsWeb) return;
     // Avoid scheduling in the past
     if (scheduledDate.isBefore(DateTime.now())) {
       return;
@@ -169,6 +173,7 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
+    if (kIsWeb) return;
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
@@ -216,6 +221,7 @@ class NotificationService {
 
   // Cancel notification
   Future<void> cancelNotification(int id) async {
+    if (kIsWeb) return;
     await _notificationsPlugin.cancel(id: id);
   }
 }
